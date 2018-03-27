@@ -10,6 +10,27 @@ public void main() {
     string strings[] = {"Hello", "ccl", "world"};
     bool isTrue = 4 > 2 && true;
     int val = ascii == 'b' ? 5 : 10;
+    MyClass newObj = myObjs[3].calcValue(34, "test");
+    int i;
 
-    statement;
+    {}
+    while(isTrue) {
+        print(str);
+        isTrue = false;
+    }
+    if(isLocked) {
+        read();
+    }
+    2 + 45;
+    spawn 2 set thread;
+    block();
+    lock mutex;
+    unlock mutex;
+    
+    for(i = 0; i < 10; i + 1) {
+        print(i);
+        if(i == num) {
+            return;
+        }
+    }
 }

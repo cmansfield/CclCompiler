@@ -16,6 +16,7 @@ public class CompilerListener extends CclGrammarBaseListener {
   @Override
   public void enterStatement(CclGrammarParser.StatementContext ctx) {
     LOGGER.debug("Entering Statement");
+    LOGGER.debug(ctx.getText());
   }
 
   @Override

@@ -8,14 +8,27 @@ methodBody : '{' variableDeclaration* statement* '}' ;
 
 variableDeclaration : type IDENTIFIER ('[' ']')? ('=' assignmentExpression)? ';' ;
 
-statement : 'statement' ';' ;
+statement 
+    : 'if' '(' expression ')' statement ('else' statement)?
+    | 'while' '(' expression ')' statement
+    | 'for' '(' expression? ';' expression? ';' expression? ')' statement
+    | 'return' expression? ';'
+    | 'print' '(' expression ')' ';'
+    | 'read' '(' ')' ';'
+    | 'spawn' expression 'set' IDENTIFIER ';'
+    | 'block' '(' ')' ';'
+    | 'lock' IDENTIFIER ';'
+    | 'unlock' IDENTIFIER ';'
+    | '{' statement* '}'
+    | expression ';'
+    ;
 
 assignmentExpression 
-    : expression
-    | 'new' type newDeclaration
+    : 'new' type newDeclaration
     | typeCast expression
     | STRING_LITTERAL
     | braceEnclosedInitializer
+    | expression
     ;
 
 typeCast : '(' PRIMITIVE_TYPE ')' ;
@@ -38,9 +51,12 @@ expression
     | expression '?' expression ':' expression
     ;
 
-fnArrMember : 'fnArrMember' ;
+fnArrMember 
+    : '(' argumentList? ')'
+    | '[' expression ']'
+    ;
 
-memberRefz : 'memberRefz' ;
+memberRefz : '.' IDENTIFIER fnArrMember? memberRefz? ;
 
 expressionz 
     : '=' assignmentExpression
