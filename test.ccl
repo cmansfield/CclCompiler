@@ -1,4 +1,6 @@
-
+import io;
+import String;
+import Math;
 
 public void main() {
     string str = "Hello World";     // This is a test comment

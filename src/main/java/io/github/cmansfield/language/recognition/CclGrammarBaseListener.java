@@ -16,6 +16,18 @@ public class CclGrammarBaseListener implements CclGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -23,6 +35,30 @@ public class CclGrammarBaseListener implements CclGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClassMemberDeclaration(CclGrammarParser.ClassMemberDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassMemberDeclaration(CclGrammarParser.ClassMemberDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

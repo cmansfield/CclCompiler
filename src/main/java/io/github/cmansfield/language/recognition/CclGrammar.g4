@@ -2,7 +2,13 @@ grammar CclGrammar;
 
 // *************** Parser ***************
 
-compilationUnit : MODIFIER PRIMITIVE_TYPE 'main' '(' ')' methodBody ;
+importDeclaration : 'import' IDENTIFIER ';' ;
+
+compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE 'main' '(' ')' methodBody ;
+
+classDeclaration : MODIFIER? 'class' IDENTIFIER '{' classDeclaration* '}' ;
+
+classMemberDeclaration : 'classMemberDeclaration' ;
 
 methodBody : '{' variableDeclaration* statement* '}' ;
 

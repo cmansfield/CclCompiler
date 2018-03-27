@@ -29,4 +29,10 @@ public class CompilerListener extends CclGrammarBaseListener {
   public void enterMethodBody(CclGrammarParser.MethodBodyContext ctx) {
     LOGGER.debug("Entering Method Body");
   }
+
+  @Override
+  public void enterImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx) {
+    LOGGER.debug("Entering Import Declaration");
+    LOGGER.debug(ctx.getText());
+  }
 }
