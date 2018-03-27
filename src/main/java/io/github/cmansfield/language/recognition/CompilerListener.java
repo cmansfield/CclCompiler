@@ -9,9 +9,23 @@ public class CompilerListener extends CclGrammarBaseListener {
   
   @Override
   public void enterCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
-    LOGGER.info("Entering Compilation Unit");
-    LOGGER.info(ctx.getText());    
-    
-    
+    LOGGER.debug("Entering Compilation Unit");
+    LOGGER.debug(ctx.getText());    
+  }
+  
+  @Override
+  public void enterStatement(CclGrammarParser.StatementContext ctx) {
+    LOGGER.debug("Entering Statement");
+  }
+
+  @Override
+  public void enterVariableDeclaration(CclGrammarParser.VariableDeclarationContext ctx) {
+    LOGGER.debug("Entering Variable Declaration");
+    LOGGER.debug(ctx.getText());
+  }
+
+  @Override
+  public void enterMethodBody(CclGrammarParser.MethodBodyContext ctx) {
+    LOGGER.debug("Entering Method Body");
   }
 }

@@ -1,3 +1,15 @@
 
 
-public void main()
+public void main() {
+    string str = "Hello World";     // This is a test comment
+    int num = 500 * 2;
+    MyClass myClass = new MyClass();
+    MyClass myObjs[] = new MyClass[10];
+    char ascii = (char)(20 + 34);
+    int numbers[] = {2, 4, 1, 7};
+    string strings[] = {"Hello", "ccl", "world"};
+    bool isTrue = 4 > 2 && true;
+    int val = ascii == 'b' ? 5 : 10;
+
+    statement;
+}
