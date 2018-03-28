@@ -2,11 +2,13 @@ grammar CclGrammar;
 
 // *************** Parser ***************
 
-compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE 'main' '(' ')' methodBody classDeclaration* ;
+compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE 'main' '(' ')' 
+        methodBody classDeclaration* ;
 
 importDeclaration : 'import' IDENTIFIER ('.' IDENTIFIER)* ';' ;
 
-classDeclaration : MODIFIER* 'class' IDENTIFIER templateDeclaration? '{' classMemberDeclaration* '}' ;
+classDeclaration : MODIFIER* 'class' IDENTIFIER templateDeclaration? 
+        '{' classMemberDeclaration* '}' ;
 
 templateDeclaration : '(' templateList ')' ;
 
@@ -18,7 +20,8 @@ classMemberDeclaration
     | constructorDeclaration
     ;
 
-methodDeclaration : MODIFIER+ templateDeclaration? type IDENTIFIER '(' parameterList? ')' methodBody ;
+methodDeclaration : MODIFIER+ templateDeclaration? type IDENTIFIER '(' parameterList? ')' 
+        methodBody ;
 
 parameterList : parameter (',' parameter)* ;
 
@@ -33,7 +36,8 @@ variableDeclaration : type IDENTIFIER (arrayOperator)? ('=' assignmentExpression
 statement 
     : 'if' '(' expression ')' statement ('else' statement)?
     | 'while' '(' expression ')' statement
-    | 'for' '(' (variableDeclaration | expression)? ';' expression? ';' expression? ')' statement
+    | 'for' '(' (variableDeclaration | expression ';' | ';') expression? ';' expression? ')' 
+        statement
     | 'return' expression? ';'
     | 'print' '(' expression ')' ';'
     | 'read' invokeOperator ';'

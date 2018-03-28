@@ -16,9 +16,10 @@ import java.nio.charset.StandardCharsets;
 
 public class App {
   private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+  private static String fileExt = ".ccl";
   
   private static void usage() {
-    LOGGER.info("Usage: CclCompiler <Filename>");
+    LOGGER.info("Usage: CclCompiler <Filename{}>", fileExt);
   }
   
   public static void main(String[] args) {
@@ -28,7 +29,7 @@ public class App {
     String fileName = args[0];    
     
     try(FileInputStream inputStream = new FileInputStream(new File(fileName))) {
-      if(!fileName.endsWith(".ccl")) {
+      if(!fileName.endsWith(fileExt)) {
         usage();
         return;
       }
