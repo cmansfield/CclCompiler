@@ -6,37 +6,39 @@ compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE '
 
 importDeclaration : 'import' IDENTIFIER ('.' IDENTIFIER)* ';' ;
 
-classDeclaration : MODIFIER* 'class' IDENTIFIER '{' classMemberDeclaration* '}' ;
+classDeclaration : MODIFIER* 'class' IDENTIFIER templateDeclaration? '{' classMemberDeclaration* '}' ;
+
+templateDeclaration : '(' templateList ')' ;
+
+templateList : IDENTIFIER (',' IDENTIFIER)* ;
 
 classMemberDeclaration 
-    : MODIFIER+ type IDENTIFIER fieldDeclaration
+    : methodDeclaration
+    | MODIFIER+ type IDENTIFIER (arrayOperator)? ('=' assignmentExpression)? ';'
     | constructorDeclaration
     ;
 
-fieldDeclaration 
-    : ('[' ']')? ('=' assignmentExpression)? ';'
-    | '(' parameterList? ')' methodBody
-    ;
+methodDeclaration : MODIFIER+ templateDeclaration? type IDENTIFIER '(' parameterList? ')' methodBody ;
 
 parameterList : parameter (',' parameter)* ;
 
-parameter : type IDENTIFIER ('[' ']')? ;
+parameter : type IDENTIFIER (arrayOperator)? ;
 
 constructorDeclaration : MODIFIER? IDENTIFIER '(' parameterList? ')' methodBody ;
 
-methodBody : '{' variableDeclaration* statement* '}' ;
+methodBody : '{' (variableDeclaration | statement)* '}' ;
 
-variableDeclaration : type IDENTIFIER ('[' ']')? ('=' assignmentExpression)? ';' ;
+variableDeclaration : type IDENTIFIER (arrayOperator)? ('=' assignmentExpression)? ';' ;
 
 statement 
     : 'if' '(' expression ')' statement ('else' statement)?
     | 'while' '(' expression ')' statement
-    | 'for' '(' expression? ';' expression? ';' expression? ')' statement
+    | 'for' '(' (variableDeclaration | expression)? ';' expression? ';' expression? ')' statement
     | 'return' expression? ';'
     | 'print' '(' expression ')' ';'
-    | 'read' '(' ')' ';'
+    | 'read' invokeOperator ';'
     | 'spawn' expression 'set' IDENTIFIER ';'
-    | 'block' '(' ')' ';'
+    | 'block' invokeOperator ';'
     | 'lock' IDENTIFIER ';'
     | 'unlock' IDENTIFIER ';'
     | '{' statement* '}'
@@ -93,6 +95,10 @@ expressionz
     | '*' expression
     | '/' expression
     ;
+
+invokeOperator : '(' ')' ;
+
+arrayOperator : '[' ']' ;
 
 argumentList : expression (',' expression)* ;
 

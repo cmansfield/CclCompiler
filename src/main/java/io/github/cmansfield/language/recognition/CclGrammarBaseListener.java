@@ -52,6 +52,30 @@ public class CclGrammarBaseListener implements CclGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTemplateDeclaration(CclGrammarParser.TemplateDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTemplateDeclaration(CclGrammarParser.TemplateDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTemplateList(CclGrammarParser.TemplateListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTemplateList(CclGrammarParser.TemplateListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterClassMemberDeclaration(CclGrammarParser.ClassMemberDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -64,13 +88,13 @@ public class CclGrammarBaseListener implements CclGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx) { }
+	@Override public void enterMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx) { }
+	@Override public void exitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -239,6 +263,30 @@ public class CclGrammarBaseListener implements CclGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExpressionz(CclGrammarParser.ExpressionzContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInvokeOperator(CclGrammarParser.InvokeOperatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInvokeOperator(CclGrammarParser.InvokeOperatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayOperator(CclGrammarParser.ArrayOperatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

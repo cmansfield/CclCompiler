@@ -38,6 +38,26 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 */
 	void exitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#templateDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterTemplateDeclaration(CclGrammarParser.TemplateDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#templateDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitTemplateDeclaration(CclGrammarParser.TemplateDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#templateList}.
+	 * @param ctx the parse tree
+	 */
+	void enterTemplateList(CclGrammarParser.TemplateListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#templateList}.
+	 * @param ctx the parse tree
+	 */
+	void exitTemplateList(CclGrammarParser.TemplateListContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#classMemberDeclaration}.
 	 * @param ctx the parse tree
 	 */
@@ -48,15 +68,15 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 */
 	void exitClassMemberDeclaration(CclGrammarParser.ClassMemberDeclarationContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link CclGrammarParser#fieldDeclaration}.
+	 * Enter a parse tree produced by {@link CclGrammarParser#methodDeclaration}.
 	 * @param ctx the parse tree
 	 */
-	void enterFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx);
+	void enterMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link CclGrammarParser#fieldDeclaration}.
+	 * Exit a parse tree produced by {@link CclGrammarParser#methodDeclaration}.
 	 * @param ctx the parse tree
 	 */
-	void exitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx);
+	void exitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#parameterList}.
 	 * @param ctx the parse tree
@@ -197,6 +217,26 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpressionz(CclGrammarParser.ExpressionzContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#invokeOperator}.
+	 * @param ctx the parse tree
+	 */
+	void enterInvokeOperator(CclGrammarParser.InvokeOperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#invokeOperator}.
+	 * @param ctx the parse tree
+	 */
+	void exitInvokeOperator(CclGrammarParser.InvokeOperatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#arrayOperator}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayOperator(CclGrammarParser.ArrayOperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#arrayOperator}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#argumentList}.
 	 * @param ctx the parse tree

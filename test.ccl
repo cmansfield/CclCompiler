@@ -2,7 +2,7 @@ import ccl.io;
 import ccl.String;
 import ccl.Math;
 
-private class MyClass {
+private class MyClass (TBD) {
     private const string name = "John Doe";
     private static int num;
     
@@ -12,6 +12,10 @@ private class MyClass {
 
     public int add(int val) {
         return num + val;
+    }
+    
+    public (T, K, V) int doSomething(T template, K key, V val) {
+        return 0;
     }
 }
 
@@ -28,9 +32,11 @@ public void main() {
     int numbers[] = {2, 4, 1, 7};
     string strings[] = {"Hello", "ccl", "world"};
     bool isTrue = 4 > 2 && true;
+
+    20 / 4;         // Random statement to make sure vars and statements can be mixed
+
     int val = ascii == 'b' ? 5 : 10;
     MyClass newObj = myObjs[3].calcValue(34, "test");
-    int i;
 
     {}
     while(isTrue) {
@@ -46,6 +52,7 @@ public void main() {
     lock mutex;
     unlock mutex;
     
+    int i;
     for(i = 0; i < 10; i + 1) {
         print(i);
         if(i == num) {
