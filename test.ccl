@@ -66,3 +66,4 @@ public static class TestClass {
     // Checking to make sure classes can be placed anywhere
     public TestClass() {}
 }
+

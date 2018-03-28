@@ -3,7 +3,7 @@ grammar CclGrammar;
 // *************** Parser ***************
 
 compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE 'main' '(' ')' 
-        methodBody classDeclaration* ;
+        methodBody classDeclaration* EOF ;
 
 importDeclaration : 'import' IDENTIFIER ('.' IDENTIFIER)* ';' ;
 
@@ -136,9 +136,9 @@ CHARACTER_LITTERAL : '\'' CHARACTER '\'' ;
 
 NUMERIC_LITTERAL : [+-]? NUMBER ;
 
-fragment LETTER : [a-zA-Z] ;
+NUMBER : [0-9]+ ;
 
-fragment NUMBER : [0-9]+ ;
+fragment LETTER : [a-zA-Z] ;
 
 fragment CHARACTER : [ -~] ;
 
