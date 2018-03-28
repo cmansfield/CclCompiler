@@ -9,20 +9,17 @@ public class CompilerListener extends CclGrammarBaseListener {
   
   @Override
   public void enterCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
-    LOGGER.debug("Entering Compilation Unit");
-    LOGGER.debug(ctx.getText());    
+    LOGGER.debug("Compilation Unit\t\t{}", ctx.getText());    
   }
   
   @Override
   public void enterStatement(CclGrammarParser.StatementContext ctx) {
-    LOGGER.debug("Entering Statement");
-    LOGGER.debug(ctx.getText());
+    LOGGER.debug("Statement\t\t{}", ctx.getText());
   }
 
   @Override
   public void enterVariableDeclaration(CclGrammarParser.VariableDeclarationContext ctx) {
-    LOGGER.debug("Entering Variable Declaration");
-    LOGGER.debug(ctx.getText());
+    LOGGER.debug("Variable Declaration\t\t{}", ctx.getText());
   }
 
   @Override
@@ -32,7 +29,11 @@ public class CompilerListener extends CclGrammarBaseListener {
 
   @Override
   public void enterImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx) {
-    LOGGER.debug("Entering Import Declaration");
-    LOGGER.debug(ctx.getText());
+    LOGGER.debug("Import Declaration\t\t{}", ctx.getText());
+  }
+
+  @Override
+  public void enterClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
+    LOGGER.debug("Class Declaration\t\t{}", ctx.getText());
   }
 }

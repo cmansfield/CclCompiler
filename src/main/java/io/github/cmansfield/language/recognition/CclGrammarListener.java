@@ -8,16 +8,6 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface CclGrammarListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link CclGrammarParser#importDeclaration}.
-	 * @param ctx the parse tree
-	 */
-	void enterImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CclGrammarParser#importDeclaration}.
-	 * @param ctx the parse tree
-	 */
-	void exitImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#compilationUnit}.
 	 * @param ctx the parse tree
 	 */
@@ -27,6 +17,16 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#importDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#importDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#classDeclaration}.
 	 * @param ctx the parse tree
@@ -47,6 +47,46 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitClassMemberDeclaration(CclGrammarParser.ClassMemberDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#fieldDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#fieldDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#parameterList}.
+	 * @param ctx the parse tree
+	 */
+	void enterParameterList(CclGrammarParser.ParameterListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#parameterList}.
+	 * @param ctx the parse tree
+	 */
+	void exitParameterList(CclGrammarParser.ParameterListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#parameter}.
+	 * @param ctx the parse tree
+	 */
+	void enterParameter(CclGrammarParser.ParameterContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#parameter}.
+	 * @param ctx the parse tree
+	 */
+	void exitParameter(CclGrammarParser.ParameterContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#constructorDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#constructorDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#methodBody}.
 	 * @param ctx the parse tree

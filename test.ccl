@@ -1,7 +1,24 @@
-import io;
-import String;
-import Math;
+import ccl.io;
+import ccl.String;
+import ccl.Math;
 
+private class MyClass {
+    private const string name = "John Doe";
+    private static int num;
+    
+    public MyClass() {
+        num = 5;
+    }
+
+    public int add(int val) {
+        return num + val;
+    }
+}
+
+/*
+    This is the main entry point
+    Testing block comments
+*/
 public void main() {
     string str = "Hello World";     // This is a test comment
     int num = 500 * 2;
@@ -35,4 +52,9 @@ public void main() {
             return;
         }
     }
+}
+
+public static class TestClass {
+    // Checking to make sure classes can be placed anywhere
+    public TestClass() {}
 }

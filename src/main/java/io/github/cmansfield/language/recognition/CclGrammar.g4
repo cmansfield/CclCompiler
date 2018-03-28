@@ -2,13 +2,27 @@ grammar CclGrammar;
 
 // *************** Parser ***************
 
-importDeclaration : 'import' IDENTIFIER ';' ;
+compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE 'main' '(' ')' methodBody classDeclaration* ;
 
-compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE 'main' '(' ')' methodBody ;
+importDeclaration : 'import' IDENTIFIER ('.' IDENTIFIER)* ';' ;
 
-classDeclaration : MODIFIER? 'class' IDENTIFIER '{' classDeclaration* '}' ;
+classDeclaration : MODIFIER* 'class' IDENTIFIER '{' classMemberDeclaration* '}' ;
 
-classMemberDeclaration : 'classMemberDeclaration' ;
+classMemberDeclaration 
+    : MODIFIER+ type IDENTIFIER fieldDeclaration
+    | constructorDeclaration
+    ;
+
+fieldDeclaration 
+    : ('[' ']')? ('=' assignmentExpression)? ';'
+    | '(' parameterList? ')' methodBody
+    ;
+
+parameterList : parameter (',' parameter)* ;
+
+parameter : type IDENTIFIER ('[' ']')? ;
+
+constructorDeclaration : MODIFIER? IDENTIFIER '(' parameterList? ')' methodBody ;
 
 methodBody : '{' variableDeclaration* statement* '}' ;
 
@@ -123,3 +137,5 @@ WHITESPACE : [ \t] -> skip ;
 NEWLINE : ('\r'? '\n' | '\r')+ -> skip ;
 
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
+
+MULTILINE_COMMENT : '/*' .*? '*/' -> skip ;
