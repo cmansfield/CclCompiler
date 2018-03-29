@@ -85,8 +85,15 @@ fnArrMember
 memberRefz : '.' IDENTIFIER fnArrMember? memberRefz? ;
 
 expressionz 
-    : '=' assignmentExpression
-    | '&&' expression
+    : assignmentOperation
+    | booleanOperation
+    | mathOperation
+    ;
+
+assignmentOperation : '=' assignmentExpression ;
+
+booleanOperation
+    : '&&' expression
     | '||' expression
     | '==' expression
     | '!=' expression
@@ -94,12 +101,15 @@ expressionz
     | '>=' expression
     | '<' expression
     | '>' expression
-    | '+' expression
+    ;
+
+mathOperation 
+    : '+' expression
     | '-' expression
     | '*' expression
     | '/' expression
     ;
-
+    
 invokeOperator : '(' ')' ;
 
 arrayOperator : '[' ']' ;

@@ -218,6 +218,36 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 */
 	void exitExpressionz(CclGrammarParser.ExpressionzContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#assignmentOperation}.
+	 * @param ctx the parse tree
+	 */
+	void enterAssignmentOperation(CclGrammarParser.AssignmentOperationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#assignmentOperation}.
+	 * @param ctx the parse tree
+	 */
+	void exitAssignmentOperation(CclGrammarParser.AssignmentOperationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#booleanOperation}.
+	 * @param ctx the parse tree
+	 */
+	void enterBooleanOperation(CclGrammarParser.BooleanOperationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#booleanOperation}.
+	 * @param ctx the parse tree
+	 */
+	void exitBooleanOperation(CclGrammarParser.BooleanOperationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#mathOperation}.
+	 * @param ctx the parse tree
+	 */
+	void enterMathOperation(CclGrammarParser.MathOperationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#mathOperation}.
+	 * @param ctx the parse tree
+	 */
+	void exitMathOperation(CclGrammarParser.MathOperationContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#invokeOperator}.
 	 * @param ctx the parse tree
 	 */
