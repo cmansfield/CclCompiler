@@ -7,7 +7,7 @@ compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE M
 
 importDeclaration : IMPORT IDENTIFIER ('.' IDENTIFIER)* ';' ;
 
-classDeclaration : MODIFIER* CLASS IDENTIFIER templateDeclaration?
+classDeclaration : MODIFIER* CLASS className templateDeclaration?
         '{' classMemberDeclaration* '}' ;
 
 templateDeclaration : '(' templateList ')' ;
@@ -27,7 +27,7 @@ parameterList : parameter (',' parameter)* ;
 
 parameter : type IDENTIFIER (arrayOperator)? ;
 
-constructorDeclaration : MODIFIER? IDENTIFIER '(' parameterList? ')' methodBody ;
+constructorDeclaration : MODIFIER? className '(' parameterList? ')' methodBody ;
 
 methodBody : '{' (variableDeclaration | statement)* '}' ;
 
@@ -119,8 +119,9 @@ argumentList : expression (',' expression)* ;
 
 type 
     : PRIMITIVE_TYPE
-    | IDENTIFIER ;
+    | className ;
 
+className : IDENTIFIER ;
 
 // *************** Lexer ***************
 

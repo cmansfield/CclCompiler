@@ -347,6 +347,18 @@ public class CclGrammarBaseListener implements CclGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitType(CclGrammarParser.TypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClassName(CclGrammarParser.ClassNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassName(CclGrammarParser.ClassNameContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
