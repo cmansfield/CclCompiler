@@ -1,4 +1,4 @@
-// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.language.recognition;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -167,6 +167,18 @@ public class CclGrammarBaseListener implements CclGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitStatement(CclGrammarParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStatementWithScope(CclGrammarParser.StatementWithScopeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatementWithScope(CclGrammarParser.StatementWithScopeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

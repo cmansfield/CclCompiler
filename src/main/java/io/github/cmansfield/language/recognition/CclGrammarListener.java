@@ -1,4 +1,4 @@
-// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.language.recognition;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -137,6 +137,16 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStatement(CclGrammarParser.StatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#statementWithScope}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatementWithScope(CclGrammarParser.StatementWithScopeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#statementWithScope}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatementWithScope(CclGrammarParser.StatementWithScopeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#assignmentExpression}.
 	 * @param ctx the parse tree

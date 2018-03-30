@@ -1,14 +1,34 @@
 package io.github.cmansfield.language.recognition;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.collections4.CollectionUtils;
+import io.github.cmansfield.symbols.SymbolFactory;
+import io.github.cmansfield.symbols.SymbolKind;
+import io.github.cmansfield.symbols.Symbol;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.List;
+import java.util.*;
 
 
-public class CompilerListener extends CclGrammarBaseListener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CompilerListener.class);
+public class SymbolTableListener extends CclGrammarBaseListener {
+  private static final Logger LOGGER = LoggerFactory.getLogger(SymbolTableListener.class);
+  private SymbolFactory symbolFactory;
+  private Map<String, Symbol> symbols;
+  private String scope;
+  
+  public SymbolTableListener() {
+    scope = "";
+    symbols = new HashMap<>();
+    symbolFactory = new SymbolFactory(this);
+  }
+  
+  public String getScope() {
+    return scope;
+  }
+  
+  public Map<String, Symbol> getSymbols() {
+    return symbols  == null ? Collections.emptyMap() : symbols;
+  }
   
   @Override
   public void enterCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
@@ -45,19 +65,24 @@ public class CompilerListener extends CclGrammarBaseListener {
     LOGGER.debug("Expressionz\t\t{}", ctx.getText());
     
     CclGrammarParser.MathOperationContext exCtx = ctx.mathOperation();
-
-    
-    
-//    System.out.println();
   }
 
   @Override
   public void enterExpression(CclGrammarParser.ExpressionContext ctx) {
     LOGGER.debug("Expression\t\t{}", ctx.getText());
+  }
 
-    TerminalNode test =  ctx.NUMERIC_LITTERAL();
-    TerminalNode test2 =  ctx.STRING_LITTERAL();
+  @Override
+  public void enterClassName(CclGrammarParser.ClassNameContext ctx) {
+    LOGGER.debug("Class Name\t\t{}", ctx.getText());
+
+    // TODO - Check to see if the "Class Name" is actually a template
     
-//    System.out.println();
+    if(symbols.containsKey(ctx.getText())) {
+      return;
+    }
+    
+    Symbol symbol = symbolFactory.getSymbol(SymbolKind.CLASS, ctx);
+    symbols.put(symbol.getText(), symbol);
   }
 }

@@ -16,11 +16,11 @@ templateList : IDENTIFIER (',' IDENTIFIER)* ;
 
 classMemberDeclaration 
     : methodDeclaration
-    | MODIFIER+ type IDENTIFIER (arrayOperator)? (ASSIGN assignmentExpression)? ';'
+    | MODIFIER* type IDENTIFIER (arrayOperator)? (ASSIGN assignmentExpression)? ';'
     | constructorDeclaration
     ;
 
-methodDeclaration : MODIFIER+ templateDeclaration? type IDENTIFIER '(' parameterList? ')' 
+methodDeclaration : MODIFIER* templateDeclaration? type IDENTIFIER '(' parameterList? ')' 
         methodBody ;
 
 parameterList : parameter (',' parameter)* ;
@@ -34,19 +34,23 @@ methodBody : '{' (variableDeclaration | statement)* '}' ;
 variableDeclaration : type IDENTIFIER (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
 
 statement 
-    : IF '(' expression ')' statement (ELSE statement)?
-    | WHILE '(' expression ')' statement
-    | FOR '(' (variableDeclaration | expression ';' | ';') expression? ';' expression? ')'
-        statement
-    | RETURN expression? ';'
+    : RETURN expression? ';'
     | PRINT '(' expression ')' ';'
     | READ invokeOperator ';'
     | SPAWN expression SET IDENTIFIER ';'
     | BLOCK invokeOperator ';'
     | LOCK IDENTIFIER ';'
     | UNLOCK IDENTIFIER ';'
-    | '{' statement* '}'
+    | statementWithScope
     | expression ';'
+    ;
+    
+statementWithScope 
+    : IF '(' expression ')' statement (ELSE statement)?
+    | WHILE '(' expression ')' statement
+    | FOR '(' (variableDeclaration | expression ';' | ';') expression? ';' expression? ')'
+      statement
+    | '{' statement* '}'
     ;
 
 assignmentExpression 
