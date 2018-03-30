@@ -17,9 +17,9 @@ import java.io.File;
 
 
 public class Compiler {
-  private final Logger logger = LoggerFactory.getLogger(Compiler.class);  
-  
-  public void compile(final String fileName) {
+  private final Logger logger = LoggerFactory.getLogger(Compiler.class);
+
+  public boolean compile(final String fileName) {
     try(FileInputStream inputStream = new FileInputStream(new File(fileName))) {
 
       CclGrammarLexer lexer = new CclGrammarLexer(
@@ -32,19 +32,22 @@ public class Compiler {
 
       if(parser.getNumberOfSyntaxErrors() > 0) {
         logger.error("Syntax errors found");
-        return;
+        return false;
       }
 
       ParseTreeWalker walker = new ParseTreeWalker();
       CompilerListener listener = new CompilerListener();
       walker.walk(listener, tree);
-
     }
     catch (FileNotFoundException e) {
       logger.error("Unable to load file {}", fileName);
+      return false;
     }
     catch (Exception e) {
       logger.error("", e);
+      return false;
     }
+
+    return true;
   }
 }

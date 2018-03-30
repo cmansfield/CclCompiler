@@ -2,12 +2,12 @@ grammar CclGrammar;
 
 // *************** Parser ***************
 
-compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE 'main' '(' ')' 
+compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE MAIN '(' ')'
         methodBody classDeclaration* EOF ;
 
-importDeclaration : 'import' IDENTIFIER ('.' IDENTIFIER)* ';' ;
+importDeclaration : IMPORT IDENTIFIER ('.' IDENTIFIER)* ';' ;
 
-classDeclaration : MODIFIER* 'class' IDENTIFIER templateDeclaration? 
+classDeclaration : MODIFIER* CLASS IDENTIFIER templateDeclaration?
         '{' classMemberDeclaration* '}' ;
 
 templateDeclaration : '(' templateList ')' ;
@@ -16,7 +16,7 @@ templateList : IDENTIFIER (',' IDENTIFIER)* ;
 
 classMemberDeclaration 
     : methodDeclaration
-    | MODIFIER+ type IDENTIFIER (arrayOperator)? ('=' assignmentExpression)? ';'
+    | MODIFIER+ type IDENTIFIER (arrayOperator)? (ASSIGN assignmentExpression)? ';'
     | constructorDeclaration
     ;
 
@@ -31,26 +31,26 @@ constructorDeclaration : MODIFIER? IDENTIFIER '(' parameterList? ')' methodBody 
 
 methodBody : '{' (variableDeclaration | statement)* '}' ;
 
-variableDeclaration : type IDENTIFIER (arrayOperator)? ('=' assignmentExpression)? ';' ;
+variableDeclaration : type IDENTIFIER (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
 
 statement 
-    : 'if' '(' expression ')' statement ('else' statement)?
-    | 'while' '(' expression ')' statement
-    | 'for' '(' (variableDeclaration | expression ';' | ';') expression? ';' expression? ')' 
+    : IF '(' expression ')' statement (ELSE statement)?
+    | WHILE '(' expression ')' statement
+    | FOR '(' (variableDeclaration | expression ';' | ';') expression? ';' expression? ')'
         statement
-    | 'return' expression? ';'
-    | 'print' '(' expression ')' ';'
-    | 'read' invokeOperator ';'
-    | 'spawn' expression 'set' IDENTIFIER ';'
-    | 'block' invokeOperator ';'
-    | 'lock' IDENTIFIER ';'
-    | 'unlock' IDENTIFIER ';'
+    | RETURN expression? ';'
+    | PRINT '(' expression ')' ';'
+    | READ invokeOperator ';'
+    | SPAWN expression SET IDENTIFIER ';'
+    | BLOCK invokeOperator ';'
+    | LOCK IDENTIFIER ';'
+    | UNLOCK IDENTIFIER ';'
     | '{' statement* '}'
     | expression ';'
     ;
 
 assignmentExpression 
-    : 'new' type newDeclaration
+    : NEW type newDeclaration
     | typeCast expression
     | STRING_LITTERAL
     | braceEnclosedInitializer
@@ -68,13 +68,14 @@ newDeclaration
 
 expression 
     : '(' expression ')' expressionz?
-    |  ('true' | 'false' | 'null') expressionz?
-    |  'this' memberRefz? expressionz?
+    |  (TRUE | FALSE | NULL) expressionz?
+    |  THIS memberRefz? expressionz?
     | NUMERIC_LITTERAL expressionz?
     | CHARACTER_LITTERAL expressionz?
     | STRING_LITTERAL expressionz?
     | IDENTIFIER fnArrMember? memberRefz? expressionz?
-    | expression '?' expression ':' expression
+    | expression QUESTION expression COLON expression
+    | NOT expression
     ;
 
 fnArrMember 
@@ -90,24 +91,24 @@ expressionz
     | mathOperation
     ;
 
-assignmentOperation : '=' assignmentExpression ;
+assignmentOperation : ASSIGN assignmentExpression ;
 
 booleanOperation
-    : '&&' expression
-    | '||' expression
-    | '==' expression
-    | '!=' expression
-    | '<=' expression
-    | '>=' expression
-    | '<' expression
-    | '>' expression
+    : AND expression
+    | OR expression
+    | EQUALS expression
+    | NOT_EQ expression
+    | LESS_EQ expression
+    | GREAT_EQ expression
+    | LESS expression
+    | GREATER expression
     ;
 
 mathOperation 
-    : '+' expression
-    | '-' expression
-    | '*' expression
-    | '/' expression
+    : PLUS expression
+    | MINUS expression
+    | MULTI expression
+    | DIV expression
     ;
     
 invokeOperator : '(' ')' ;
@@ -122,6 +123,46 @@ type
 
 
 // *************** Lexer ***************
+
+// Keywords
+TRUE : 'true' ;
+FALSE : 'false' ;
+NULL : 'null' ;
+THIS : 'this' ;
+IF : 'if' ;
+ELSE : 'else' ;
+WHILE : 'while' ;
+FOR : 'for' ;
+NEW : 'new' ;
+RETURN : 'return' ;
+PRINT : 'print' ;
+READ : 'read' ;
+SPAWN : 'spawn' ;
+SET : 'set' ;
+BLOCK : 'block' ;
+LOCK : 'lock' ;
+UNLOCK : 'unlock' ;
+IMPORT : 'import' ;
+CLASS : 'class' ;
+MAIN : 'main' ;
+
+// Operators
+NOT_EQ : '!=' ;
+NOT : '!' ;
+AND : '&&' ;
+OR : '||' ;
+PLUS : '+' ;
+MINUS : '-';
+MULTI : '*';
+DIV : '/' ;
+EQUALS : '==' ;
+LESS_EQ : '<=' ;
+GREAT_EQ : '>=' ;
+LESS : '<' ;
+GREATER : '>' ;
+ASSIGN : '=' ;
+QUESTION : '?' ;
+COLON : ':' ;
 
 MODIFIER 
     : 'public' 

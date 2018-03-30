@@ -16,6 +16,7 @@ public class App {
   public static void main(String[] args) {
     if(args.length != 1) {
       usage();
+      return;
     }
     String fileName = args[0];
 
@@ -30,7 +31,9 @@ public class App {
     }
     
     Compiler compiler = new Compiler();
-    compiler.compile(fileName);
+    if(!compiler.compile(fileName)) {
+      return;
+    }
     
     LOGGER.info("Complete");
   }
