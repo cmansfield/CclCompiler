@@ -80,8 +80,16 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
   @Override
   public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
-    // TODO - Complete this
-    return SymbolIdGenerator.generateId(SymbolKind.PARAM);
+    if(ctx.children == null || ctx.children.size() != 2) {
+      throw new IllegalArgumentException("Parameter has the wrong number of children nodes");
+    }
+
+    String type = ctx.children.get(0).getText();
+    String name = ctx.children.get(1).getText();
+    Data data = new Data(type, AccessModifier.PRIVATE);
+    Symbol symbol = addNewSymbol(name, SymbolKind.PARAM, data);
+    
+    return symbol.getSymbolId();
   }
 
   @Override
@@ -89,15 +97,16 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     return getChildText(ctx);
   }
   
-  private void addNewSymbol(String identifier, SymbolKind symbolKind, Data data) {
+  private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, Data data) {
     Symbol symbol = symbolFactory.getSymbol(identifier, symbolKind, data);
 
     if(symbols.containsValue(symbol)) {
-      return;
+      return symbols.get(symbol);
     }
     symbol.setSymbolId(SymbolIdGenerator.generateId(symbolKind));
-
     symbols.put(symbol.getSymbolId(), symbol);
+    
+    return symbol;
   }
 
   private String getChildText(ParserRuleContext ctx) {

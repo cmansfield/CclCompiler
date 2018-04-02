@@ -1,8 +1,11 @@
 
 TODO List
+    All
+        Add method headers to all methods
+
     SymbolTableVisitor
         visitMethodDeclaration: Check for template declarations
-        visitParameter: Complete this method
+        Add and update the scope as the visitor moves down the tree
         Continue producing the SymbolTableVisitor
 
     Add Unit tests for the following:
