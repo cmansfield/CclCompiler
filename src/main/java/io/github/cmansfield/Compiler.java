@@ -2,8 +2,7 @@ package io.github.cmansfield;
 
 import io.github.cmansfield.language.recognition.CclGrammarLexer;
 import io.github.cmansfield.language.recognition.CclGrammarParser;
-import io.github.cmansfield.symbols.SymbolTableListener;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import io.github.cmansfield.symbols.SymbolTableVisitor;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.CharStreams;
@@ -35,11 +34,12 @@ public class Compiler {
         return false;
       }
 
-      ParseTreeWalker walker = new ParseTreeWalker();
-      SymbolTableListener listener = new SymbolTableListener();
-      walker.walk(listener, tree);
+//      ParseTreeWalker walker = new ParseTreeWalker();
+      SymbolTableVisitor visitor = new SymbolTableVisitor();
+      visitor.visit(tree);
+//      walker.walk(visitor, tree);
       
-      logger.info("SymbolTable: {}", listener.getSymbols().toString());
+      logger.info("SymbolTable: {}", visitor.getSymbols().toString());
     }
     catch (FileNotFoundException e) {
       logger.error("Unable to load file {}", fileName);

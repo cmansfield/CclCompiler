@@ -1,6 +1,6 @@
 package io.github.cmansfield.symbols;
 
-import io.github.cmansfield.symbols.data.DataFactory;
+import io.github.cmansfield.symbols.data.Data;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -8,19 +8,18 @@ import org.slf4j.Logger;
 
 public class SymbolFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(SymbolFactory.class);
-  private SymbolTableListener symbolTableListener;
+  private SymbolTableVisitor symbolTableListener;
   
-  public SymbolFactory(SymbolTableListener symbolTableListener) {
-    this.symbolTableListener = symbolTableListener;
+  public SymbolFactory(SymbolTableVisitor symbolTableVisitor) {
+    this.symbolTableListener = symbolTableVisitor;
   }
   
-  public Symbol getSymbol(SymbolKind symbolKind, ParserRuleContext ctx) {
+  public Symbol getSymbol(String identifier, SymbolKind symbolKind, Data data) {
     Symbol.SymbolBuilder symbolBuilder = new Symbol().new SymbolBuilder()
             .scope(symbolTableListener.getScope())
-            .symbolId(SymbolIdGenerator.generateId(symbolKind))
-            .text(ctx.getText())      // TODO - double check this, good chance ctx text won't be what I want here
+            .text(identifier)
             .symbolKind(symbolKind)
-            .data(DataFactory.getData(ctx));
+            .data(data);
     
     Symbol symbol = symbolBuilder.build();
     if(symbol == null) {

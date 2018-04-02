@@ -1,180 +1,110 @@
 package io.github.cmansfield.symbols;
 
-import io.github.cmansfield.language.recognition.CclGrammarVisitor;
+import io.github.cmansfield.language.recognition.CclGrammarBaseVisitor;
 import io.github.cmansfield.language.recognition.CclGrammarParser;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.RuleNode;
+import io.github.cmansfield.symbols.data.AccessModifier;
+import io.github.cmansfield.symbols.data.Data;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
-public class SymbolTableVisitor implements CclGrammarVisitor {
-  @Override
-  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
-    return null;
+import java.util.*;
+import java.util.stream.Collectors;
+
+
+public class SymbolTableVisitor extends CclGrammarBaseVisitor {
+  private static final Logger LOGGER = LoggerFactory.getLogger(SymbolTableVisitor.class);
+  private SymbolFactory symbolFactory;
+  private Map<String, Symbol> symbols;
+  private String scope;
+  
+  public SymbolTableVisitor() {
+    scope = "";
+    symbols = new HashMap<>();
+    symbolFactory = new SymbolFactory(this);
   }
 
-  @Override
-  public Object visitImportDeclaration(CclGrammarParser.ImportDeclarationContext ctx) {
-    return null;
+  public String getScope() {
+    return scope;
   }
 
-  @Override
-  public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
-    return null;
+  public Map<String, Symbol> getSymbols() {
+    return symbols == null ? Collections.emptyMap() : symbols;
   }
-
-  @Override
-  public Object visitTemplateDeclaration(CclGrammarParser.TemplateDeclarationContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitTemplateList(CclGrammarParser.TemplateListContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitClassMemberDeclaration(CclGrammarParser.ClassMemberDeclarationContext ctx) {
-    return null;
-  }
-
+  
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
+    // TODO - get template declaration
+    List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
+    String returnType = SymbolTableUtils.getReturnType(ctx, this);
+    List<String> parameters = SymbolTableUtils.getParameters(ctx, this);
+    String name = SymbolTableUtils.getName(ctx, this);
+    
+    Data data = new Data("", returnType, accessModifiers.get(0), parameters);
+    addNewSymbol(name, SymbolKind.METHOD, data);
+
+    CclGrammarParser.MethodBodyContext methodBodyContext = ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
+            .map(context -> (CclGrammarParser.MethodBodyContext)context)
+            .findFirst()
+            .orElse(null);
+    visitMethodBody(methodBodyContext);
+
     return null;
   }
 
   @Override
-  public Object visitParameterList(CclGrammarParser.ParameterListContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitMethodBody(CclGrammarParser.MethodBodyContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitVariableDeclaration(CclGrammarParser.VariableDeclarationContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitStatement(CclGrammarParser.StatementContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitStatementWithScope(CclGrammarParser.StatementWithScopeContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitAssignmentExpression(CclGrammarParser.AssignmentExpressionContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitTypeCast(CclGrammarParser.TypeCastContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitBraceEnclosedInitializer(CclGrammarParser.BraceEnclosedInitializerContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitNewDeclaration(CclGrammarParser.NewDeclarationContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitExpression(CclGrammarParser.ExpressionContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitFnArrMember(CclGrammarParser.FnArrMemberContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitMemberRefz(CclGrammarParser.MemberRefzContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitExpressionz(CclGrammarParser.ExpressionzContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitAssignmentOperation(CclGrammarParser.AssignmentOperationContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitBooleanOperation(CclGrammarParser.BooleanOperationContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitMathOperation(CclGrammarParser.MathOperationContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitInvokeOperator(CclGrammarParser.InvokeOperatorContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx) {
-    return null;
-  }
-
-  @Override
-  public Object visitArgumentList(CclGrammarParser.ArgumentListContext ctx) {
-    return null;
+  public Object visitModifier(CclGrammarParser.ModifierContext ctx) {
+    if(CollectionUtils.isEmpty(ctx.children)) {
+      throw new IllegalArgumentException("No children found in context");
+    }
+  
+    return AccessModifier.find(ctx.children.get(0).getText());
   }
 
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {
-    return null;
+    return getChildText(ctx);
   }
 
   @Override
-  public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
-    return null;
+  public Object visitParameterList(CclGrammarParser.ParameterListContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ParameterContext)
+            .map(node -> (CclGrammarParser.ParameterContext)node)
+            .map(this::visitParameter)
+            .map(val -> (String)val)
+            .collect(Collectors.toList());
   }
 
   @Override
-  public Object visit(ParseTree tree) {
-    return null;
+  public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
+    // TODO - Complete this
+    return SymbolIdGenerator.generateId(SymbolKind.PARAM);
   }
 
   @Override
-  public Object visitChildren(RuleNode node) {
-    return null;
+  public Object visitName(CclGrammarParser.NameContext ctx) {
+    return getChildText(ctx);
+  }
+  
+  private void addNewSymbol(String identifier, SymbolKind symbolKind, Data data) {
+    Symbol symbol = symbolFactory.getSymbol(identifier, symbolKind, data);
+
+    if(symbols.containsValue(symbol)) {
+      return;
+    }
+    symbol.setSymbolId(SymbolIdGenerator.generateId(symbolKind));
+
+    symbols.put(symbol.getSymbolId(), symbol);
   }
 
-  @Override
-  public Object visitTerminal(TerminalNode node) {
-    return null;
-  }
+  private String getChildText(ParserRuleContext ctx) {
+    if(CollectionUtils.isEmpty(ctx.children)) {
+      throw new IllegalArgumentException("No children found in context");
+    }
 
-  @Override
-  public Object visitErrorNode(ErrorNode node) {
-    return null;
+    return ctx.children.get(0).getText();
   }
 }

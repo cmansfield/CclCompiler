@@ -1,0 +1,13 @@
+
+TODO List
+    SymbolTableVisitor
+        visitMethodDeclaration: Check for template declarations
+        visitParameter: Complete this method
+        Continue producing the SymbolTableVisitor
+
+    Add Unit tests for the following:
+        AccessModifier
+        SymbolFactory
+        SymbolTableUtils
+        Compiler
+        SymbolTableVisitor

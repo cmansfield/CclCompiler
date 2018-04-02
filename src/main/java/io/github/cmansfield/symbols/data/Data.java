@@ -60,12 +60,24 @@ public class Data {
     }
     Data data = (Data) obj;
 
-    if(!this.type.equals(data.type)) {
+    if(this.type == null) {
+      if(data.type != null) {
+        return false;
+      }
+    }
+    else if(!this.type.equals(data.type)) {
       return false;
     }
-    if(!this.returnType.equals(data.returnType)) {
+    
+    if(this.returnType == null) {
+      if(data.returnType != null) {
+        return false;
+      }
+    }
+    else if(!this.returnType.equals(data.returnType)) {
       return false;
     }
+    
     if(this.accessModifier != data.accessModifier) {
       return false;
     }

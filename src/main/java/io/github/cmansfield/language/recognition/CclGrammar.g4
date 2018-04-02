@@ -2,12 +2,12 @@ grammar CclGrammar;
 
 // *************** Parser ***************
 
-compilationUnit : importDeclaration* classDeclaration* MODIFIER PRIMITIVE_TYPE MAIN '(' ')'
+compilationUnit : importDeclaration* classDeclaration* modifier PRIMITIVE_TYPE MAIN '(' ')'
         methodBody classDeclaration* EOF ;
 
 importDeclaration : IMPORT IDENTIFIER ('.' IDENTIFIER)* ';' ;
 
-classDeclaration : MODIFIER* CLASS className templateDeclaration?
+classDeclaration : modifier* CLASS className templateDeclaration?
         '{' classMemberDeclaration* '}' ;
 
 templateDeclaration : '(' templateList ')' ;
@@ -16,31 +16,33 @@ templateList : IDENTIFIER (',' IDENTIFIER)* ;
 
 classMemberDeclaration 
     : methodDeclaration
-    | MODIFIER* type IDENTIFIER (arrayOperator)? (ASSIGN assignmentExpression)? ';'
+    | fieldDeclaration
     | constructorDeclaration
     ;
 
-methodDeclaration : MODIFIER* templateDeclaration? type IDENTIFIER '(' parameterList? ')' 
+methodDeclaration : modifier* templateDeclaration? type name '(' parameterList? ')' 
         methodBody ;
+
+fieldDeclaration : modifier* type name (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
 
 parameterList : parameter (',' parameter)* ;
 
-parameter : type IDENTIFIER (arrayOperator)? ;
+parameter : type name (arrayOperator)? ;
 
-constructorDeclaration : MODIFIER? className '(' parameterList? ')' methodBody ;
+constructorDeclaration : modifier? className '(' parameterList? ')' methodBody ;
 
 methodBody : '{' (variableDeclaration | statement)* '}' ;
 
-variableDeclaration : type IDENTIFIER (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
+variableDeclaration : type name (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
 
 statement 
     : RETURN expression? ';'
     | PRINT '(' expression ')' ';'
     | READ invokeOperator ';'
-    | SPAWN expression SET IDENTIFIER ';'
+    | SPAWN expression SET name ';'
     | BLOCK invokeOperator ';'
-    | LOCK IDENTIFIER ';'
-    | UNLOCK IDENTIFIER ';'
+    | LOCK name ';'
+    | UNLOCK name ';'
     | statementWithScope
     | expression ';'
     ;
@@ -77,7 +79,7 @@ expression
     | NUMERIC_LITTERAL expressionz?
     | CHARACTER_LITTERAL expressionz?
     | STRING_LITTERAL expressionz?
-    | IDENTIFIER fnArrMember? memberRefz? expressionz?
+    | name fnArrMember? memberRefz? expressionz?
     | expression QUESTION expression COLON expression
     | NOT expression
     ;
@@ -87,7 +89,7 @@ fnArrMember
     | '[' expression ']'
     ;
 
-memberRefz : '.' IDENTIFIER fnArrMember? memberRefz? ;
+memberRefz : '.' name fnArrMember? memberRefz? ;
 
 expressionz 
     : assignmentOperation
@@ -121,11 +123,15 @@ arrayOperator : '[' ']' ;
 
 argumentList : expression (',' expression)* ;
 
+modifier : MODIFIER ;
+
 type 
     : PRIMITIVE_TYPE
     | className ;
 
 className : IDENTIFIER ;
+
+name : IDENTIFIER ;
 
 // *************** Lexer ***************
 

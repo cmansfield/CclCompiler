@@ -1,4 +1,4 @@
-// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.language.recognition;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -77,6 +77,16 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#fieldDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#fieldDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#parameterList}.
 	 * @param ctx the parse tree
@@ -288,6 +298,16 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 */
 	void exitArgumentList(CclGrammarParser.ArgumentListContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#modifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterModifier(CclGrammarParser.ModifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#modifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitModifier(CclGrammarParser.ModifierContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CclGrammarParser#type}.
 	 * @param ctx the parse tree
 	 */
@@ -307,4 +327,14 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitClassName(CclGrammarParser.ClassNameContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#name}.
+	 * @param ctx the parse tree
+	 */
+	void enterName(CclGrammarParser.NameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#name}.
+	 * @param ctx the parse tree
+	 */
+	void exitName(CclGrammarParser.NameContext ctx);
 }

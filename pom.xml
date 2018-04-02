@@ -124,7 +124,7 @@
                 <version>${antlrVersion}</version>
                 <configuration>
                     <sourceDirectory>src/main/java</sourceDirectory>
-                    <outputDirectory>src/main/generated-sources</outputDirectory>
+                    <outputDirectory>src/main/java/io/github/cmansfield/language/recognition</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>

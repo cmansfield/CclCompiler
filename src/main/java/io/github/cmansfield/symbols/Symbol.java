@@ -34,6 +34,10 @@ public class Symbol {
   public String getSymbolId() {
     return symbolId == null ? "" : symbolId;
   }
+  
+  public void setSymbolId(String symbolId) {
+    this.symbolId = symbolId;
+  }
 
   public String getText() {
     return text == null ? "" : text;
@@ -63,13 +67,29 @@ public class Symbol {
     if(this.symbolKind != symbol.symbolKind) {
       return false;
     }
-    if(!this.scope.equals(symbol.scope)) {
+    
+    if(this.scope == null) {
+      if(symbol.scope != null) {
+        return false;
+      }
+    }
+    else if(!this.scope.equals(symbol.scope)) {
       return false;
     }
-    if(!this.text.equals(symbol.text)) {
+    
+    if(this.text == null) {
+      if(symbol.text != null) {
+        return false;
+      }
+    }
+    else if(!this.text.equals(symbol.text)) {
       return false;
     }
 
+    if(this.data == null) { 
+      return symbol.data == null;
+    }
+    
     return this.data.equals(symbol.data);
   }
 
@@ -86,7 +106,7 @@ public class Symbol {
 
   @Override
   public String toString() {
-    return String.format("(%S - %s)", symbolId, text);
+    return String.format("(%s scope: %s)", text, scope);
   }
 
   
@@ -124,10 +144,6 @@ public class Symbol {
     }
     
     public Symbol build() {
-      if(StringUtils.isBlank(this.symbolId)) {
-        LOGGER.error("SymbolId is blank, all symbols should have an Id");
-        return null;
-      }
       if(this.symbolKind == null || this.symbolKind == SymbolKind.UNKNOWN) {
         LOGGER.error("Symbol {}'s kind is either null or UNKNOWN, it must have a known value", this.symbolId);
         return null;
