@@ -1,22 +1,19 @@
 package io.github.cmansfield.symbols;
 
 import io.github.cmansfield.symbols.data.Data;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 
 public class SymbolFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(SymbolFactory.class);
-  private SymbolTableVisitor symbolTableListener;
   
-  public SymbolFactory(SymbolTableVisitor symbolTableVisitor) {
-    this.symbolTableListener = symbolTableVisitor;
+  private SymbolFactory() {
   }
   
-  public Symbol getSymbol(String identifier, SymbolKind symbolKind, Data data) {
+  public static Symbol getSymbol(String identifier, SymbolKind symbolKind, String scope, Data data) {
     Symbol.SymbolBuilder symbolBuilder = new Symbol().new SymbolBuilder()
-            .scope(symbolTableListener.getScope())
+            .scope(scope)
             .text(identifier)
             .symbolKind(symbolKind)
             .data(data);

@@ -3,26 +3,24 @@ package io.github.cmansfield.symbols;
 import io.github.cmansfield.language.recognition.CclGrammarBaseVisitor;
 import io.github.cmansfield.language.recognition.CclGrammarParser;
 import io.github.cmansfield.symbols.data.AccessModifier;
+import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.symbols.data.Data;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.*;
 import java.util.stream.Collectors;
+import java.util.*;
 
 
 public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   private static final Logger LOGGER = LoggerFactory.getLogger(SymbolTableVisitor.class);
-  private SymbolFactory symbolFactory;
   private Map<String, Symbol> symbols;
   private String scope;
   
   public SymbolTableVisitor() {
-    scope = "";
+    scope = "g.MyClass_package";
     symbols = new HashMap<>();
-    symbolFactory = new SymbolFactory(this);
   }
 
   public String getScope() {
@@ -36,13 +34,17 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
     // TODO - get template declaration
+    String scopeOrig = scope;
+
+    String name = SymbolTableUtils.getName(ctx, this);
+    scope = scope + "." + name;
+    
     List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
     String returnType = SymbolTableUtils.getReturnType(ctx, this);
     List<String> parameters = SymbolTableUtils.getParameters(ctx, this);
-    String name = SymbolTableUtils.getName(ctx, this);
     
     Data data = new Data("", returnType, accessModifiers.get(0), parameters);
-    addNewSymbol(name, SymbolKind.METHOD, data);
+    addNewSymbol(name, SymbolKind.METHOD, scopeOrig, data);
 
     CclGrammarParser.MethodBodyContext methodBodyContext = ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
@@ -51,6 +53,8 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .orElse(null);
     visitMethodBody(methodBodyContext);
 
+    scope = scopeOrig;
+    
     return null;
   }
 
@@ -87,7 +91,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     String type = ctx.children.get(0).getText();
     String name = ctx.children.get(1).getText();
     Data data = new Data(type, AccessModifier.PRIVATE);
-    Symbol symbol = addNewSymbol(name, SymbolKind.PARAM, data);
+    Symbol symbol = addNewSymbol(name, SymbolKind.PARAM, scope, data);
     
     return symbol.getSymbolId();
   }
@@ -96,9 +100,27 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   public Object visitName(CclGrammarParser.NameContext ctx) {
     return getChildText(ctx);
   }
+
+  @Override
+  public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
+    return getChildText(ctx);
+  }
+
+  @Override
+  public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
+    String name = SymbolTableUtils.getClassName(ctx, this);
+    String scopeOrig = scope;
+    scope = scope + "." + name;
+
+    Object object = super.visitClassDeclaration(ctx);
+    scope = scopeOrig;
+
+    return object;
+  }
   
-  private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, Data data) {
-    Symbol symbol = symbolFactory.getSymbol(identifier, symbolKind, data);
+  
+  private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data) {
+    Symbol symbol = SymbolFactory.getSymbol(identifier, symbolKind, scope, data);
 
     if(symbols.containsValue(symbol)) {
       return symbols.get(symbol);
@@ -116,4 +138,5 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
     return ctx.children.get(0).getText();
   }
+
 }

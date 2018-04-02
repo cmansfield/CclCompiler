@@ -53,6 +53,20 @@ class SymbolTableUtils {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
   }
+
+  static String getClassName(ParserRuleContext ctx, SymbolTableVisitor visitor) {
+    if(ctx == null || visitor == null) {
+      return null;
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ClassNameContext)
+            .map(context -> (CclGrammarParser.ClassNameContext)context)
+            .map(visitor::visitClassName)
+            .map(val -> (String)val)
+            .findFirst()
+            .orElse(null);
+  }
   
   static String getName(ParserRuleContext ctx, SymbolTableVisitor visitor) {
     if(ctx == null || visitor == null) {
