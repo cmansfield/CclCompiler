@@ -1,9 +1,7 @@
-package io.github.cmansfield.language.recognition;
+package io.github.cmansfield.symbols;
 
-import org.apache.commons.collections4.CollectionUtils;
-import io.github.cmansfield.symbols.SymbolFactory;
-import io.github.cmansfield.symbols.SymbolKind;
-import io.github.cmansfield.symbols.Symbol;
+import io.github.cmansfield.language.recognition.CclGrammarBaseListener;
+import io.github.cmansfield.language.recognition.CclGrammarParser;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -13,12 +11,12 @@ import java.util.*;
 public class SymbolTableListener extends CclGrammarBaseListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(SymbolTableListener.class);
   private SymbolFactory symbolFactory;
-  private Map<String, Symbol> symbols;
+  private Set<Symbol> symbols;
   private String scope;
   
   public SymbolTableListener() {
     scope = "";
-    symbols = new HashMap<>();
+    symbols = new HashSet<>();
     symbolFactory = new SymbolFactory(this);
   }
   
@@ -26,8 +24,8 @@ public class SymbolTableListener extends CclGrammarBaseListener {
     return scope;
   }
   
-  public Map<String, Symbol> getSymbols() {
-    return symbols  == null ? Collections.emptyMap() : symbols;
+  public Set<Symbol> getSymbols() {
+    return symbols == null ? Collections.emptySet() : symbols;
   }
   
   @Override
@@ -77,12 +75,13 @@ public class SymbolTableListener extends CclGrammarBaseListener {
     LOGGER.debug("Class Name\t\t{}", ctx.getText());
 
     // TODO - Check to see if the "Class Name" is actually a template
-    
-    if(symbols.containsKey(ctx.getText())) {
+
+    Symbol symbol = symbolFactory.getSymbol(SymbolKind.CLASS, ctx);
+
+    if(symbols.contains(symbol)) {
       return;
     }
-    
-    Symbol symbol = symbolFactory.getSymbol(SymbolKind.CLASS, ctx);
-    symbols.put(symbol.getText(), symbol);
+
+    symbols.add(symbol);
   }
 }

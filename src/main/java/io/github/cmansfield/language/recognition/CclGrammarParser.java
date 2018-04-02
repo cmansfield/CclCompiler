@@ -1,10 +1,13 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.language.recognition;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class CclGrammarParser extends Parser {
@@ -143,6 +146,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitCompilationUnit(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitCompilationUnit(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final CompilationUnitContext compilationUnit() throws RecognitionException {
@@ -242,6 +250,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitImportDeclaration(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitImportDeclaration(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ImportDeclarationContext importDeclaration() throws RecognitionException {
@@ -315,6 +328,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitClassDeclaration(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitClassDeclaration(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -400,6 +418,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitTemplateDeclaration(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitTemplateDeclaration(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TemplateDeclarationContext templateDeclaration() throws RecognitionException {
@@ -443,6 +466,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitTemplateList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitTemplateList(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -517,6 +545,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitClassMemberDeclaration(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitClassMemberDeclaration(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -632,6 +665,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitMethodDeclaration(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitMethodDeclaration(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MethodDeclarationContext methodDeclaration() throws RecognitionException {
@@ -717,6 +755,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitParameterList(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitParameterList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ParameterListContext parameterList() throws RecognitionException {
@@ -777,6 +820,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitParameter(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitParameter(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ParameterContext parameter() throws RecognitionException {
@@ -835,6 +883,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitConstructorDeclaration(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitConstructorDeclaration(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -911,6 +964,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitMethodBody(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitMethodBody(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MethodBodyContext methodBody() throws RecognitionException {
@@ -986,6 +1044,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitVariableDeclaration(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitVariableDeclaration(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1067,6 +1130,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitStatement(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1245,6 +1313,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitStatementWithScope(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitStatementWithScope(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1425,6 +1498,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitAssignmentExpression(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitAssignmentExpression(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AssignmentExpressionContext assignmentExpression() throws RecognitionException {
@@ -1502,6 +1580,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitTypeCast(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitTypeCast(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TypeCastContext typeCast() throws RecognitionException {
@@ -1544,6 +1627,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitBraceEnclosedInitializer(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitBraceEnclosedInitializer(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1599,6 +1687,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitNewDeclaration(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitNewDeclaration(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1693,6 +1786,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitExpression(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitExpression(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1943,6 +2041,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitFnArrMember(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitFnArrMember(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final FnArrMemberContext fnArrMember() throws RecognitionException {
@@ -2018,6 +2121,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitMemberRefz(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitMemberRefz(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MemberRefzContext memberRefz() throws RecognitionException {
@@ -2084,6 +2192,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitExpressionz(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitExpressionz(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -2157,6 +2270,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitAssignmentOperation(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitAssignmentOperation(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AssignmentOperationContext assignmentOperation() throws RecognitionException {
@@ -2205,6 +2323,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitBooleanOperation(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitBooleanOperation(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -2322,6 +2445,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitMathOperation(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitMathOperation(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MathOperationContext mathOperation() throws RecognitionException {
@@ -2395,6 +2523,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitInvokeOperator(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitInvokeOperator(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final InvokeOperatorContext invokeOperator() throws RecognitionException {
@@ -2432,6 +2565,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitArrayOperator(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitArrayOperator(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -2476,6 +2614,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitArgumentList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitArgumentList(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -2534,6 +2677,11 @@ public class CclGrammarParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitType(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitType(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TypeContext type() throws RecognitionException {
@@ -2585,6 +2733,11 @@ public class CclGrammarParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof CclGrammarListener ) ((CclGrammarListener)listener).exitClassName(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitClassName(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 

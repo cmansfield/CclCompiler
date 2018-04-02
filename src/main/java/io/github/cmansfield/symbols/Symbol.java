@@ -1,5 +1,6 @@
 package io.github.cmansfield.symbols;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import io.github.cmansfield.symbols.data.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,43 @@ public class Symbol {
 
   public Optional<Data> getData() {
     return data == null ? Optional.empty() : Optional.of(data);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(obj == null) {
+      return false;
+    }
+    if(this == obj) {
+      return true;
+    }
+    if(!(obj instanceof Symbol)) {
+      return false;
+    }
+    Symbol symbol = (Symbol) obj;
+
+    if(this.symbolKind != symbol.symbolKind) {
+      return false;
+    }
+    if(!this.scope.equals(symbol.scope)) {
+      return false;
+    }
+    if(!this.text.equals(symbol.text)) {
+      return false;
+    }
+
+    return this.data.equals(symbol.data);
+  }
+
+  @Override
+  public int hashCode() {
+    // Not including the symbolId in this check
+    return new HashCodeBuilder(17, 37)
+            .append(scope)
+            .append(text)
+            .append(symbolKind.toString())
+            .append(data.hashCode())
+            .toHashCode();
   }
 
   @Override

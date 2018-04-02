@@ -1,6 +1,5 @@
 package io.github.cmansfield.symbols;
 
-import io.github.cmansfield.language.recognition.SymbolTableListener;
 import io.github.cmansfield.symbols.data.DataFactory;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.LoggerFactory;

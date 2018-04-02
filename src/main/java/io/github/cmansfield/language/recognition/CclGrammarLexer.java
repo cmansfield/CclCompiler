@@ -1,4 +1,4 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.language.recognition;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
