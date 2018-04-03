@@ -126,10 +126,20 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     String scopeOrig = scope;
     scope = scope + "." + name;
 
-    Object object = super.visitClassDeclaration(ctx);
+    // TODO - get Template Declarations
+    List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
+    Data data = new Data().new DataBuilder()
+            .accessModifiers(accessModifiers)
+            .build();
+    addNewSymbol(name, SymbolKind.CLASS, scopeOrig, data);
+    
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ClassMemberDeclarationContext)
+            .map(context -> (CclGrammarParser.ClassMemberDeclarationContext)context)
+            .forEach(this::visitClassMemberDeclaration);
     scope = scopeOrig;
 
-    return object;
+    return null;
   }
 
   @Override
