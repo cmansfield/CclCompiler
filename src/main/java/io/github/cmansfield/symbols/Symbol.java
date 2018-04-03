@@ -106,7 +106,7 @@ public class Symbol {
 
   @Override
   public String toString() {
-    return String.format("(\"%s\" scope: %s)", text, scope);
+    return String.format("(%s \"%s\" scope: %s)", symbolKind.toString(), text, scope);
   }
 
   
