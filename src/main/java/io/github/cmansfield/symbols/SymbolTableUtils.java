@@ -81,4 +81,11 @@ class SymbolTableUtils {
             .findFirst()
             .orElse(null);
   }
+  
+  static void visitMethodBody(ParserRuleContext ctx, SymbolTableVisitor visitor) {
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
+            .map(context -> (CclGrammarParser.MethodBodyContext)context)
+            .forEach(visitor::visitMethodBody);
+  }
 }

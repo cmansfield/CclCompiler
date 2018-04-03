@@ -3,6 +3,10 @@ TODO List
     All
         Add method headers to all methods
 
+    Data
+        Add a DataBuilder that checks to make sure there aren't 
+            duplicates in the accessModifiers list
+        
     SymbolTableVisitor
         visitMethodDeclaration: Check for template declarations
         Add and update the scope as the visitor moves down the tree

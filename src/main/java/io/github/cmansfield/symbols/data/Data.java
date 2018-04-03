@@ -1,32 +1,31 @@
 package io.github.cmansfield.symbols.data;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.List;
+import java.util.stream.Collectors;
+import java.util.*;
 
 
 public class Data {
   private String type;
   private String returnType;
-  private AccessModifier accessModifier;
+  private List<AccessModifier> accessModifiers;
   private List<String> parameters;
   
   public Data() {
-    accessModifier = AccessModifier.PROJECT;
+    accessModifiers = new ArrayList<>();
+    accessModifiers.add(AccessModifier.PROJECT);
     parameters = new ArrayList<>();
   }
 
-  public Data(final String type, AccessModifier accessModifier) {
-    this.accessModifier = accessModifier;
+  public Data(final String type, List<AccessModifier> accessModifiers) {
+    this.accessModifiers = accessModifiers;
     this.type = type;
   }
   
-  public Data(final String type, final String returnType, AccessModifier accessModifier, List<String> parameters) {
-    this(type, accessModifier);
+  public Data(final String type, final String returnType, List<AccessModifier> accessModifiers, List<String> parameters) {
+    this(type, accessModifiers);
     this.returnType = returnType;
     this.parameters = parameters;
   }
@@ -39,8 +38,8 @@ public class Data {
     return StringUtils.isBlank(returnType) ? Optional.empty() : Optional.of(returnType);
   }
 
-  public AccessModifier getAccessModifier() {
-    return accessModifier == null ? AccessModifier.PROJECT : accessModifier;
+  public List<AccessModifier> getAccessModifiers() {
+    return accessModifiers == null ? Collections.singletonList(AccessModifier.PROJECT) : accessModifiers;
   }
 
   public List<String> getParameters() {
@@ -78,14 +77,34 @@ public class Data {
       return false;
     }
     
-    if(this.accessModifier != data.accessModifier) {
+    if(this.accessModifiers == null && data.accessModifiers != null) {
+      return false;
+    }
+    if(data.accessModifiers == null && this.accessModifiers != null) {
+      return false;
+    }
+    if(this.accessModifiers.size() != data.accessModifiers.size()) {
+      return false;
+    }
+    Collections.sort(this.accessModifiers);
+    Collections.sort(data.accessModifiers);
+    if(!this.accessModifiers.equals(data.accessModifiers)) {
+      return false;
+    }
+
+    if(this.parameters == null && data.parameters != null) {
+      return false;
+    }
+    if(data.parameters == null && this.parameters != null) {
       return false;
     }
     if(this.parameters.size() != data.parameters.size()) {
       return false;
     }
+    Collections.sort(this.parameters);
+    Collections.sort(data.parameters);
 
-    return this.parameters.containsAll(data.parameters);
+    return this.parameters.equals(data.parameters);
   }
 
   @Override
@@ -93,8 +112,70 @@ public class Data {
     return new HashCodeBuilder(17, 37)
             .append(type)
             .append(returnType)
-            .append(accessModifier.toString())
+            .append(accessModifiers.toString())
             .append(parameters)
             .toHashCode();
+  }
+  
+  
+  public class DataBuilder {
+    private String type;
+    private String returnType;
+    private List<AccessModifier> accessModifiers;
+    private List<String> parameters;
+
+    public DataBuilder type(String type) {
+      this.type = type;
+      return this;
+    }
+    
+    public DataBuilder returnType(String returnType) {
+      this.returnType = returnType;
+      return this;
+    }
+    
+    public DataBuilder accessModifier(AccessModifier accessModifier) {
+      if(accessModifiers == null) {
+        accessModifiers = new ArrayList<>();
+      }
+      accessModifiers.add(accessModifier);
+      return this;
+    }
+    
+    public DataBuilder accessModifiers(List<AccessModifier> accessModifiers) {
+      if(this.accessModifiers == null) {
+        this.accessModifiers = new ArrayList<>();
+      }
+      this.accessModifiers.addAll(accessModifiers);
+      return this;
+    }
+    
+    public DataBuilder parameter(String parameter) {
+      if(parameters == null) {
+        parameters = new ArrayList<>();
+      }
+      parameters.add(parameter);
+      return this;
+    }
+    
+    public DataBuilder parameters(List<String> parameters) {
+      if(this.parameters == null) {
+        this.parameters = new ArrayList<>();
+      }
+      this.parameters.addAll(parameters);
+      return this;
+    }
+    
+    public Data build() {
+      Set<String> uniqueAccessModifiers = accessModifiers.stream()
+              .map(AccessModifier::toString)
+              .collect(Collectors.toSet());
+      
+      if(uniqueAccessModifiers.size() != accessModifiers.size()) {
+        throw new IllegalArgumentException("There cannot be duplicate access modifiers");
+      }
+      
+      return new Data(this.type, this.returnType, this.accessModifiers, this.parameters);
+    }
   }
 }

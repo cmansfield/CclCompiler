@@ -19,7 +19,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   private String scope;
   
   public SymbolTableVisitor() {
-    scope = "g.MyClass_package";
+    scope = "g.p0";
     symbols = new HashMap<>();
   }
 
@@ -29,6 +29,26 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
   public Map<String, Symbol> getSymbols() {
     return symbols == null ? Collections.emptyMap() : symbols;
+  }
+
+  private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data) {
+    Symbol symbol = SymbolFactory.getSymbol(identifier, symbolKind, scope, data);
+
+    if(symbols.containsValue(symbol)) {
+      return symbols.get(symbol);
+    }
+    symbol.setSymbolId(SymbolIdGenerator.generateId(symbolKind));
+    symbols.put(symbol.getSymbolId(), symbol);
+
+    return symbol;
+  }
+
+  private String getChildText(ParserRuleContext ctx) {
+    if(CollectionUtils.isEmpty(ctx.children)) {
+      throw new IllegalArgumentException("No children found in context");
+    }
+
+    return ctx.children.get(0).getText();
   }
   
   @Override
@@ -43,16 +63,10 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     String returnType = SymbolTableUtils.getReturnType(ctx, this);
     List<String> parameters = SymbolTableUtils.getParameters(ctx, this);
     
-    Data data = new Data("", returnType, accessModifiers.get(0), parameters);
+    Data data = new Data("", returnType, accessModifiers, parameters);
     addNewSymbol(name, SymbolKind.METHOD, scopeOrig, data);
 
-    CclGrammarParser.MethodBodyContext methodBodyContext = ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
-            .map(context -> (CclGrammarParser.MethodBodyContext)context)
-            .findFirst()
-            .orElse(null);
-    visitMethodBody(methodBodyContext);
-
+    SymbolTableUtils.visitMethodBody(ctx, this);
     scope = scopeOrig;
     
     return null;
@@ -90,7 +104,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
     String type = ctx.children.get(0).getText();
     String name = ctx.children.get(1).getText();
-    Data data = new Data(type, AccessModifier.PRIVATE);
+    Data data = new Data(type, Collections.singletonList(AccessModifier.PRIVATE));
     Symbol symbol = addNewSymbol(name, SymbolKind.PARAM, scope, data);
     
     return symbol.getSymbolId();
@@ -117,26 +131,25 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
     return object;
   }
-  
-  
-  private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data) {
-    Symbol symbol = SymbolFactory.getSymbol(identifier, symbolKind, scope, data);
 
-    if(symbols.containsValue(symbol)) {
-      return symbols.get(symbol);
-    }
-    symbol.setSymbolId(SymbolIdGenerator.generateId(symbolKind));
-    symbols.put(symbol.getSymbolId(), symbol);
-    
-    return symbol;
+  @Override
+  public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
+    String name = SymbolTableUtils.getClassName(ctx, this);
+    String scopeOrig = scope;
+    scope = scope + "." + name;
+
+    List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
+    List<String> parameters = SymbolTableUtils.getParameters(ctx, this);
+
+    Data data = new Data().new DataBuilder()
+            .accessModifiers(accessModifiers)
+            .parameters(parameters)
+            .build();
+    addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data);
+
+    SymbolTableUtils.visitMethodBody(ctx, this);
+    scope = scopeOrig;
+
+    return null;
   }
-
-  private String getChildText(ParserRuleContext ctx) {
-    if(CollectionUtils.isEmpty(ctx.children)) {
-      throw new IllegalArgumentException("No children found in context");
-    }
-
-    return ctx.children.get(0).getText();
-  }
-
 }

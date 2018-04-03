@@ -1,5 +1,6 @@
 package io.github.cmansfield.symbols.data;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,7 +21,7 @@ public class DataTest {
     parameters.add("P104");
     parameters.add("P105");
     parameters.add("P106");
-    data = new Data("", "int", AccessModifier.PRIVATE, parameters);
+    data = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
   }
 
   @Test
@@ -56,7 +57,7 @@ public class DataTest {
     parameters.add("P104");
     parameters.add("P105");
     parameters.add("P106");
-    Data otherData = new Data("", "int", AccessModifier.PRIVATE, parameters);
+    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
 
     assertTrue(data.equals(otherData));
   }
@@ -67,7 +68,7 @@ public class DataTest {
     parameters.add("P104");
     parameters.add("P105");
     parameters.add("P100");
-    Data otherData = new Data("", "int", AccessModifier.PRIVATE, parameters);
+    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
 
     assertFalse(data.equals(otherData));
   }
@@ -76,28 +77,28 @@ public class DataTest {
   public void test_notEquals_parameterSize() {
     List<String> parameters = new ArrayList<>();
     parameters.add("P104");
-    Data otherData = new Data("", "int", AccessModifier.PRIVATE, parameters);
+    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
 
     assertFalse(data.equals(otherData));
   }
 
   @Test
   public void test_notEquals_accessModifier() {
-    Data otherData = new Data("", "int", AccessModifier.PUBLIC, data.getParameters());
+    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PUBLIC), data.getParameters());
 
     assertFalse(data.equals(otherData));
   }
 
   @Test
   public void test_notEquals_returnType() {
-    Data otherData = new Data("", "void", data.getAccessModifier(), data.getParameters());
+    Data otherData = new Data("", "void", data.getAccessModifiers(), data.getParameters());
 
     assertFalse(data.equals(otherData));
   }
 
   @Test
   public void test_notEquals_type() {
-    Data otherData = new Data("bool", "int", data.getAccessModifier(), data.getParameters());
+    Data otherData = new Data("bool", "int", data.getAccessModifiers(), data.getParameters());
 
     assertFalse(data.equals(otherData));
   }
@@ -118,7 +119,7 @@ public class DataTest {
     parameters.add("P104");
     parameters.add("P105");
     parameters.add("P106");
-    Data otherData = new Data("", "int", AccessModifier.PRIVATE, parameters);
+    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
 
     assertEquals(data.hashCode(), otherData.hashCode());
   }
@@ -129,15 +130,58 @@ public class DataTest {
     parameters.add("P104");
     parameters.add("P105");
     parameters.add("P107");
-    Data otherData = new Data("", "int", AccessModifier.PRIVATE, parameters);
+    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
 
     assertNotEquals(data.hashCode(), otherData.hashCode());
   }
 
   @Test
   public void test_failed_hashCode_accessModifier() {
-    Data otherData = new Data("", "int", AccessModifier.PUBLIC, data.getParameters());
+    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PUBLIC), data.getParameters());
 
     assertNotEquals(data.hashCode(), otherData.hashCode());
+  }
+  
+  @Test
+  public void test_build() {
+    Data data = new Data().new DataBuilder()
+            .type("")
+            .returnType("int")
+            .accessModifier(AccessModifier.STATIC)
+            .accessModifier(AccessModifier.CONST)
+            .accessModifiers(Collections.singletonList(AccessModifier.PUBLIC))
+            .parameter("P004")
+            .parameter("P005")
+            .parameters(Collections.singletonList("P006"))
+            .build();
+    
+    assertNotNull(data);
+    assertFalse(data.getType().isPresent());
+    assertTrue(data.getReturnType().isPresent());
+    assertEquals(data.getReturnType().get(), "int");
+    
+    List<AccessModifier> accessModifiers = data.getAccessModifiers();
+    assertTrue(CollectionUtils.isNotEmpty(accessModifiers));
+    assertEquals(accessModifiers.size(), 3);
+    assertTrue(accessModifiers.contains(AccessModifier.PUBLIC));
+    assertTrue(accessModifiers.contains(AccessModifier.CONST));
+    assertTrue(accessModifiers.contains(AccessModifier.STATIC));
+
+    List<String> parameters = data.getParameters();
+    assertTrue(CollectionUtils.isNotEmpty(parameters));
+    assertEquals(parameters.size(), 3);
+    assertTrue(parameters.contains("P004"));
+    assertTrue(parameters.contains("P005"));
+    assertTrue(parameters.contains("P006"));
+  }
+  
+  @Test (expectedExceptions = IllegalArgumentException.class)
+  public void test_build_fail_duplicateAccessModifiers() {
+    Data data = new Data().new DataBuilder()
+            .accessModifier(AccessModifier.PRIVATE)
+            .accessModifier(AccessModifier.PRIVATE)
+            .accessModifier(AccessModifier.STATIC)
+            .build();
+    fail("Should have gotten an IllegalArg exception here");
   }
 }

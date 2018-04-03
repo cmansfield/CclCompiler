@@ -6,6 +6,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.testng.Assert.*;
@@ -25,7 +26,7 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", AccessModifier.PRIVATE, parameters))
+            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters))
             .build();
   }
 
@@ -40,7 +41,7 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", AccessModifier.PRIVATE, moreParameters))
+            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), moreParameters))
             .build();
 
     assertTrue(symbol.equals(anotherSymbol));
@@ -75,7 +76,7 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", AccessModifier.PRIVATE, moreParameters))
+            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), moreParameters))
             .build();
 
     assertFalse(symbol.equals(anotherSymbol));
@@ -128,7 +129,7 @@ public class SymbolTest {
             .symbolId("M010")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", AccessModifier.PRIVATE, moreParameters))
+            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), moreParameters))
             .build();
 
     assertEquals(symbol.hashCode(), anotherSymbol.hashCode());
@@ -145,7 +146,7 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", AccessModifier.PRIVATE, moreParameters))
+            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), moreParameters))
             .build();
 
     assertNotEquals(symbol.hashCode(), anotherSymbol.hashCode());
