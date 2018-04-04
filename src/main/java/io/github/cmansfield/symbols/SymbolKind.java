@@ -2,16 +2,17 @@ package io.github.cmansfield.symbols;
 
 public enum SymbolKind {
   MAIN("X"),
-  CLASS("K"),
+  CLASS("C"),
   METHOD("M"),
   CONSTRUCTOR("N"),
   PARAM("P"),
   FVAR("F"),      // Class Field / Instance variable
   LVAR("L"),      // Local variable
   ILIT("I"),      // Integer literal
-  CLIT("C"),      // Character literal
+  CLIT("A"),      // Character literal
   SLIT("S"),      // String literal
-  TEMPLATE("T"),
+  TEMPLATE_CLASS("T"),
+  TEMPLATE_METHOD("K"),
   UNKNOWN("U");
   
   private String prefix;

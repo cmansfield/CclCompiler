@@ -92,10 +92,24 @@ class SymbolTableUtils {
             .map(context -> (CclGrammarParser.MethodBodyContext)context)
             .forEach(visitor::visitMethodBody);
   }
+
+  static void visitAssignmentExpression(ParserRuleContext ctx, SymbolTableVisitor visitor) {
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.AssignmentExpressionContext)
+            .map(context -> (CclGrammarParser.AssignmentExpressionContext)context)
+            .forEach(visitor::visitAssignmentExpression);
+  }
   
   static boolean isArray(ParserRuleContext ctx) {
     return ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.ArrayOperatorContext)
+            .count() > 0;
+  }
+  
+  static boolean isTemplate(ParserRuleContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
+            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
             .count() > 0;
   }
 }

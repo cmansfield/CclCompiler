@@ -1,5 +1,15 @@
 
+public class TestClass (TBD) {
+    private static const int number = 300 / 10;
+    
+    public void someMethod() {
+        int anotherNumber = 400 / 4;
+    }
+}
+
 public void main() {
-    2 + 3;
+    int num = 500 * 2;
+    char test = 'a';
+    string str = "Hello World";
 }
 

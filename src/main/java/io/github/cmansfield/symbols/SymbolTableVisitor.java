@@ -133,12 +133,13 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     String scopeOrig = scope;
     scope = scope + "." + name;
 
-    // TODO - get Template Declarations
+    boolean isTemplate = SymbolTableUtils.isTemplate(ctx);
+    
     List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
     Data data = new Data().new DataBuilder()
             .accessModifiers(accessModifiers)
             .build();
-    addNewSymbol(name, SymbolKind.CLASS, scopeOrig, data);
+    addNewSymbol(name, isTemplate ? SymbolKind.TEMPLATE_CLASS : SymbolKind.CLASS, scopeOrig, data);
     
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.ClassMemberDeclarationContext)
@@ -184,6 +185,8 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .build();
     addNewSymbol(name, SymbolKind.FVAR, scope, data);
 
+    SymbolTableUtils.visitAssignmentExpression(ctx, this);
+    
     return null;
   }
 
@@ -199,6 +202,8 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .type(type)
             .build();
     addNewSymbol(name, SymbolKind.LVAR, scope, data);
+
+    SymbolTableUtils.visitAssignmentExpression(ctx, this);
     
     return null;
   }
@@ -246,9 +251,39 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     return super.visitNumericliteral(ctx);
   }
 
+  @Override
+  public Object visitCharacterliteral(CclGrammarParser.CharacterliteralContext ctx) {
+    ParseTree child = ctx.getChild(0);
+    if(child == null) {
+      throw new IllegalArgumentException("There should be at least one child node");
+    }
+    String value = child.getText();
+    // Remove single quotes around the char
+    value = value.substring(1, value.length() - 1);
+    Data data = new Data().new DataBuilder()
+            .type("char")
+            .accessModifier(AccessModifier.PUBLIC)
+            .build();
+    addNewSymbol(value, SymbolKind.CLIT, GLOBAL_SCOPE, data);
+    
+    return super.visitCharacterliteral(ctx);
+  }
 
   @Override
-  public Object visitAssignmentExpression(CclGrammarParser.AssignmentExpressionContext ctx) {
-    return super.visitAssignmentExpression(ctx);
+  public Object visitStringliteral(CclGrammarParser.StringliteralContext ctx) {
+    ParseTree child = ctx.getChild(0);
+    if(child == null) {
+      throw new IllegalArgumentException("There should be at least one child node");
+    }
+    String value = child.getText();
+    // Remove quotes around the string
+    value = value.substring(1, value.length() - 1);
+    Data data = new Data().new DataBuilder()
+            .type("string")
+            .accessModifier(AccessModifier.PUBLIC)
+            .build();
+    addNewSymbol(value, SymbolKind.SLIT, GLOBAL_SCOPE, data);
+
+    return super.visitStringliteral(ctx);
   }
 }

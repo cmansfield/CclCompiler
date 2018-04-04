@@ -143,6 +143,24 @@ public class DataTest {
   }
   
   @Test
+  public void test_equals_templatePlaceHolders() {
+    Data data1 = new Data().new DataBuilder()
+            .type("int")
+            .templatePlaceHolder("T")
+            .templatePlaceHolder("K")
+            .build();
+    Data data2 = new Data().new DataBuilder()
+            .type("int")
+            .templatePlaceHolder("T")
+            .templatePlaceHolder("K")
+            .build();
+    
+    assertNotNull(data1);
+    assertNotNull(data2);
+    assertEquals(data1, data2);
+  }
+  
+  @Test
   public void test_build() {
     Data data = new Data().new DataBuilder()
             .type("")

@@ -12,6 +12,7 @@ public class Data {
   private String type;
   private String returnType;
   private List<AccessModifier> accessModifiers;
+  private List<String> templatePlaceHolders;
   private List<String> parameters;
   private boolean isArray = false;
   
@@ -36,6 +37,11 @@ public class Data {
     this(type, returnType, accessModifiers, parameters);
     this.isArray = isArray;
   }
+
+  public Data(final String type, final String returnType, List<AccessModifier> accessModifiers, List<String> parameters, boolean isArray, List<String> templatePlaceHolders) {
+    this(type, returnType, accessModifiers, parameters, isArray);
+    this.templatePlaceHolders = templatePlaceHolders;
+  }
   
   public Optional<String> getType() {
     return StringUtils.isBlank(type) ? Optional.empty() : Optional.of(type);
@@ -53,6 +59,10 @@ public class Data {
     return parameters == null ? Collections.emptyList() : parameters;
   }
 
+  public List<String> getTemplatePlaceHolders() {
+    return templatePlaceHolders == null ? Collections.emptyList() : templatePlaceHolders;
+  }
+  
   public boolean isTypeAnArray() {
     return isArray;
   }
@@ -124,6 +134,15 @@ public class Data {
       return false;
     }
 
+    if(this.templatePlaceHolders != null) {
+      if(!this.templatePlaceHolders.equals(data.templatePlaceHolders)) {
+        return false;
+      }
+    }
+    else if(data.templatePlaceHolders != null) {
+      return false;
+    }
+    
     List<String> lhsParameters = this.getParameters();
     List<String> rhsParameters = data.getParameters();
     if(lhsParameters.size() != rhsParameters.size()) {
@@ -142,6 +161,7 @@ public class Data {
             .append(returnType)
             .append(accessModifiers.toString())
             .append(parameters)
+            .append(templatePlaceHolders)
             .append(isArray)
             .toHashCode();
   }
@@ -151,6 +171,7 @@ public class Data {
     private String type;
     private String returnType;
     private List<AccessModifier> accessModifiers;
+    private List<String> templatePlaceHolders;
     private List<String> parameters;
     private boolean isArray = false;
 
@@ -196,6 +217,22 @@ public class Data {
       return this;
     }
     
+    public DataBuilder templatePlaceHolder(String templatePlaceHolder) {
+      if(this.templatePlaceHolders == null) {
+        this.templatePlaceHolders = new ArrayList<>();
+      }
+      this.templatePlaceHolders.add(templatePlaceHolder);
+      return this;
+    }
+    
+    public DataBuilder templatePlaceHolders(List<String> templatePlaceHolders) {
+      if(this.templatePlaceHolders == null) {
+        this.templatePlaceHolders = new ArrayList<>();
+      }
+      this.templatePlaceHolders.addAll(templatePlaceHolders);
+      return this;
+    }
+    
     public DataBuilder isTypeAnArray(boolean isArray) {
       this.isArray = isArray;
       return this;
@@ -213,7 +250,12 @@ public class Data {
         throw new IllegalArgumentException("Cannot be both 'private' and 'public' at the same time");
       }
       
-      return new Data(this.type, this.returnType, this.accessModifiers, this.parameters, this.isArray);
+      Set<String> uniqueTemplatePlaceHolders = new HashSet<>(templatePlaceHolders);
+      if(uniqueTemplatePlaceHolders.size() != templatePlaceHolders.size()) {
+        throw new IllegalArgumentException("Each template place holder must be unique");
+      }
+      
+      return new Data(this.type, this.returnType, this.accessModifiers, this.parameters, this.isArray, this.templatePlaceHolders);
     }
   }
 }
