@@ -162,4 +162,23 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
     return null;
   }
+
+  @Override
+  public Object visitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx) {
+    String name = SymbolTableUtils.getName(ctx, this);
+    List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
+    String type = SymbolTableUtils.getType(ctx, this);
+
+    boolean isArray = ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ArrayOperatorContext)
+            .count() > 0;
+
+    Data data = new Data().new DataBuilder()
+            .accessModifiers(accessModifiers)
+            .type(type)
+            .build();
+    addNewSymbol(name, SymbolKind.FVAR, scope, data);
+
+    return null;
+  }
 }

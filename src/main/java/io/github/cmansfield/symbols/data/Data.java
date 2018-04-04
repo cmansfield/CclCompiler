@@ -174,7 +174,10 @@ public class Data {
       if(uniqueAccessModifiers.size() != accessModifiers.size()) {
         throw new IllegalArgumentException("There cannot be duplicate access modifiers");
       }
-      
+      if(accessModifiers.contains(AccessModifier.PRIVATE) && accessModifiers.contains(AccessModifier.PUBLIC)) {
+        throw new IllegalArgumentException("Cannot be both 'private' and 'public' at the same time");
+      }
+
       return new Data(this.type, this.returnType, this.accessModifiers, this.parameters);
     }
   }

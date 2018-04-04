@@ -76,6 +76,9 @@ public void main() {
 }
 
 public static class TestClass {
+    public int test[] = int[10];
+    private static int num;
+
     // Checking to make sure classes can be placed anywhere
     public TestClass() {}
 }

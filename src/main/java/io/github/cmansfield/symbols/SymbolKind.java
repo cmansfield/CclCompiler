@@ -6,11 +6,11 @@ public enum SymbolKind {
   METHOD("M"),
   CONSTRUCTOR("N"),
   PARAM("P"),
-  IVAR("O"),
-  LVAR("L"),
-  ILIT("I"),
-  CLIT("C"),
-  SLIT("S"),
+  FVAR("F"),      // Class Field / Instance variable
+  LVAR("L"),      // Local variable
+  ILIT("I"),      // Integer literal
+  CLIT("C"),      // Character literal
+  SLIT("S"),      // String literal
   TEMPLATE("T"),
   UNKNOWN("U");
   

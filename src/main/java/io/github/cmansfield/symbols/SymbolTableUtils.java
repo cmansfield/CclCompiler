@@ -25,7 +25,11 @@ class SymbolTableUtils {
             .map(am -> (AccessModifier)am)
             .collect(Collectors.toList());
   }
-  
+
+  static String getType(ParserRuleContext ctx, SymbolTableVisitor visitor) {
+    return getReturnType(ctx, visitor);
+  }
+
   static String getReturnType(ParserRuleContext ctx, SymbolTableVisitor visitor) {
     if(ctx == null || visitor == null) {
       return null;
