@@ -337,4 +337,34 @@ public interface CclGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitName(CclGrammarParser.NameContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#stringliteral}.
+	 * @param ctx the parse tree
+	 */
+	void enterStringliteral(CclGrammarParser.StringliteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#stringliteral}.
+	 * @param ctx the parse tree
+	 */
+	void exitStringliteral(CclGrammarParser.StringliteralContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#characterliteral}.
+	 * @param ctx the parse tree
+	 */
+	void enterCharacterliteral(CclGrammarParser.CharacterliteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#characterliteral}.
+	 * @param ctx the parse tree
+	 */
+	void exitCharacterliteral(CclGrammarParser.CharacterliteralContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CclGrammarParser#numericliteral}.
+	 * @param ctx the parse tree
+	 */
+	void enterNumericliteral(CclGrammarParser.NumericliteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CclGrammarParser#numericliteral}.
+	 * @param ctx the parse tree
+	 */
+	void exitNumericliteral(CclGrammarParser.NumericliteralContext ctx);
 }

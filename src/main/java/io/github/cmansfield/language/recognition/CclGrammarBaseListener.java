@@ -407,6 +407,42 @@ public class CclGrammarBaseListener implements CclGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitName(CclGrammarParser.NameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStringliteral(CclGrammarParser.StringliteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStringliteral(CclGrammarParser.StringliteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCharacterliteral(CclGrammarParser.CharacterliteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCharacterliteral(CclGrammarParser.CharacterliteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNumericliteral(CclGrammarParser.NumericliteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNumericliteral(CclGrammarParser.NumericliteralContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

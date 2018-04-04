@@ -1,5 +1,6 @@
 package io.github.cmansfield.symbols.data;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,6 +13,7 @@ public class Data {
   private String returnType;
   private List<AccessModifier> accessModifiers;
   private List<String> parameters;
+  private boolean isArray = false;
   
   public Data() {
     accessModifiers = new ArrayList<>();
@@ -29,6 +31,11 @@ public class Data {
     this.returnType = returnType;
     this.parameters = parameters;
   }
+
+  public Data(final String type, final String returnType, List<AccessModifier> accessModifiers, List<String> parameters, boolean isArray) {
+    this(type, returnType, accessModifiers, parameters);
+    this.isArray = isArray;
+  }
   
   public Optional<String> getType() {
     return StringUtils.isBlank(type) ? Optional.empty() : Optional.of(type);
@@ -43,9 +50,31 @@ public class Data {
   }
 
   public List<String> getParameters() {
-    return parameters.isEmpty() ? Collections.emptyList() : parameters;
+    return parameters == null ? Collections.emptyList() : parameters;
   }
 
+  public boolean isTypeAnArray() {
+    return isArray;
+  }
+  
+  @Override
+  public String toString() {
+    return String.format(
+            "%s%s%s%s%s", 
+            CollectionUtils.isEmpty(accessModifiers) ? 
+                    "" :
+                    "AccessModifiers:" + getAccessModifiers().stream()
+                      .map(AccessModifier::toString)
+                      .collect(Collectors.joining(" ")),
+            StringUtils.isBlank(type) ? "" : " Type:" + type, 
+            isArray ? " isTypeAnArray:true" : "",
+            StringUtils.isBlank(returnType) ? "" : " ReturnType:" + returnType,
+            CollectionUtils.isEmpty(parameters) ? 
+                    "" :
+                    " Parameters:" + getParameters().stream()
+                            .collect(Collectors.joining(" ")));
+  }
+  
   @Override
   public boolean equals(Object obj) {
     if(obj == null) {
@@ -59,6 +88,9 @@ public class Data {
     }
     Data data = (Data) obj;
 
+    if(this.isArray != data.isArray) {
+      return false;
+    }
     if(this.type == null) {
       if(data.type != null) {
         return false;
@@ -92,19 +124,15 @@ public class Data {
       return false;
     }
 
-    if(this.parameters == null && data.parameters != null) {
+    List<String> lhsParameters = this.getParameters();
+    List<String> rhsParameters = data.getParameters();
+    if(lhsParameters.size() != rhsParameters.size()) {
       return false;
     }
-    if(data.parameters == null && this.parameters != null) {
-      return false;
-    }
-    if(this.parameters.size() != data.parameters.size()) {
-      return false;
-    }
-    Collections.sort(this.parameters);
-    Collections.sort(data.parameters);
+    Collections.sort(lhsParameters);
+    Collections.sort(rhsParameters);
 
-    return this.parameters.equals(data.parameters);
+    return lhsParameters.equals(rhsParameters);
   }
 
   @Override
@@ -114,6 +142,7 @@ public class Data {
             .append(returnType)
             .append(accessModifiers.toString())
             .append(parameters)
+            .append(isArray)
             .toHashCode();
   }
   
@@ -123,6 +152,7 @@ public class Data {
     private String returnType;
     private List<AccessModifier> accessModifiers;
     private List<String> parameters;
+    private boolean isArray = false;
 
     public DataBuilder type(String type) {
       this.type = type;
@@ -166,6 +196,11 @@ public class Data {
       return this;
     }
     
+    public DataBuilder isTypeAnArray(boolean isArray) {
+      this.isArray = isArray;
+      return this;
+    }
+    
     public Data build() {
       Set<String> uniqueAccessModifiers = accessModifiers.stream()
               .map(AccessModifier::toString)
@@ -177,8 +212,8 @@ public class Data {
       if(accessModifiers.contains(AccessModifier.PRIVATE) && accessModifiers.contains(AccessModifier.PUBLIC)) {
         throw new IllegalArgumentException("Cannot be both 'private' and 'public' at the same time");
       }
-
-      return new Data(this.type, this.returnType, this.accessModifiers, this.parameters);
+      
+      return new Data(this.type, this.returnType, this.accessModifiers, this.parameters, this.isArray);
     }
   }
 }

@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.File;
+import java.util.stream.Collectors;
 
 
 public class Compiler {
@@ -39,7 +40,10 @@ public class Compiler {
       visitor.visit(tree);
 //      walker.walk(visitor, tree);
       
-      logger.info("SymbolTable: {}", visitor.getSymbols().toString());
+      logger.info("SymbolTable:\n\t{}", 
+              visitor.getSymbols().entrySet().stream()
+                .map(Object::toString)
+                .collect(Collectors.joining("\n\t")));
     }
     catch (FileNotFoundException e) {
       logger.error("Unable to load file {}", fileName);

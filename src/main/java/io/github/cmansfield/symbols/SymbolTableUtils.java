@@ -92,4 +92,10 @@ class SymbolTableUtils {
             .map(context -> (CclGrammarParser.MethodBodyContext)context)
             .forEach(visitor::visitMethodBody);
   }
+  
+  static boolean isArray(ParserRuleContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ArrayOperatorContext)
+            .count() > 0;
+  }
 }

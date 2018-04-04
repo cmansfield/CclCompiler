@@ -58,7 +58,6 @@ statementWithScope
 assignmentExpression 
     : NEW type newDeclaration
     | typeCast expression
-    | STRING_LITTERAL
     | braceEnclosedInitializer
     | expression
     ;
@@ -76,9 +75,9 @@ expression
     : '(' expression ')' expressionz?
     |  (TRUE | FALSE | NULL) expressionz?
     |  THIS memberRefz? expressionz?
-    | NUMERIC_LITTERAL expressionz?
-    | CHARACTER_LITTERAL expressionz?
-    | STRING_LITTERAL expressionz?
+    | numericliteral expressionz?
+    | characterliteral expressionz?
+    | stringliteral
     | name fnArrMember? memberRefz? expressionz?
     | expression QUESTION expression COLON expression
     | NOT expression
@@ -132,6 +131,12 @@ type
 className : IDENTIFIER ;
 
 name : IDENTIFIER ;
+
+stringliteral : STRING_LITERAL ;
+
+characterliteral : CHARACTER_LITERAL ;
+
+numericliteral : NUMERIC_LITERAL ;
 
 // *************** Lexer ***************
 
@@ -192,11 +197,11 @@ PRIMITIVE_TYPE
     
 IDENTIFIER : LETTER (LETTER | NUMBER)* ;
 
-STRING_LITTERAL : '"' CHARACTER* '"' ;
+STRING_LITERAL : '"' CHARACTER* '"' ;
 
-CHARACTER_LITTERAL : '\'' CHARACTER '\'' ;
+CHARACTER_LITERAL : '\'' CHARACTER '\'' ;
 
-NUMERIC_LITTERAL : [+-]? NUMBER ;
+NUMERIC_LITERAL : [+-]? NUMBER ;
 
 NUMBER : [0-9]+ ;
 

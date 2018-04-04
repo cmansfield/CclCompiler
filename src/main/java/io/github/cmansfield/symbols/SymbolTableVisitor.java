@@ -3,9 +3,12 @@ package io.github.cmansfield.symbols;
 import io.github.cmansfield.language.recognition.CclGrammarBaseVisitor;
 import io.github.cmansfield.language.recognition.CclGrammarParser;
 import io.github.cmansfield.symbols.data.AccessModifier;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.symbols.data.Data;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -15,12 +18,14 @@ import java.util.*;
 
 public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   private static final Logger LOGGER = LoggerFactory.getLogger(SymbolTableVisitor.class);
-  private Map<String, Symbol> symbols;
+  private static final String GLOBAL_SCOPE = "g";
+  
+  private BidiMap<String, Symbol> symbols;
   private String scope;
   
   public SymbolTableVisitor() {
-    scope = "g.p0";
-    symbols = new HashMap<>();
+    scope = GLOBAL_SCOPE + ".p0";
+    symbols = new DualHashBidiMap<>();
   }
 
   public String getScope() {
@@ -35,7 +40,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     Symbol symbol = SymbolFactory.getSymbol(identifier, symbolKind, scope, data);
 
     if(symbols.containsValue(symbol)) {
-      return symbols.get(symbol);
+      return symbols.get(symbols.getKey(symbol));
     }
     symbol.setSymbolId(SymbolIdGenerator.generateId(symbolKind));
     symbols.put(symbol.getSymbolId(), symbol);
@@ -98,13 +103,15 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
   @Override
   public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
-    if(ctx.children == null || ctx.children.size() != 2) {
-      throw new IllegalArgumentException("Parameter has the wrong number of children nodes");
-    }
-
     String type = ctx.children.get(0).getText();
     String name = ctx.children.get(1).getText();
-    Data data = new Data(type, Collections.singletonList(AccessModifier.PRIVATE));
+    boolean isArray = SymbolTableUtils.isArray(ctx);
+    
+    Data data = new Data().new DataBuilder()
+            .type(type)
+            .accessModifier(AccessModifier.PRIVATE)
+            .isTypeAnArray(isArray)
+            .build();
     Symbol symbol = addNewSymbol(name, SymbolKind.PARAM, scope, data);
     
     return symbol.getSymbolId();
@@ -168,17 +175,80 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     String name = SymbolTableUtils.getName(ctx, this);
     List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
     String type = SymbolTableUtils.getType(ctx, this);
-
-    boolean isArray = ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ArrayOperatorContext)
-            .count() > 0;
-
+    boolean isArray = SymbolTableUtils.isArray(ctx);
+                        
     Data data = new Data().new DataBuilder()
             .accessModifiers(accessModifiers)
             .type(type)
+            .isTypeAnArray(isArray)
             .build();
     addNewSymbol(name, SymbolKind.FVAR, scope, data);
 
     return null;
+  }
+
+  @Override
+  public Object visitVariableDeclaration(CclGrammarParser.VariableDeclarationContext ctx) {
+    String type = SymbolTableUtils.getType(ctx, this);
+    String name = SymbolTableUtils.getName(ctx, this);
+    boolean isArray = SymbolTableUtils.isArray(ctx);
+    
+    Data data = new Data().new DataBuilder()
+            .accessModifier(AccessModifier.PRIVATE)
+            .isTypeAnArray(isArray)
+            .type(type)
+            .build();
+    addNewSymbol(name, SymbolKind.LVAR, scope, data);
+    
+    return null;
+  }
+
+  @Override
+  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
+    final String mainEntryPointName = "main";
+    List<ParseTree> children = new ArrayList<>(ctx.children);
+
+    for(ParseTree parseTree: children) {
+      if(parseTree instanceof CclGrammarParser.MethodBodyContext) {
+        List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
+        Data data = new Data().new DataBuilder()
+                .returnType("void")
+                .accessModifiers(accessModifiers)
+                .build();
+        addNewSymbol(mainEntryPointName, SymbolKind.MAIN, scope, data);
+        
+        String scopeOrig = scope;
+        scope += "." + mainEntryPointName;         // NOSONAR - will only happen once
+        parseTree.accept(this);
+        scope = scopeOrig;
+      }
+      else {
+        parseTree.accept(this);
+      }
+    }
+    
+    return null;
+  }
+
+  @Override
+  public Object visitNumericliteral(CclGrammarParser.NumericliteralContext ctx) {
+    ParseTree child = ctx.getChild(0);
+    if(child == null) {
+      throw new IllegalArgumentException("There should be at least one child node");
+    }
+    String value = child.getText();
+    Data data = new Data().new DataBuilder()
+            .type("int")
+            .accessModifier(AccessModifier.PUBLIC)
+            .build();
+    addNewSymbol(value, SymbolKind.ILIT, GLOBAL_SCOPE, data);
+    
+    return super.visitNumericliteral(ctx);
+  }
+
+
+  @Override
+  public Object visitAssignmentExpression(CclGrammarParser.AssignmentExpressionContext ctx) {
+    return super.visitAssignmentExpression(ctx);
   }
 }

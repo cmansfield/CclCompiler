@@ -208,4 +208,22 @@ public interface CclGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitName(CclGrammarParser.NameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#stringliteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStringliteral(CclGrammarParser.StringliteralContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#characterliteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCharacterliteral(CclGrammarParser.CharacterliteralContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#numericliteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNumericliteral(CclGrammarParser.NumericliteralContext ctx);
 }

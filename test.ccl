@@ -76,10 +76,12 @@ public void main() {
 }
 
 public static class TestClass {
-    public int test[] = int[10];
+    public int test[] = new int[10];
     private static int num;
 
     // Checking to make sure classes can be placed anywhere
     public TestClass() {}
+    
+    static public void someMethod(int numbers[]) {}
 }
 
