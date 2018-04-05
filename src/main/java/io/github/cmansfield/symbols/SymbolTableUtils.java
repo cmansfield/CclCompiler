@@ -4,7 +4,6 @@ import io.github.cmansfield.language.recognition.CclGrammarParser;
 import io.github.cmansfield.symbols.data.AccessModifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.Collections;
 import java.util.Collection;
