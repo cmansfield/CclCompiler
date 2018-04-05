@@ -179,10 +179,12 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
   @Override
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
-    String name = SymbolTableUtils.getClassName(ctx, this);
+    SymbolKind symbolKind = SymbolKind.CONSTRUCTOR;
+    String symbolId = SymbolIdGenerator.generateId(symbolKind);
     String scopeOrig = scope;
-    scope = scope + "." + name;
+    scope = scope + "." + symbolId;
 
+    String name = SymbolTableUtils.getClassName(ctx, this);
     List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
     List<String> parameters = SymbolTableUtils.getParameters(ctx, this);
 
@@ -190,7 +192,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .accessModifiers(accessModifiers)
             .parameters(parameters)
             .build();
-    addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data);
+    addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data, symbolId);
 
     SymbolTableUtils.visitMethodBody(ctx, this);
     scope = scopeOrig;
@@ -237,7 +239,8 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
   @Override
   public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
-    final String mainEntryPointName = "main";
+    SymbolKind symbolKind = SymbolKind.MAIN;
+    String symbolId = SymbolIdGenerator.generateId(symbolKind);
     List<ParseTree> children = new ArrayList<>(ctx.children);
 
     for(ParseTree parseTree: children) {
@@ -247,10 +250,10 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
                 .returnType("void")
                 .accessModifiers(accessModifiers)
                 .build();
-        addNewSymbol(mainEntryPointName, SymbolKind.MAIN, scope, data);
+        addNewSymbol("main", SymbolKind.MAIN, scope, data, symbolId);
         
         String scopeOrig = scope;
-        scope += "." + mainEntryPointName;         // NOSONAR - will only happen once
+        scope += "." + symbolId;         // NOSONAR - will only happen once
         parseTree.accept(this);
         scope = scopeOrig;
       }

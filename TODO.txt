@@ -7,9 +7,8 @@ TODO List
         Update toString to use a StingBuilder
         
     SymbolTableVisitor
-        visitMethodDeclaration: Check for template declarations
+        Import classes from other files
         Add and update the scope as the visitor moves through statements
-        Change scope from text values to symbolId
 
     Add Unit tests for the following:
         AccessModifier

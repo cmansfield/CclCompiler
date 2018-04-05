@@ -1,11 +1,22 @@
 package io.github.cmansfield.symbols;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 class SymbolIdGenerator {
-  private static int id = 1;
-  
+  private static Map<SymbolKind, Integer> indexes;
+
+  static {
+    indexes = new EnumMap<>(SymbolKind.class);
+    for(SymbolKind key : SymbolKind.class.getEnumConstants()) {
+      indexes.put(key, 0);
+    }
+  }
+
   private SymbolIdGenerator() {}
   
   static String generateId(SymbolKind symbolKind) {
-    return String.format("%S%05d", symbolKind.getPrefix(), id++);
+    indexes.put(symbolKind, indexes.get(symbolKind) + 1);
+    return String.format("%S%05d", symbolKind.getPrefix(), indexes.get(symbolKind));
   }
 }
