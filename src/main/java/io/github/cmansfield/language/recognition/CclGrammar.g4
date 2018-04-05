@@ -36,7 +36,9 @@ methodBody : '{' (variableDeclaration | statement)* '}' ;
 variableDeclaration : type name (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
 
 statement 
-    : RETURN expression? ';'
+    : IF '(' expression ')' statement (ELSE statement)?
+    | WHILE '(' expression ')' statement
+    | RETURN expression? ';'
     | PRINT '(' expression ')' ';'
     | READ invokeOperator ';'
     | SPAWN expression SET name ';'
@@ -48,11 +50,9 @@ statement
     ;
     
 statementWithScope 
-    : IF '(' expression ')' statement (ELSE statement)?
-    | WHILE '(' expression ')' statement
-    | FOR '(' (variableDeclaration | expression ';' | ';') expression? ';' expression? ')'
+    : FOR '(' (variableDeclaration | expression ';' | ';') expression? ';' expression? ')'
       statement
-    | '{' statement* '}'
+    | '{' (statement | variableDeclaration)* '}'
     ;
 
 assignmentExpression 

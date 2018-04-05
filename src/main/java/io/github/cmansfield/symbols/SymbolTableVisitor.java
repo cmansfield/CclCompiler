@@ -9,6 +9,7 @@ import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.symbols.data.Data;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -333,5 +334,39 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .filter(node -> !",".equals(node.getText()))
             .map(ParseTree::getText)
             .collect(Collectors.toList());
+  }
+
+  @Override
+  public Object visitStatementWithScope(CclGrammarParser.StatementWithScopeContext ctx) {
+    if(ctx.children == null || ctx.children.isEmpty()) {
+      throw new IllegalArgumentException("There must be child nodes at this point in the tree");
+    }
+    SymbolKind symbolKind = SymbolKind.UNKNOWN;
+    String symbolId;
+    String scopeOrig = scope;
+    ParseTree child = ctx.getChild(0);
+
+    if("{".equals(child.getText())) {
+      symbolKind = SymbolKind.BLOCK;
+    }
+    else if("for".equals(child.getText())) {
+      symbolKind = SymbolKind.FOR;
+    }
+    
+    if(symbolKind == SymbolKind.UNKNOWN) {
+      throw new IllegalStateException(
+              String.format("Unknown statement \"%s\" found", StringUtils.isBlank(child.getText()) ? "" : child.getText()));
+    }
+
+    symbolId = SymbolIdGenerator.generateId(symbolKind);
+    scope += "." + symbolId;
+    
+    Data data = new Data().new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
+    addNewSymbol(child.getText(), symbolKind, scopeOrig, data, symbolId);
+    
+    super.visitStatementWithScope(ctx);
+    scope = scopeOrig;
+    
+    return null;
   }
 }

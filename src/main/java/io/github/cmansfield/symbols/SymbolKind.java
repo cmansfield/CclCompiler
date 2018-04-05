@@ -6,13 +6,15 @@ public enum SymbolKind {
   METHOD("M"),
   CONSTRUCTOR("N"),
   PARAM("P"),
-  FVAR("F"),      // Class Field / Instance variable
+  FVAR("V"),      // Class Field / Instance variable
   LVAR("L"),      // Local variable
   ILIT("I"),      // Integer literal
   CLIT("A"),      // Character literal
   SLIT("S"),      // String literal
   TEMPLATE_CLASS("T"),
   TEMPLATE_METHOD("K"),
+  FOR("F"),
+  BLOCK("B"),
   UNKNOWN("U");
   
   private String prefix;
