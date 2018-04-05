@@ -159,6 +159,24 @@ public class DataTest {
     assertNotNull(data2);
     assertEquals(data1, data2);
   }
+
+  @Test
+  public void test_equals_failed_templatePlaceHolders_outOfOrder() {
+    Data data1 = new Data().new DataBuilder()
+            .type("int")
+            .templatePlaceHolder("T")
+            .templatePlaceHolder("K")
+            .build();
+    Data data2 = new Data().new DataBuilder()
+            .type("int")
+            .templatePlaceHolder("K")
+            .templatePlaceHolder("T")
+            .build();
+
+    assertNotNull(data1);
+    assertNotNull(data2);
+    assertNotEquals(data1, data2);
+  }
   
   @Test
   public void test_build() {

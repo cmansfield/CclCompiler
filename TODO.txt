@@ -4,13 +4,12 @@ TODO List
         Add method headers to all methods
 
     Data
-        Add a DataBuilder that checks to make sure there aren't 
-            duplicates in the accessModifiers list
+        Update toString to use a StingBuilder
         
     SymbolTableVisitor
         visitMethodDeclaration: Check for template declarations
-        Add and update the scope as the visitor moves down the tree
-        Continue producing the SymbolTableVisitor
+        Add and update the scope as the visitor moves through statements
+        Change scope from text values to symbolId
 
     Add Unit tests for the following:
         AccessModifier

@@ -2,13 +2,13 @@ package io.github.cmansfield.symbols;
 
 import io.github.cmansfield.language.recognition.CclGrammarBaseVisitor;
 import io.github.cmansfield.language.recognition.CclGrammarParser;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.symbols.data.AccessModifier;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.symbols.data.Data;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -37,12 +37,16 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   }
 
   private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data) {
+    return addNewSymbol(identifier, symbolKind, scope, data, SymbolIdGenerator.generateId(symbolKind));
+  }
+
+  private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data, String symbolId) {
     Symbol symbol = SymbolFactory.getSymbol(identifier, symbolKind, scope, data);
 
     if(symbols.containsValue(symbol)) {
       return symbols.get(symbols.getKey(symbol));
     }
-    symbol.setSymbolId(SymbolIdGenerator.generateId(symbolKind));
+    symbol.setSymbolId(symbolId);
     symbols.put(symbol.getSymbolId(), symbol);
 
     return symbol;
@@ -58,18 +62,30 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
-    // TODO - get template declaration
+    boolean isTemplate = SymbolTableUtils.isTemplate(ctx);
+    SymbolKind symbolKind = isTemplate ? SymbolKind.TEMPLATE_METHOD : SymbolKind.METHOD;
+    String symbolId = SymbolIdGenerator.generateId(symbolKind);
     String scopeOrig = scope;
+    scope = scope + "." + symbolId;
 
     String name = SymbolTableUtils.getName(ctx, this);
-    scope = scope + "." + name;
-    
+    List<String> templatePlaceHolders = SymbolTableUtils.getTemplatePlaceHolders(ctx, this);
     List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
     String returnType = SymbolTableUtils.getReturnType(ctx, this);
     List<String> parameters = SymbolTableUtils.getParameters(ctx, this);
-    
-    Data data = new Data("", returnType, accessModifiers, parameters);
-    addNewSymbol(name, SymbolKind.METHOD, scopeOrig, data);
+
+    Data data = new Data().new DataBuilder()
+            .returnType(returnType)
+            .accessModifiers(accessModifiers)
+            .parameters(parameters)
+            .templatePlaceHolders(templatePlaceHolders)
+            .build();
+    addNewSymbol(
+            name,
+            symbolKind,
+            scopeOrig,
+            data,
+            symbolId);
 
     SymbolTableUtils.visitMethodBody(ctx, this);
     scope = scopeOrig;
@@ -129,17 +145,28 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
   @Override
   public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
-    String name = SymbolTableUtils.getClassName(ctx, this);
+    SymbolKind symbolKind = SymbolTableUtils.isTemplate(ctx)
+            ? SymbolKind.TEMPLATE_CLASS
+            : SymbolKind.CLASS;
+    String symbolId = SymbolIdGenerator.generateId(symbolKind);
     String scopeOrig = scope;
-    scope = scope + "." + name;
+    scope = scope + "." + symbolId;
 
-    boolean isTemplate = SymbolTableUtils.isTemplate(ctx);
-    
+    String name = SymbolTableUtils.getClassName(ctx, this);
+    List<String> templatePlaceHolders = SymbolTableUtils.getTemplatePlaceHolders(ctx, this);
     List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
     Data data = new Data().new DataBuilder()
             .accessModifiers(accessModifiers)
+            .templatePlaceHolders(templatePlaceHolders)
             .build();
-    addNewSymbol(name, isTemplate ? SymbolKind.TEMPLATE_CLASS : SymbolKind.CLASS, scopeOrig, data);
+    addNewSymbol(
+            name,
+            templatePlaceHolders.isEmpty()
+                    ? SymbolKind.CLASS
+                    : SymbolKind.TEMPLATE_CLASS,
+            scopeOrig,
+            data,
+            symbolId);
     
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.ClassMemberDeclarationContext)
@@ -285,5 +312,23 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     addNewSymbol(value, SymbolKind.SLIT, GLOBAL_SCOPE, data);
 
     return super.visitStringliteral(ctx);
+  }
+
+  @Override
+  public Object visitTemplateDeclaration(CclGrammarParser.TemplateDeclarationContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplateListContext)
+            .map(context -> (CclGrammarParser.TemplateListContext)context)
+            .map(this::visitTemplateList)
+            .findFirst()
+            .orElse(Collections.emptyList());
+  }
+
+  @Override
+  public Object visitTemplateList(CclGrammarParser.TemplateListContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> !",".equals(node.getText()))
+            .map(ParseTree::getText)
+            .collect(Collectors.toList());
   }
 }

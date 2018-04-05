@@ -2,7 +2,7 @@ import ccl.io;
 import ccl.String;
 import ccl.Math;
 
-private class MyClass (TBD) {
+private class MyClass (A, B, C) {
     private const string name = "John Doe";
     private static int num;
     

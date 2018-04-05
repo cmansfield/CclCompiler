@@ -70,7 +70,11 @@ public class Data {
   @Override
   public String toString() {
     return String.format(
-            "%s%s%s%s%s", 
+            "%s%s%s%s%s%s",
+            CollectionUtils.isEmpty(templatePlaceHolders) ?
+                    "" :
+                    "TemplatePlaceHolders:" + getTemplatePlaceHolders().stream()
+                            .collect(Collectors.joining(" ")) + " ",
             CollectionUtils.isEmpty(accessModifiers) ? 
                     "" :
                     "AccessModifiers:" + getAccessModifiers().stream()
@@ -125,13 +129,15 @@ public class Data {
     if(data.accessModifiers == null && this.accessModifiers != null) {
       return false;
     }
-    if(this.accessModifiers.size() != data.accessModifiers.size()) {
-      return false;
-    }
-    Collections.sort(this.accessModifiers);
-    Collections.sort(data.accessModifiers);
-    if(!this.accessModifiers.equals(data.accessModifiers)) {
-      return false;
+    if(this.accessModifiers != null) {
+      if(this.accessModifiers.size() != data.accessModifiers.size()) {
+        return false;
+      }
+      Collections.sort(this.accessModifiers);
+      Collections.sort(data.accessModifiers);
+      if(!this.accessModifiers.equals(data.accessModifiers)) {
+        return false;
+      }
     }
 
     if(this.templatePlaceHolders != null) {
@@ -239,22 +245,26 @@ public class Data {
     }
     
     public Data build() {
-      Set<String> uniqueAccessModifiers = accessModifiers.stream()
-              .map(AccessModifier::toString)
-              .collect(Collectors.toSet());
-      
-      if(uniqueAccessModifiers.size() != accessModifiers.size()) {
-        throw new IllegalArgumentException("There cannot be duplicate access modifiers");
+      if(accessModifiers != null) {
+        Set<String> uniqueAccessModifiers = accessModifiers.stream()
+                .map(AccessModifier::toString)
+                .collect(Collectors.toSet());
+
+        if(uniqueAccessModifiers.size() != accessModifiers.size()) {
+          throw new IllegalArgumentException("There cannot be duplicate access modifiers");
+        }
+        if(accessModifiers.contains(AccessModifier.PRIVATE) && accessModifiers.contains(AccessModifier.PUBLIC)) {
+          throw new IllegalArgumentException("Cannot be both 'private' and 'public' at the same time");
+        }
       }
-      if(accessModifiers.contains(AccessModifier.PRIVATE) && accessModifiers.contains(AccessModifier.PUBLIC)) {
-        throw new IllegalArgumentException("Cannot be both 'private' and 'public' at the same time");
+
+      if(templatePlaceHolders != null) {
+        Set<String> uniqueTemplatePlaceHolders = new HashSet<>(templatePlaceHolders);
+        if(uniqueTemplatePlaceHolders.size() != templatePlaceHolders.size()) {
+          throw new IllegalArgumentException("Each template place holder must be unique");
+        }
       }
-      
-      Set<String> uniqueTemplatePlaceHolders = new HashSet<>(templatePlaceHolders);
-      if(uniqueTemplatePlaceHolders.size() != templatePlaceHolders.size()) {
-        throw new IllegalArgumentException("Each template place holder must be unique");
-      }
-      
+
       return new Data(this.type, this.returnType, this.accessModifiers, this.parameters, this.isArray, this.templatePlaceHolders);
     }
   }

@@ -4,6 +4,7 @@ import io.github.cmansfield.language.recognition.CclGrammarParser;
 import io.github.cmansfield.symbols.data.AccessModifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.Collections;
 import java.util.Collection;
@@ -111,5 +112,14 @@ class SymbolTableUtils {
             .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
             .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
             .count() > 0;
+  }
+
+  static List<String> getTemplatePlaceHolders(ParserRuleContext ctx, SymbolTableVisitor visitor) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
+            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
+            .map(visitor::visitTemplateDeclaration)
+            .flatMap(val -> ((List<String>)val).stream())
+            .collect(Collectors.toList());
   }
 }
