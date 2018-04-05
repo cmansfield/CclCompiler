@@ -1,5 +1,5 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
-package io.github.cmansfield.language.recognition;
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
+package io.github.cmansfield.parser.language;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -48,7 +48,7 @@ public class CclGrammarLexer extends Lexer {
 		null, "'('", "')'", "'.'", "';'", "'{'", "'}'", "','", "'['", "']'", "'true'", 
 		"'false'", "'null'", "'this'", "'if'", "'else'", "'while'", "'for'", "'new'", 
 		"'return'", "'print'", "'read'", "'spawn'", "'set'", "'block'", "'lock'", 
-		"'unlock'", "'import'", "'class'", "'main'", "'!='", "'!'", "'&&'", "'||'", 
+		"'unlock'", "'include'", "'class'", "'main'", "'!='", "'!'", "'&&'", "'||'",
 		"'+'", "'-'", "'*'", "'/'", "'=='", "'<='", "'>='", "'<'", "'>'", "'='", 
 		"'?'", "':'"
 	};

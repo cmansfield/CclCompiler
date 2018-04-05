@@ -1,5 +1,5 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/language/recognition\CclGrammar.g4 by ANTLR 4.7
-package io.github.cmansfield.language.recognition;
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
+package io.github.cmansfield.parser.language;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**

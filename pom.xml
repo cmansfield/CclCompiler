@@ -123,8 +123,10 @@
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>${antlrVersion}</version>
                 <configuration>
-                    <sourceDirectory>src/main/java/io/github/cmansfield/language/recognition</sourceDirectory>
-                    <outputDirectory>src/main/java/io/github/cmansfield/language/recognition</outputDirectory>
+                    <listener>false</listener>
+                    <visitor>true</visitor>
+                    <!--<sourceDirectory>src/main/java/io/github/cmansfield/parser/</sourceDirectory>-->
+                    <!--<outputDirectory>src/main/java/io/github/cmansfield/parser/</outputDirectory>-->
                 </configuration>
                 <executions>
                     <execution>

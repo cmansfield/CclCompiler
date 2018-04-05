@@ -1,7 +1,7 @@
 package io.github.cmansfield.symbols;
 
-import io.github.cmansfield.language.recognition.CclGrammarBaseVisitor;
-import io.github.cmansfield.language.recognition.CclGrammarParser;
+import io.github.cmansfield.parser.language.CclGrammarBaseVisitor;
+import io.github.cmansfield.parser.language.CclGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.symbols.data.AccessModifier;
 import org.apache.commons.collections4.CollectionUtils;

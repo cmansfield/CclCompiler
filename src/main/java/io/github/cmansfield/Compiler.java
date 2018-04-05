@@ -1,7 +1,7 @@
 package io.github.cmansfield;
 
-import io.github.cmansfield.language.recognition.CclGrammarLexer;
-import io.github.cmansfield.language.recognition.CclGrammarParser;
+import io.github.cmansfield.parser.language.CclGrammarLexer;
+import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.symbols.SymbolTableVisitor;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;

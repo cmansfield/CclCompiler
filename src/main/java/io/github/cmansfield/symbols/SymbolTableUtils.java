@@ -1,6 +1,6 @@
 package io.github.cmansfield.symbols;
 
-import io.github.cmansfield.language.recognition.CclGrammarParser;
+import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.symbols.data.AccessModifier;
 import org.antlr.v4.runtime.ParserRuleContext;
 
