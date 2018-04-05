@@ -6,11 +6,11 @@ public enum SymbolKind {
   METHOD("M"),
   CONSTRUCTOR("N"),
   PARAM("P"),
-  FVAR("V"),      // Class Field / Instance variable
-  LVAR("L"),      // Local variable
-  ILIT("I"),      // Integer literal
-  CLIT("A"),      // Character literal
-  SLIT("S"),      // String literal
+  INSTANCE_VAR("V"),      // Class Field / Instance variable
+  LOCAL_VAR("L"),         // Local variable
+  INT_LIT("I"),           // Integer literal
+  CHAR_LIT("A"),          // Character literal
+  STR_LIT("S"),           // String literal
   TEMPLATE_CLASS("T"),
   TEMPLATE_METHOD("K"),
   FOR("F"),
@@ -25,5 +25,15 @@ public enum SymbolKind {
   
   public String getPrefix() {
     return prefix;
+  }
+  
+  public boolean isLiteral() {
+    if(this.name().equals(INT_LIT.toString())) {
+      return true;
+    }
+    if(this.name().equals(CHAR_LIT.toString())) {
+      return true;
+    }
+    return this.name().equals(STR_LIT.toString());
   }
 }

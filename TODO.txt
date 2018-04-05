@@ -8,7 +8,6 @@ TODO List
         
     SymbolTableVisitor
         Import classes from other files
-        Add and update the scope as the visitor moves through statements
 
     Add Unit tests for the following:
         AccessModifier

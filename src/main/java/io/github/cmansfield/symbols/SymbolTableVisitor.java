@@ -45,7 +45,11 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     Symbol symbol = SymbolFactory.getSymbol(identifier, symbolKind, scope, data);
 
     if(symbols.containsValue(symbol)) {
-      return symbols.get(symbols.getKey(symbol));
+      if(symbol.getSymbolKind().isLiteral()) {
+        return symbols.get(symbols.getKey(symbol));   
+      }
+      throw new IllegalStateException(String.format("There is already a %s with the name %s defined in the scope %s", 
+              symbol.getSymbolKind().toString(), symbol.getText(), symbol.getScope()));
     }
     symbol.setSymbolId(symbolId);
     symbols.put(symbol.getSymbolId(), symbol);
@@ -213,7 +217,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .type(type)
             .isTypeAnArray(isArray)
             .build();
-    addNewSymbol(name, SymbolKind.FVAR, scope, data);
+    addNewSymbol(name, SymbolKind.INSTANCE_VAR, scope, data);
 
     SymbolTableUtils.visitAssignmentExpression(ctx, this);
     
@@ -231,7 +235,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .isTypeAnArray(isArray)
             .type(type)
             .build();
-    addNewSymbol(name, SymbolKind.LVAR, scope, data);
+    addNewSymbol(name, SymbolKind.LOCAL_VAR, scope, data);
 
     SymbolTableUtils.visitAssignmentExpression(ctx, this);
     
@@ -277,7 +281,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .type("int")
             .accessModifier(AccessModifier.PUBLIC)
             .build();
-    addNewSymbol(value, SymbolKind.ILIT, GLOBAL_SCOPE, data);
+    addNewSymbol(value, SymbolKind.INT_LIT, GLOBAL_SCOPE, data);
     
     return super.visitNumericliteral(ctx);
   }
@@ -295,7 +299,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .type("char")
             .accessModifier(AccessModifier.PUBLIC)
             .build();
-    addNewSymbol(value, SymbolKind.CLIT, GLOBAL_SCOPE, data);
+    addNewSymbol(value, SymbolKind.CHAR_LIT, GLOBAL_SCOPE, data);
     
     return super.visitCharacterliteral(ctx);
   }
@@ -313,7 +317,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .type("string")
             .accessModifier(AccessModifier.PUBLIC)
             .build();
-    addNewSymbol(value, SymbolKind.SLIT, GLOBAL_SCOPE, data);
+    addNewSymbol(value, SymbolKind.STR_LIT, GLOBAL_SCOPE, data);
 
     return super.visitStringliteral(ctx);
   }
@@ -362,7 +366,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     scope += "." + symbolId;
     
     Data data = new Data().new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
-    addNewSymbol(child.getText(), symbolKind, scopeOrig, data, symbolId);
+    addNewSymbol(symbolId, symbolKind, scopeOrig, data, symbolId);
     
     super.visitStatementWithScope(ctx);
     scope = scopeOrig;
