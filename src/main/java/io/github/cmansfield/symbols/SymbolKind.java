@@ -15,6 +15,7 @@ public enum SymbolKind {
   TEMPLATE_METHOD("K"),
   FOR("F"),
   BLOCK("B"),
+  PACKAGE("D"),
   UNKNOWN("U");
   
   private String prefix;

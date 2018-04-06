@@ -17,8 +17,8 @@ public class ImportGrammarParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, IMPORT=3, IDENTIFIER=4, CHARACTER=5, WHITESPACE=6, NEWLINE=7, 
-		LINE_COMMENT=8, MULTILINE_COMMENT=9;
+		T__0=1, T__1=2, IMPORT=3, IDENTIFIER=4, WHITESPACE=5, NEWLINE=6, LINE_COMMENT=7, 
+		MULTILINE_COMMENT=8;
 	public static final int
 		RULE_importList = 0, RULE_importDeclaration = 1, RULE_directoryOrFile = 2;
 	public static final String[] ruleNames = {
@@ -29,8 +29,8 @@ public class ImportGrammarParser extends Parser {
 		null, "'.'", "';'", "'import'"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, "IMPORT", "IDENTIFIER", "CHARACTER", "WHITESPACE", "NEWLINE", 
-		"LINE_COMMENT", "MULTILINE_COMMENT"
+		null, null, null, "IMPORT", "IDENTIFIER", "WHITESPACE", "NEWLINE", "LINE_COMMENT", 
+		"MULTILINE_COMMENT"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -93,12 +93,9 @@ public class ImportGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_importList; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof ImportGrammarListener ) ((ImportGrammarListener)listener).enterImportList(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof ImportGrammarListener ) ((ImportGrammarListener)listener).exitImportList(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof ImportGrammarVisitor ) return ((ImportGrammarVisitor<? extends T>)visitor).visitImportList(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -149,12 +146,9 @@ public class ImportGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_importDeclaration; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof ImportGrammarListener ) ((ImportGrammarListener)listener).enterImportDeclaration(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof ImportGrammarListener ) ((ImportGrammarListener)listener).exitImportDeclaration(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof ImportGrammarVisitor ) return ((ImportGrammarVisitor<? extends T>)visitor).visitImportDeclaration(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -207,12 +201,9 @@ public class ImportGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_directoryOrFile; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof ImportGrammarListener ) ((ImportGrammarListener)listener).enterDirectoryOrFile(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof ImportGrammarListener ) ((ImportGrammarListener)listener).exitDirectoryOrFile(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof ImportGrammarVisitor ) return ((ImportGrammarVisitor<? extends T>)visitor).visitDirectoryOrFile(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -238,7 +229,7 @@ public class ImportGrammarParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\13\34\4\2\t\2\4\3"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\n\34\4\2\t\2\4\3"+
 		"\t\3\4\4\t\4\3\2\7\2\n\n\2\f\2\16\2\r\13\2\3\3\3\3\3\3\3\3\7\3\23\n\3"+
 		"\f\3\16\3\26\13\3\3\3\3\3\3\4\3\4\3\4\2\2\5\2\4\6\2\2\2\32\2\13\3\2\2"+
 		"\2\4\16\3\2\2\2\6\31\3\2\2\2\b\n\5\4\3\2\t\b\3\2\2\2\n\r\3\2\2\2\13\t"+

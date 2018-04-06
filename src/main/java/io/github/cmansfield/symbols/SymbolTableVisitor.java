@@ -25,16 +25,23 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   private String scope;
   
   public SymbolTableVisitor() {
-    scope = GLOBAL_SCOPE + ".p0";
+    scope = GLOBAL_SCOPE;
     symbols = new DualHashBidiMap<>();
+  }
+
+  public SymbolTableVisitor(BidiMap<String, Symbol> symbols) {
+    String packageId = SymbolIdGenerator.generateId(SymbolKind.PACKAGE);
+    scope = GLOBAL_SCOPE + "." + packageId;
+    this.symbols = symbols;
+    addNewSymbol(packageId, SymbolKind.PACKAGE, GLOBAL_SCOPE, new Data(), packageId);
   }
 
   public String getScope() {
     return scope;
   }
 
-  public Map<String, Symbol> getSymbols() {
-    return symbols == null ? Collections.emptyMap() : symbols;
+  public BidiMap<String, Symbol> getSymbols() {
+    return symbols;
   }
 
   private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data) {

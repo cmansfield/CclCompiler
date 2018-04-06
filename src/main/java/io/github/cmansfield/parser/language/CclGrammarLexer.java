@@ -48,7 +48,7 @@ public class CclGrammarLexer extends Lexer {
 		null, "'('", "')'", "'.'", "';'", "'{'", "'}'", "','", "'['", "']'", "'true'", 
 		"'false'", "'null'", "'this'", "'if'", "'else'", "'while'", "'for'", "'new'", 
 		"'return'", "'print'", "'read'", "'spawn'", "'set'", "'block'", "'lock'", 
-		"'unlock'", "'include'", "'class'", "'main'", "'!='", "'!'", "'&&'", "'||'",
+		"'unlock'", "'import'", "'class'", "'main'", "'!='", "'!'", "'&&'", "'||'", 
 		"'+'", "'-'", "'*'", "'/'", "'=='", "'<='", "'>='", "'<'", "'>'", "'='", 
 		"'?'", "':'"
 	};

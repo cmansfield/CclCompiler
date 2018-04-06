@@ -20,7 +20,7 @@ fragment NUMBER : [0-9]+ ;
 
 fragment LETTER : [a-zA-Z] ;
 
-CHARACTER : [ -~] ;
+//CHARACTER : [ -~] ;
 
 WHITESPACE : [ \t] -> skip ;
 

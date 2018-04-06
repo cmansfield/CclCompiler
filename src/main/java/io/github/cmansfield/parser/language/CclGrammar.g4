@@ -2,8 +2,8 @@ grammar CclGrammar;
 
 // *************** Parser ***************
 
-compilationUnit : importDeclaration* classDeclaration* modifier PRIMITIVE_TYPE MAIN '(' ')'
-        methodBody classDeclaration* EOF ;
+compilationUnit : importDeclaration* classDeclaration* (modifier PRIMITIVE_TYPE MAIN '(' ')'
+        methodBody)? classDeclaration* EOF ;
 
 importDeclaration : IMPORT IDENTIFIER ('.' IDENTIFIER)* ';' ;
 

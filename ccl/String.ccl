@@ -1,0 +1,19 @@
+
+public class String {
+	private char buffer[];
+	private int length;
+	
+	public String() {
+		buffer = new char[1];
+		//buffer[0] = '\0';
+		length = 0;
+	}
+	
+	public String(string value) {
+		
+	}
+	
+	public int length() {
+		return length;
+	}
+}
