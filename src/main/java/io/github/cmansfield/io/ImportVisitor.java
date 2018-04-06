@@ -2,16 +2,13 @@ package io.github.cmansfield.io;
 
 import io.github.cmansfield.parser.include.ImportGrammarBaseVisitor;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
-import java.util.*;
 import java.util.stream.Collectors;
 import java.io.File;
+import java.util.*;
 
 
 public class ImportVisitor extends ImportGrammarBaseVisitor {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ImportVisitor.class);
   private Set<String> imports;
 
   public ImportVisitor() {

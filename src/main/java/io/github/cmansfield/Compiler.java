@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
 import java.util.stream.Collectors;
+import java.util.*;
 import java.io.*;
 
 
@@ -25,16 +25,18 @@ class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
 
   boolean compile(final String fileName) throws IOException {
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    List<InputStream> streams = new ArrayList<>();
+    Set<String> imports = new HashSet<>();
 
-    Set<String> imports = new HashSet<>(); 
     imports.add(fileName);
     // Populate the import set
     getImports(fileName, imports);
-    List<InputStream> streams = new ArrayList<>();
-    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
 
-    logger.debug("Import List:\n\t{}",
-            imports.stream().collect(Collectors.joining("\n\t")));
+    if(logger.isDebugEnabled()) {
+      logger.debug("Import List:\n\t{}",
+              imports.stream().collect(Collectors.joining("\n\t")));
+    }
     
     try {               // NOSONAR
       for(String file : imports) {
@@ -48,10 +50,6 @@ class Compiler {
       logger.error("Unable to load file", e);
       return false;
     }
-    catch (Exception e) {
-      logger.error("", e);
-      return false;
-    }
     finally {
       for(InputStream stream : streams) {
         if(stream != null) {
@@ -60,14 +58,16 @@ class Compiler {
       }
     }
 
-    logger.debug("SymbolTable:\n\t{}",
-            symbolTable.entrySet().stream()
-                    .map(Object::toString)
-                    .collect(Collectors.joining("\n\t")));
+    if(logger.isDebugEnabled() && symbolTable != null) {
+      logger.debug("SymbolTable:\n\t{}",
+              symbolTable.entrySet().stream()
+                      .map(Object::toString)
+                      .collect(Collectors.joining("\n\t")));
+    }
     return true;
   }
 
-  private void getImports(String fileName, Set<String> imports) {
+  private void getImports(String fileName, Set<String> imports) throws IOException {
     ImportVisitor visitor = new ImportVisitor();
 
     try(FileInputStream inputStream = new FileInputStream(new File(fileName))) {
@@ -89,10 +89,6 @@ class Compiler {
     }
     catch (FileNotFoundException e) {
       logger.error("Unable to load file {}", fileName);
-    }
-    catch (Exception e) {
-      logger.error("", e);
-      throw new RuntimeException(e);      // NOSONAR
     }
 
     for(String file : visitor.getImports()) {
@@ -125,7 +121,6 @@ class Compiler {
     }
 
     visitor.visit(tree);
-
     return visitor.getSymbols();
   }
 }

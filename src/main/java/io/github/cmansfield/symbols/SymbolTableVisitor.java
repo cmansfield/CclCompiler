@@ -10,15 +10,12 @@ import io.github.cmansfield.symbols.data.Data;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 import java.util.stream.Collectors;
 import java.util.*;
 
 
 public class SymbolTableVisitor extends CclGrammarBaseVisitor {
-  private static final Logger LOGGER = LoggerFactory.getLogger(SymbolTableVisitor.class);
   private static final String GLOBAL_SCOPE = "g";
   
   private BidiMap<String, Symbol> symbols;

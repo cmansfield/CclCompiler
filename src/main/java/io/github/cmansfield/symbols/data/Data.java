@@ -90,7 +90,7 @@ public class Data {
   }
   
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(Object obj) {     // NOSONAR
     if(obj == null) {
       return false;
     }
