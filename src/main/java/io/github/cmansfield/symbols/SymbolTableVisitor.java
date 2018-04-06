@@ -1,15 +1,15 @@
 package io.github.cmansfield.symbols;
 
 import io.github.cmansfield.parser.language.CclGrammarBaseVisitor;
-import io.github.cmansfield.parser.language.CclGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
+import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.symbols.data.AccessModifier;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.symbols.data.Data;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -281,7 +281,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   public Object visitNumericliteral(CclGrammarParser.NumericliteralContext ctx) {
     ParseTree child = ctx.getChild(0);
     if(child == null) {
-      throw new IllegalArgumentException("There should be at least one child node");
+      throw new IllegalArgumentException("There are no child nodes");
     }
     String value = child.getText();
     Data data = new Data().new DataBuilder()

@@ -1,3 +1,4 @@
+import ccl.Math;
 
 public class String {
 	private char buffer[];

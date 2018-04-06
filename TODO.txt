@@ -7,7 +7,9 @@ TODO List
         Update toString to use a StingBuilder
 
     CclGrammar
-        Add support for escaped characters (Ex. '\0')
+        Add support for escaped characters. Ex. '\0'
+        Fix argumentList of strings. Ex. someMethod("hello", "programming", "world")
+            "hello", "programming", "world" becomes one token
 
     Add Unit tests for the following:
         AccessModifier

@@ -16,26 +16,28 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Collections;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.*;
 
 
-public class Compiler {
+class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
 
-  public boolean compile(final String fileName) throws IOException {
+  boolean compile(final String fileName) throws IOException {
 
-    List<String> files = new ArrayList<>();
-    files.add(fileName);
-    files.addAll(getImports(fileName));
+    Set<String> imports = new HashSet<>(); 
+    imports.add(fileName);
+    // Populate the import set
+    getImports(fileName, imports);
     List<InputStream> streams = new ArrayList<>();
     BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
 
-    try {
-      for(String file : files) {
+    logger.debug("Import List:\n\t{}",
+            imports.stream().collect(Collectors.joining("\n\t")));
+    
+    try {               // NOSONAR
+      for(String file : imports) {
         streams.add(new FileInputStream(new File(file)));
       }
       for(InputStream inputStream : streams) {
@@ -62,11 +64,10 @@ public class Compiler {
             symbolTable.entrySet().stream()
                     .map(Object::toString)
                     .collect(Collectors.joining("\n\t")));
-
     return true;
   }
 
-  private List<String> getImports(String fileName) throws IOException {
+  private void getImports(String fileName, Set<String> imports) {
     ImportVisitor visitor = new ImportVisitor();
 
     try(FileInputStream inputStream = new FileInputStream(new File(fileName))) {
@@ -85,21 +86,23 @@ public class Compiler {
 
       ParseTree tree = parser.importList();
       visitor.visit(tree);
-
-      logger.debug("Import List:\n\t{}",
-              visitor.getImports().stream()
-                      .collect(Collectors.joining("\n\t")));
     }
     catch (FileNotFoundException e) {
       logger.error("Unable to load file {}", fileName);
-      return Collections.emptyList();
     }
     catch (Exception e) {
       logger.error("", e);
-      throw e;
+      throw new RuntimeException(e);      // NOSONAR
     }
 
-    return visitor.getImports();
+    for(String file : visitor.getImports()) {
+      if(file.equals(fileName) || imports.contains(file)) {
+        continue;
+      }
+      imports.add(file);
+      getImports(file, imports);      
+    }
+    imports.add(fileName);
   }
 
   private BidiMap<String, Symbol> populateSymbolTable(InputStream inputStream, SymbolTableVisitor visitor) throws IOException {

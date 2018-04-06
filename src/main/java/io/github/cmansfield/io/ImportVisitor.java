@@ -5,23 +5,21 @@ import io.github.cmansfield.parser.include.ImportGrammarParser;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Collections;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.File;
 
 
 public class ImportVisitor extends ImportGrammarBaseVisitor {
   private static final Logger LOGGER = LoggerFactory.getLogger(ImportVisitor.class);
-  private List<String> imports;
+  private Set<String> imports;
 
   public ImportVisitor() {
-    this.imports = new ArrayList<>();
+    this.imports = new HashSet<>();
   }
 
-  public List<String> getImports() {
-    return imports == null ? Collections.emptyList() : imports;
+  public Set<String> getImports() {
+    return imports == null ? Collections.emptySet() : imports;
   }
 
   @Override
@@ -34,8 +32,8 @@ public class ImportVisitor extends ImportGrammarBaseVisitor {
             .map(context -> (ImportGrammarParser.ImportDeclarationContext)context)
             .map(this::visitImportDeclaration)
             .map(value -> (String)value)
-            .collect(Collectors.toList());
-    return null;
+            .collect(Collectors.toSet());
+    return new Object();
   }
 
   @Override
