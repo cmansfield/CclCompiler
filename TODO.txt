@@ -5,9 +5,9 @@ TODO List
 
     Data
         Update toString to use a StingBuilder
-        
-    SymbolTableVisitor
-        Import classes from other files
+
+    CclGrammar
+        Add support for escaped characters (Ex. '\0')
 
     Add Unit tests for the following:
         AccessModifier
@@ -15,3 +15,4 @@ TODO List
         SymbolTableUtils
         Compiler
         SymbolTableVisitor
+        ImportVisitor
