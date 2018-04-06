@@ -1,13 +1,15 @@
 package io.github.cmansfield.symbols.data;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.collections4.CollectionUtils;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.stream.Collectors;
 import java.util.*;
 
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Data {
   private String type;
   private String returnType;

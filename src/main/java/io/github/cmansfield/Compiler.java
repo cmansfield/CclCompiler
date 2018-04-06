@@ -1,5 +1,6 @@
 package io.github.cmansfield;
 
+import io.github.cmansfield.io.SymbolTableWriter;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.include.ImportGrammarLexer;
@@ -70,6 +71,8 @@ class Compiler {
                       .map(Object::toString)
                       .collect(Collectors.joining("\n\t")));
     }
+    SymbolTableWriter.exportSymbolTable(symbolTable);
+
     return true;
   }
 
