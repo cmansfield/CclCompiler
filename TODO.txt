@@ -2,10 +2,9 @@
 TODO List
     Data
         Update toString to use a StingBuilder
-        Add jackson serialization
         
     Symbol
-        Add jackson serialization
+        Add jackson deserialization
 
     CclGrammar
         Add support for escaped characters. Ex. '\0'
