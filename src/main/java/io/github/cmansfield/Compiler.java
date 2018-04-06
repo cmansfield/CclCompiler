@@ -24,6 +24,12 @@ import java.io.*;
 class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
 
+  /**
+   * This will compile the file supplied
+   * 
+   * @param fileName      The name of the file to be compiled
+   * @return              Boolean, true if the file was compiled without errors
+   */
   boolean compile(final String fileName) throws IOException {
     BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
     List<InputStream> streams = new ArrayList<>();
@@ -67,6 +73,13 @@ class Compiler {
     return true;
   }
 
+  /**
+   * This will populate the Set passed in with any unique imports found in the file supplied
+   * This will recursively call itself to ensure all import files are found
+   * 
+   * @param fileName      The name of the file to extract all files to import
+   * @param imports       A Set with already discovered import files
+   */
   private void getImports(String fileName, Set<String> imports) throws IOException {
     ImportVisitor visitor = new ImportVisitor();
 
@@ -101,6 +114,14 @@ class Compiler {
     imports.add(fileName);
   }
 
+  /**
+   * This will parse and traverse the input stream to try and populate the symbol table 
+   * with the token produced
+   * 
+   * @param inputStream A stream to pull code characters from
+   * @param visitor     The visitor to be used to traverse the newly created tree
+   * @return            A Map with symbolIds as the key, and symbol objects as the value
+   */
   private BidiMap<String, Symbol> populateSymbolTable(InputStream inputStream, SymbolTableVisitor visitor) throws IOException {
     if(inputStream == null) {
       logger.warn("Input stream was null");

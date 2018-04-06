@@ -14,7 +14,13 @@ class SymbolIdGenerator {
   }
 
   private SymbolIdGenerator() {}
-  
+
+  /**
+   * Generates a unique symbol ID based on the type of Symbol
+   * 
+   * @param symbolKind  The type of symbol being produced
+   * @return            A String value of the new symbol ID
+   */
   static String generateId(SymbolKind symbolKind) {
     indexes.put(symbolKind, indexes.get(symbolKind) + 1);
     return String.format("%S%05d", symbolKind.getPrefix(), indexes.get(symbolKind));

@@ -27,7 +27,13 @@ public enum SymbolKind {
   public String getPrefix() {
     return prefix;
   }
-  
+
+  /**
+   * Checks to see if the SymbolKind instance is a literal or not
+   * Literals are: integers, characters, and strings
+   * 
+   * @return Boolean, true is the SymbolKind is a literal
+   */
   public boolean isLiteral() {
     if(this.name().equals(INT_LIT.toString())) {
       return true;

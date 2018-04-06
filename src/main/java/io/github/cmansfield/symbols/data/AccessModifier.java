@@ -1,7 +1,5 @@
 package io.github.cmansfield.symbols.data;
 
-import org.apache.commons.lang3.StringUtils;
-
 public enum AccessModifier {
   PUBLIC("public"),
   PROJECT(""),
@@ -11,16 +9,22 @@ public enum AccessModifier {
   
   private final String value;
   
-  private AccessModifier(String value) {
+  AccessModifier(String value) {
     this.value = value;
   }
-  
+
+  /**
+   * Find the AccessModifier those string value matches the supplied String
+   * 
+   * @param val AccessModifier to find
+   * @return    A found AccessModifier or null if not found
+   */
   public static AccessModifier find(String val) {
-    if(StringUtils.isBlank(val)) {
+    if(val == null) {
       return null;
     }
     for(AccessModifier accessModifier : AccessModifier.class.getEnumConstants()) {
-      if(val.equals(accessModifier.toString())) {
+      if(val.equalsIgnoreCase(accessModifier.toString())) {
         return accessModifier;
       }
     }

@@ -17,9 +17,9 @@ import java.util.*;
 
 public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   private static final String GLOBAL_SCOPE = "g";
-  
   private BidiMap<String, Symbol> symbols;
   private String scope;
+
   
   public SymbolTableVisitor() {
     scope = GLOBAL_SCOPE;
@@ -45,8 +45,24 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     return addNewSymbol(identifier, symbolKind, scope, data, SymbolIdGenerator.generateId(symbolKind));
   }
 
+  /**
+   * Will create and add a new Symbol to the symbol table based on the supplied parameters
+   * 
+   * @param identifier  The token's text
+   * @param symbolKind  The type of symbol being created
+   * @param scope       The scope where this symbol belongs
+   * @param data        A Data object with more detailed information about the symbol
+   * @param symbolId    A unique identifier for the symbol
+   * @return            The newly created symbol or if it's a duplicate it will return the
+   *                    original symbol object from the symbol table
+   */
   private Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data, String symbolId) {
-    Symbol symbol = SymbolFactory.getSymbol(identifier, symbolKind, scope, data);
+    Symbol.SymbolBuilder symbolBuilder = new Symbol().new SymbolBuilder()
+            .scope(scope)
+            .text(identifier)
+            .symbolKind(symbolKind)
+            .data(data);
+    Symbol symbol = symbolBuilder.build();
 
     if(symbols.containsValue(symbol)) {
       if(symbol.getSymbolKind().isLiteral()) {
@@ -61,6 +77,12 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     return symbol;
   }
 
+  /**
+   * Gets the text from the first child in the context
+   * 
+   * @param ctx The current context to get the child's text from 
+   * @return    The text of the first child
+   */
   private String getChildText(ParserRuleContext ctx) {
     if(CollectionUtils.isEmpty(ctx.children)) {
       throw new IllegalArgumentException("No children found in context");

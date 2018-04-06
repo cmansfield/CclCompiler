@@ -1,10 +1,11 @@
 
 TODO List
-    All
-        Add method headers to all methods
-
     Data
         Update toString to use a StingBuilder
+        Add jackson serialization
+        
+    Symbol
+        Add jackson serialization
 
     CclGrammar
         Add support for escaped characters. Ex. '\0'
@@ -12,9 +13,4 @@ TODO List
             "hello", "programming", "world" becomes one token
 
     Add Unit tests for the following:
-        AccessModifier
-        SymbolFactory
-        SymbolTableUtils
         Compiler
-        SymbolTableVisitor
-        ImportVisitor
