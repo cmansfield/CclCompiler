@@ -1,12 +1,12 @@
-package io.github.cmansfield;
+package io.github.cmansfield.compiler;
 
-import io.github.cmansfield.io.SymbolTableWriter;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.include.ImportGrammarLexer;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.language.CclGrammarLexer;
 import io.github.cmansfield.symbols.SymbolTableVisitor;
+import io.github.cmansfield.io.SymbolTableWriter;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.CommonTokenStream;
 import io.github.cmansfield.io.ImportVisitor;
@@ -22,8 +22,18 @@ import java.util.*;
 import java.io.*;
 
 
-class Compiler {
+public class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
+  private Set<CompilerOptions> options;
+
+  public Compiler(CompilerOptions... options) {
+    if(options != null) {
+      this.options = new HashSet<>(Arrays.asList(options));
+    }
+    else {
+      this.options = Collections.emptySet();
+    }
+  }
 
   /**
    * This will compile the file supplied
@@ -31,7 +41,7 @@ class Compiler {
    * @param fileName      The name of the file to be compiled
    * @return              Boolean, true if the file was compiled without errors
    */
-  boolean compile(final String fileName) throws IOException {
+  public boolean compile(final String fileName) throws IOException {
     BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
     List<InputStream> streams = new ArrayList<>();
     Set<String> imports = new HashSet<>();
@@ -71,7 +81,10 @@ class Compiler {
                       .map(Object::toString)
                       .collect(Collectors.joining("\n\t")));
     }
-    SymbolTableWriter.exportSymbolTable(symbolTable);
+
+    if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
+      SymbolTableWriter.exportSymbolTable(symbolTable);
+    }
 
     return true;
   }
