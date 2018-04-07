@@ -1,0 +1,89 @@
+
+private class MyClass (A, B, C) {
+    private const string name = "John \"Smile\" Doe";
+    private static int num;
+    
+    public MyClass() {
+        num = 5;
+        for(int i = 0; i < num; i + 1) {
+            if(i == 3) {
+                print("Testing");
+            }
+        }
+    }
+
+    public int add(int val) {
+        return num + val - 3;
+    }
+    
+    public (T, K, V) int doSomething(T template, K key, V val) {
+        return 0;
+    }
+}
+
+private class YourClass {
+    private const string name = "John Doe";
+    private static int num;
+    
+    public YourClass() {
+        num = 5;
+    }
+
+    public int add(int val) {
+        return num + val;
+    }
+}
+
+/*
+    This is the main entry point
+    Testing block comments
+*/
+public void main() {
+    string str = "Hello World";     // This is a test comment
+    int num = 500 * 2;
+    MyClass myClass = new MyClass();
+    MyClass myObjs[] = new MyClass[10];
+    char ascii = (char)(20 + 34);
+    int numbers[] = {2, 4, 1, 7};
+    string strings[] = {"Hello", "ccl", "world"};
+    bool isTrue = 4 > 2 && true;
+
+    20 / 4;         // Random statement to make sure vars and statements can be mixed
+
+    int val = ascii == 'b' ? 5 : 10;
+    MyClass newObj = myObjs[3].calcValue(34, "test");
+
+    {}
+    while(isTrue) {
+        print(str);
+        isTrue = false;
+    }
+    if(isLocked) {
+        read();
+    }
+    2 + 45;
+    spawn 2 set thread;
+    block();
+    lock mutex;
+    unlock mutex;
+    
+    for(i = 0; i < 10; i + 1) {}
+    for(;;) {}
+    for(int i = 0; i < 10; i + 1) {
+        print(i);
+        if(i == num) {
+            return;
+        }
+    }
+}
+
+public static class TestClass {
+    public int test[] = new int[10];
+    private static int num;
+
+    // Checking to make sure classes can be placed anywhere
+    public TestClass() {}
+    
+    static public void someMethod(int numbers[]) {}
+}
+

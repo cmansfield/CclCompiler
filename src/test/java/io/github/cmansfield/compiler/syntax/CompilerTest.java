@@ -16,6 +16,16 @@ import static org.testng.Assert.*;
 public class CompilerTest {
 
   @Test
+  public void test_validSymbolTable() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compile("test1.ccl");
+
+    assertNotNull(symbolTable);
+    assertFalse(symbolTable.isEmpty());
+    assertEquals(symbolTable.size(), 70);
+    SymbolTableUtils.checkSymbolTable(symbolTable);
+  }
+
+  @Test
   public void test_validCharacters() throws IOException {
     BidiMap<String, Symbol> symbolTable = compile("test2.ccl");
 

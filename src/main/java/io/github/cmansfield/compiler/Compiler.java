@@ -49,7 +49,7 @@ public class Compiler {
    */
   public boolean compile(final String fileName) throws IOException {
     BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
-    List<InputStream> streams = new ArrayList<>();
+    Map<String,InputStream> streams = new HashMap<>();
     Set<String> imports = new HashSet<>();
 
     imports.add(fileName);
@@ -63,10 +63,12 @@ public class Compiler {
     
     try {               // NOSONAR
       for(String file : imports) {
-        streams.add(new FileInputStream(new File(file)));
+        streams.put(file, new FileInputStream(new File(file)));
       }
-      for(InputStream inputStream : streams) {
-        symbolTable = populateSymbolTable(inputStream, new SymbolTableVisitor(symbolTable));
+      for(Map.Entry<String, InputStream> entry : streams.entrySet()) {
+        symbolTable = populateSymbolTable(
+                entry.getValue(),
+                new SymbolTableVisitor(symbolTable, entry.getKey()));
       }
     }
     catch (FileNotFoundException e) {
@@ -74,9 +76,9 @@ public class Compiler {
       return false;
     }
     finally {
-      for(InputStream stream : streams) {
-        if(stream != null) {
-          stream.close();
+      for(Map.Entry<String, InputStream> entry : streams.entrySet()) {
+        if(entry.getValue() != null) {
+          entry.getValue().close();
         }
       }
     }

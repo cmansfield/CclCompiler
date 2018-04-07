@@ -41,8 +41,6 @@ public class App {
       return;
     }
 
-    SymbolTableUtils.checkSymbolTable(compiler.getSymbolTable());
-
     LOGGER.info("Complete");
   }
 }

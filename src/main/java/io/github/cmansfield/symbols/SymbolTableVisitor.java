@@ -26,11 +26,11 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     symbols = new DualHashBidiMap<>();
   }
 
-  public SymbolTableVisitor(BidiMap<String, Symbol> symbols) {
+  public SymbolTableVisitor(BidiMap<String, Symbol> symbols, String packageName) {
     String packageId = SymbolIdGenerator.generateId(SymbolKind.PACKAGE);
     scope = GLOBAL_SCOPE + "." + packageId;
     this.symbols = symbols;
-    addNewSymbol(packageId, SymbolKind.PACKAGE, GLOBAL_SCOPE, new Data(), packageId);
+    addNewSymbol(packageName, SymbolKind.PACKAGE, GLOBAL_SCOPE, new Data(), packageId);
   }
 
   public String getScope() {

@@ -1,13 +1,13 @@
 
 TODO List
+    Other
+        Update README.md
+
     Data
         Update toString to use a StingBuilder
         
     Symbol
         Add jackson deserialization
-
-    SymbolTableVisitor
-        Add the package names to the symbol text for the package
 
     Add Unit tests for the following:
         Compiler
