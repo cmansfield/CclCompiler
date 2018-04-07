@@ -48,6 +48,28 @@ public class Compiler {
    * @return              Boolean, true if the file was compiled without errors
    */
   public boolean compile(final String fileName) throws IOException {
+    if(!runFirstPass(fileName)) {
+      logger.error("Unable to complete the first pass at this time");
+      return false;
+    }
+    if(options.contains(CompilerOptions.FIRST_PASS_ONLY)) {
+      return true;
+    }
+    if(!runSecondPass(fileName)) {
+      logger.error("Unable to complete the second pass at this time");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * This method will house all of the logic for the first pass; this includes
+   * the lexical analysis, syntax, and populating the symbol table
+   *
+   * @param fileName  The code file to compile
+   * @return          A boolean true if everything ran correctly
+   */
+  private boolean runFirstPass(final String fileName) throws IOException {
     BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
     Map<String,InputStream> streams = new HashMap<>();
     Set<String> imports = new HashSet<>();
@@ -60,7 +82,7 @@ public class Compiler {
       logger.debug("Import List:\n\t{}",
               imports.stream().collect(Collectors.joining("\n\t")));
     }
-    
+
     try {               // NOSONAR
       for(String file : imports) {
         streams.put(file, new FileInputStream(new File(file)));
@@ -73,6 +95,10 @@ public class Compiler {
     }
     catch (FileNotFoundException e) {
       logger.error("Unable to load file", e);
+      return false;
+    }
+    catch (IllegalStateException e) {
+      logger.error("There were syntax errors", e);
       return false;
     }
     finally {
@@ -100,6 +126,17 @@ public class Compiler {
     this.symbolTable = symbolTable;
 
     return true;
+  }
+
+  /**
+   * This method will house all of the logic for the second pass; this includes
+   * the creating the template classes, iCode, and tCode
+   *
+   * @param fileName  The code file to compile
+   * @return          A boolean true if everything ran correctly
+   */
+  private boolean runSecondPass(final String fileName) {
+    return false;
   }
 
   /**
@@ -166,8 +203,8 @@ public class Compiler {
     ParseTree tree = parser.compilationUnit();
 
     if(parser.getNumberOfSyntaxErrors() > 0) {
-      logger.error("Syntax errors found");
-      return null;
+      throw new IllegalStateException(
+              "Syntax " + parser.getNumberOfSyntaxErrors() + " errors found");
     }
 
     visitor.visit(tree);

@@ -35,6 +35,13 @@ public class CompilerTest {
     SymbolTableUtils.checkSymbolTable(symbolTable);
   }
 
+  @Test (expectedExceptions = IllegalStateException.class)
+  public void test_invalidCharacter() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compile("test4.ccl");
+
+    fail("Should have received an exception before now");
+  }
+
   @Test
   public void test_validStringCharacters() throws IOException {
     BidiMap<String, Symbol> symbolTable = compile("test3.ccl");

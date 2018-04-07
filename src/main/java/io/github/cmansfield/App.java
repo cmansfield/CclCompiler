@@ -1,10 +1,10 @@
 package io.github.cmansfield;
 
+import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.compiler.Compiler;
-import io.github.cmansfield.symbols.SymbolTableUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Level;
 import org.slf4j.LoggerFactory;
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class App {
       return;
     }
     
-    Compiler compiler = new Compiler();
+    Compiler compiler = new Compiler(CompilerOptions.FIRST_PASS_ONLY);
     if(!compiler.compile(fileName)) {
       return;
     }
