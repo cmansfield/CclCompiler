@@ -1,0 +1,23 @@
+
+public void main() {
+    char char1 = '4';
+    char char2 = '!';
+    char char3 = '(';
+    char char4 = '[';
+    char char5 = '\0';
+    char char6 = '\n';
+    char char7 = '\\';
+    char char8 = '\"';
+    char char9 = ';';
+    char char10 = 'A';
+    char char11 = 't';
+    char char12 = '_';
+    char char13 = '\b';
+    char char14 = '\t';
+    char char15 = '\r';
+    char char16 = '|';
+    char char17 = '+';
+    char char18 = '.';
+    char char19 = '*';
+}
+

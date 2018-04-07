@@ -9,10 +9,5 @@ TODO List
     SymbolTableVisitor
         Add the package names to the symbol text for the package
 
-    CclGrammar
-        Add support for escaped characters. Ex. '\0'
-        Fix argumentList of strings. Ex. someMethod("hello", "programming", "world")
-            "hello", "programming", "world" becomes one token
-
     Add Unit tests for the following:
         Compiler

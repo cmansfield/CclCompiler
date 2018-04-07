@@ -25,6 +25,7 @@ import java.io.*;
 public class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
   private Set<CompilerOptions> options;
+  BidiMap<String, Symbol> symbolTable;
 
   public Compiler(CompilerOptions... options) {
     if(options != null) {
@@ -33,6 +34,10 @@ public class Compiler {
     else {
       this.options = Collections.emptySet();
     }
+  }
+
+  public BidiMap<String, Symbol> getSymbolTable() {
+    return symbolTable == null ? new DualHashBidiMap<>() : symbolTable;
   }
 
   /**
@@ -85,6 +90,7 @@ public class Compiler {
     if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
       SymbolTableWriter.exportSymbolTable(symbolTable);
     }
+    this.symbolTable = symbolTable;
 
     return true;
   }

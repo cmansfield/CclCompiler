@@ -1,0 +1,5 @@
+
+public void main() {
+    string str = "*.\\$@\b~^(),;\r:{}\nHello \"0,8|&'~`<=>?[]_\t-+/\0";
+}
+

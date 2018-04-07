@@ -195,7 +195,7 @@ PRIMITIVE_TYPE
     | 'void'
     ;
     
-IDENTIFIER : LETTER (LETTER | NUMBER)* ;
+IDENTIFIER : LETTER (LETTER | NUMBER | UNDERSCORE)* ;
 
 STRING_LITERAL : '"' CHARACTER* '"' ;
 
@@ -207,7 +207,9 @@ NUMBER : [0-9]+ ;
 
 fragment LETTER : [a-zA-Z] ;
 
-fragment CHARACTER : [ -~] ;
+fragment UNDERSCORE : '_' ;
+
+fragment CHARACTER : LETTER | [0-9 !#$%&'()*+,-./:;<=>?@[\]^_`~{}|] | '\\t' | '\\\\' | '\\b' | '\\0' | '\\"' | '\\n' | '\\r' ;
 
 WHITESPACE : [ \t] -> skip ;
 
