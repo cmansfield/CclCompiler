@@ -1,206 +1,90 @@
 package io.github.cmansfield.symbols;
 
-import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.symbols.data.AccessModifier;
-import org.antlr.v4.runtime.ParserRuleContext;
+import org.apache.commons.collections4.BidiMap;
+import io.github.cmansfield.symbols.data.Data;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.stream.Collectors;
-import java.util.Collections;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 
-class SymbolTableUtils {
+public class SymbolTableUtils {
   private SymbolTableUtils() {}
 
   /**
-   * This will get the children from the context and then traverse any modifier nodes and
-   * return a list of discovered access modifiers
-   * 
-   * @param ctx     The current context to search for access modifiers
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   * @return        List of found access modifiers
+   * This will extract and return the parent symbolId from the scope
+   *
+   * @param scope The scope to pull the parentId from
+   * @return      The parent symbolId discovered, or empty string if not
    */
-  static List<AccessModifier> getAccessModifiers(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    if(ctx == null || visitor == null) {
-      return Collections.emptyList();
+  public static String getParentScope(String scope) {
+    int index = scope.lastIndexOf('.');
+    if(index < 0) {
+      return "";
     }
-    
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ModifierContext)
-            .map(context -> (CclGrammarParser.ModifierContext)context)
-            .map(visitor::visitModifier)
-            .map(am -> (AccessModifier)am)
-            .collect(Collectors.toList());
+    return scope.substring(index + 1, scope.length());
   }
 
   /**
-   * This will get the children from the context and then traverse any type nodes and
-   * return a String
+   * This method will check to make sure all of the symbolIds stored in the
+   * symbols actually exist in the symbol table, will throw an
+   * IllegalStateException if there is an error
    *
-   * @param ctx     The current context to search for type nodes
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   * @return        A String of the found type
+   * @param symbolTable The symbol table to validate
    */
-  static String getType(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    return getReturnType(ctx, visitor);
+  public static void checkSymbolTable(BidiMap<String, Symbol> symbolTable) {
+    symbolTable.entrySet().stream()
+            .filter(Objects::nonNull)
+            .map(Map.Entry::getValue)
+            .filter(Objects::nonNull)
+            .map(symbol -> checkParameters(symbolTable, symbol))
+            .forEach(symbol -> checkScope(symbolTable, symbol));
   }
 
   /**
-   * This will get the children from the context and then traverse any type nodes and
-   * return a String
+   * This will check to make sure all of the parameter IDs found exist in
+   * the symbol table, will throw an IllegalStateException if there is an error
    *
-   * @param ctx     The current context to search for type nodes
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   * @return        A String of the found type
+   * @param symbolTable Symbol table to look up IDs
+   * @param symbol      The Symbol who's parameters are being checked
+   * @return            The unmodified Symbol object
    */
-  static String getReturnType(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    if(ctx == null || visitor == null) {
-      return null;
+  private static Symbol checkParameters(BidiMap<String, Symbol> symbolTable, Symbol symbol) {
+    if(symbol == null || symbol.getData() == null || !symbol.getData().isPresent()) {
+      return symbol;
     }
-    
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TypeContext)
-            .map(context -> (CclGrammarParser.TypeContext)context)
-            .map(visitor::visitType)
-            .map(val -> (String)val)
-            .findFirst()
-            .orElse(null);
+    Data data = symbol.getData().get();
+    data.getParameters().forEach(parameter -> {
+      if(!symbolTable.containsKey(parameter)) {
+        throw new IllegalStateException(
+                String.format("Parameter %s is not in the symbol table", parameter));
+      }
+    });
+    return symbol;
   }
 
   /**
-   * This will get the children from the context and then traverse any parameter nodes and
-   * return a String List with the symbol IDs of the newly created parameter symbols
+   * This will check to make sure all of the IDs in a scope exist in
+   * the symbol table, will throw an IllegalStateException if there is an error
    *
-   * @param ctx     The current context to search for any parameter nodes
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   * @return        A String List of symbol IDs for the newly created parameter symbols
+   * @param symbolTable Symbol table to look up IDs
+   * @param symbol      The Symbol who's scope is being checked
+   * @return            The unmodified Symbol object
    */
-  static List<String> getParameters(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    if(ctx == null || visitor == null) {
-      return Collections.emptyList();
+  private static Symbol checkScope(BidiMap<String, Symbol> symbolTable, Symbol symbol) {
+    if(symbol == null || StringUtils.isBlank(symbol.getScope())) {
+      return symbol;
     }
-    
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ParameterListContext)
-            .map(context -> (CclGrammarParser.ParameterListContext)context)
-            .map(visitor::visitParameterList)
-            .map(val -> (List<String>)val)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-  }
+    String scope = symbol.getScope();
+    String parentId;
 
-  /**
-   * This will get the children from the context and then traverse any class name nodes 
-   * and return a class name if found
-   *
-   * @param ctx     The current context to search for any class name nodes
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   * @return        The class name if found, null if not
-   */
-  static String getClassName(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    if(ctx == null || visitor == null) {
-      return null;
+    while(StringUtils.isNotBlank(parentId = getParentScope(scope))) {
+      if(!symbolTable.containsKey(parentId)) {
+        throw new IllegalStateException(
+                String.format("SymbolId %s is not in the symbol table", parentId));
+      }
+      scope = symbolTable.get(parentId).getScope();
     }
 
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ClassNameContext)
-            .map(context -> (CclGrammarParser.ClassNameContext)context)
-            .map(visitor::visitClassName)
-            .map(val -> (String)val)
-            .findFirst()
-            .orElse(null);
-  }
-
-  /**
-   * This will get the children from the context and then traverse any name nodes 
-   * and return the name if found
-   *
-   * @param ctx     The current context to search for any name nodes
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   * @return        The name of the node if found, null if not
-   */
-  static String getName(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    if(ctx == null || visitor == null) {
-      return null;
-    }
-    
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.NameContext)
-            .map(context -> (CclGrammarParser.NameContext)context)
-            .map(visitor::visitName)
-            .map(val -> (String)val)
-            .findFirst()
-            .orElse(null);
-  }
-
-  /**
-   * This will get the children from the context and then traverse any method body nodes 
-   *
-   * @param ctx     The current context to search for any method body nodes
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   */
-  static void visitMethodBody(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
-            .map(context -> (CclGrammarParser.MethodBodyContext)context)
-            .forEach(visitor::visitMethodBody);
-  }
-
-  /**
-   * This will get the children from the context and then traverse any assignment expression nodes 
-   *
-   * @param ctx     The current context to search for any assignment expression nodes
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   */
-  static void visitAssignmentExpression(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.AssignmentExpressionContext)
-            .map(context -> (CclGrammarParser.AssignmentExpressionContext)context)
-            .forEach(visitor::visitAssignmentExpression);
-  }
-
-  /**
-   * This will get the children from the context and then check for any array nodes 
-   * and return true if any are found
-   *
-   * @param ctx     The current context to search for any array nodes
-   * @return        Boolean, if array nodes were found
-   */
-  static boolean isArray(ParserRuleContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ArrayOperatorContext)
-            .count() > 0;
-  }
-
-  /**
-   * This will get the children from the context and then check for any template nodes 
-   * and return true if any are found
-   *
-   * @param ctx     The current context to search for any template nodes
-   * @return        Boolean, if template nodes were found
-   */
-  static boolean isTemplate(ParserRuleContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
-            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
-            .count() > 0;
-  }
-
-  /**
-   * This will get the children from the context and then traverse any template nodes and
-   * return a String List with all of the found template placeholders
-   *
-   * @param ctx     The current context to search for any template nodes
-   * @param visitor The symbol table visitor, used to traverse the nodes
-   * @return        A String List of found template placeholders 
-   */
-  static List<String> getTemplatePlaceHolders(ParserRuleContext ctx, SymbolTableVisitor visitor) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
-            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
-            .map(visitor::visitTemplateDeclaration)
-            .flatMap(val -> ((List<String>)val).stream())
-            .collect(Collectors.toList());
+    return symbol;
   }
 }

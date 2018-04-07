@@ -6,6 +6,7 @@ import io.github.cmansfield.parser.include.ImportGrammarLexer;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.language.CclGrammarLexer;
 import io.github.cmansfield.symbols.SymbolTableVisitor;
+import io.github.cmansfield.symbols.SymbolTableUtils;
 import io.github.cmansfield.io.SymbolTableWriter;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -25,7 +26,7 @@ import java.io.*;
 public class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
   private Set<CompilerOptions> options;
-  BidiMap<String, Symbol> symbolTable;
+  private BidiMap<String, Symbol> symbolTable;
 
   public Compiler(CompilerOptions... options) {
     if(options != null) {
@@ -90,6 +91,10 @@ public class Compiler {
     if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
       SymbolTableWriter.exportSymbolTable(symbolTable);
     }
+
+    // TODO - Remove this after implementing semantics
+    SymbolTableUtils.checkSymbolTable(symbolTable);
+
     this.symbolTable = symbolTable;
 
     return true;

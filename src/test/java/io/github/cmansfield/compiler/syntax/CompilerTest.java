@@ -1,13 +1,13 @@
 package io.github.cmansfield.compiler.syntax;
 
 import io.github.cmansfield.compiler.CompilerOptions;
+import io.github.cmansfield.symbols.SymbolTableUtils;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.compiler.Compiler;
 import io.github.cmansfield.symbols.Symbol;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.util.Map;
 import java.io.File;
 
 import static org.testng.Assert.*;
@@ -17,20 +17,22 @@ public class CompilerTest {
 
   @Test
   public void test_validCharacters() throws IOException {
-    Map<String, Symbol> symbolTable = compile("test2.ccl");
+    BidiMap<String, Symbol> symbolTable = compile("test2.ccl");
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 40);
+    SymbolTableUtils.checkSymbolTable(symbolTable);
   }
 
   @Test
   public void test_validStringCharacters() throws IOException {
-    Map<String, Symbol> symbolTable = compile("test3.ccl");
+    BidiMap<String, Symbol> symbolTable = compile("test3.ccl");
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 4);
+    SymbolTableUtils.checkSymbolTable(symbolTable);
   }
 
   /**

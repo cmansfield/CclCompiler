@@ -1,7 +1,9 @@
 package io.github.cmansfield;
 
 import io.github.cmansfield.compiler.Compiler;
+import io.github.cmansfield.symbols.SymbolTableUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Level;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -17,6 +19,7 @@ public class App {
   }
   
   public static void main(String[] args) throws IOException {
+    org.apache.log4j.Logger.getRootLogger().setLevel(Level.TRACE);
     if(args.length != 1) {
       usage();
       return;
@@ -37,6 +40,8 @@ public class App {
     if(!compiler.compile(fileName)) {
       return;
     }
+
+    SymbolTableUtils.checkSymbolTable(compiler.getSymbolTable());
 
     LOGGER.info("Complete");
   }

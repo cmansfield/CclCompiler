@@ -93,17 +93,17 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
-    boolean isTemplate = SymbolTableUtils.isTemplate(ctx);
+    boolean isTemplate = isTemplate(ctx);
     SymbolKind symbolKind = isTemplate ? SymbolKind.TEMPLATE_METHOD : SymbolKind.METHOD;
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
-    String name = SymbolTableUtils.getName(ctx, this);
-    List<String> templatePlaceHolders = SymbolTableUtils.getTemplatePlaceHolders(ctx, this);
-    List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
-    String returnType = SymbolTableUtils.getReturnType(ctx, this);
-    List<String> parameters = SymbolTableUtils.getParameters(ctx, this);
+    String name = getName(ctx);
+    List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
+    List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
+    String returnType = getReturnType(ctx);
+    List<String> parameters = getParameters(ctx);
 
     Data data = new Data().new DataBuilder()
             .returnType(returnType)
@@ -118,7 +118,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             data,
             symbolId);
 
-    SymbolTableUtils.visitMethodBody(ctx, this);
+    visitMethodBody(ctx);
     scope = scopeOrig;
     
     return null;
@@ -152,7 +152,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
     String type = ctx.children.get(0).getText();
     String name = ctx.children.get(1).getText();
-    boolean isArray = SymbolTableUtils.isArray(ctx);
+    boolean isArray = isArray(ctx);
     
     Data data = new Data().new DataBuilder()
             .type(type)
@@ -176,16 +176,16 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
   @Override
   public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
-    SymbolKind symbolKind = SymbolTableUtils.isTemplate(ctx)
+    SymbolKind symbolKind = isTemplate(ctx)
             ? SymbolKind.TEMPLATE_CLASS
             : SymbolKind.CLASS;
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
-    String name = SymbolTableUtils.getClassName(ctx, this);
-    List<String> templatePlaceHolders = SymbolTableUtils.getTemplatePlaceHolders(ctx, this);
-    List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
+    String name = getClassName(ctx);
+    List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
+    List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     Data data = new Data().new DataBuilder()
             .accessModifiers(accessModifiers)
             .templatePlaceHolders(templatePlaceHolders)
@@ -215,9 +215,9 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
-    String name = SymbolTableUtils.getClassName(ctx, this);
-    List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
-    List<String> parameters = SymbolTableUtils.getParameters(ctx, this);
+    String name = getClassName(ctx);
+    List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
+    List<String> parameters = getParameters(ctx);
 
     Data data = new Data().new DataBuilder()
             .accessModifiers(accessModifiers)
@@ -225,7 +225,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .build();
     addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data, symbolId);
 
-    SymbolTableUtils.visitMethodBody(ctx, this);
+    visitMethodBody(ctx);
     scope = scopeOrig;
 
     return null;
@@ -233,10 +233,10 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
   @Override
   public Object visitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx) {
-    String name = SymbolTableUtils.getName(ctx, this);
-    List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
-    String type = SymbolTableUtils.getType(ctx, this);
-    boolean isArray = SymbolTableUtils.isArray(ctx);
+    String name = getName(ctx);
+    List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
+    String type = getType(ctx);
+    boolean isArray = isArray(ctx);
                         
     Data data = new Data().new DataBuilder()
             .accessModifiers(accessModifiers)
@@ -245,16 +245,16 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .build();
     addNewSymbol(name, SymbolKind.INSTANCE_VAR, scope, data);
 
-    SymbolTableUtils.visitAssignmentExpression(ctx, this);
+    visitAssignmentExpression(ctx);
     
     return null;
   }
 
   @Override
   public Object visitVariableDeclaration(CclGrammarParser.VariableDeclarationContext ctx) {
-    String type = SymbolTableUtils.getType(ctx, this);
-    String name = SymbolTableUtils.getName(ctx, this);
-    boolean isArray = SymbolTableUtils.isArray(ctx);
+    String type = getType(ctx);
+    String name = getName(ctx);
+    boolean isArray = isArray(ctx);
     
     Data data = new Data().new DataBuilder()
             .accessModifier(AccessModifier.PRIVATE)
@@ -263,7 +263,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
             .build();
     addNewSymbol(name, SymbolKind.LOCAL_VAR, scope, data);
 
-    SymbolTableUtils.visitAssignmentExpression(ctx, this);
+    visitAssignmentExpression(ctx);
     
     return null;
   }
@@ -276,7 +276,7 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
 
     for(ParseTree parseTree: children) {
       if(parseTree instanceof CclGrammarParser.MethodBodyContext) {
-        List<AccessModifier> accessModifiers = SymbolTableUtils.getAccessModifiers(ctx, this);
+        List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
         Data data = new Data().new DataBuilder()
                 .returnType("void")
                 .accessModifiers(accessModifiers)
@@ -398,5 +398,187 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
     scope = scopeOrig;
     
     return null;
+  }
+
+  /**
+   * This will get the children from the context and then traverse any modifier nodes and
+   * return a list of discovered access modifiers
+   *
+   * @param ctx     The current context to search for access modifiers
+   * @return        List of found access modifiers
+   */
+  private List<AccessModifier> getAccessModifiers(ParserRuleContext ctx) {
+    if(ctx == null) {
+      return Collections.emptyList();
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ModifierContext)
+            .map(context -> (CclGrammarParser.ModifierContext)context)
+            .map(this::visitModifier)
+            .map(am -> (AccessModifier)am)
+            .collect(Collectors.toList());
+  }
+
+  /**
+   * This will get the children from the context and then traverse any type nodes and
+   * return a String
+   *
+   * @param ctx     The current context to search for type nodes
+   * @return        A String of the found type
+   */
+  private String getType(ParserRuleContext ctx) {
+    return getReturnType(ctx);
+  }
+
+  /**
+   * This will get the children from the context and then traverse any type nodes and
+   * return a String
+   *
+   * @param ctx     The current context to search for type nodes
+   * @return        A String of the found type
+   */
+  private String getReturnType(ParserRuleContext ctx) {
+    if(ctx == null) {
+      return null;
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TypeContext)
+            .map(context -> (CclGrammarParser.TypeContext)context)
+            .map(this::visitType)
+            .map(val -> (String)val)
+            .findFirst()
+            .orElse(null);
+  }
+
+  /**
+   * This will get the children from the context and then traverse any parameter nodes and
+   * return a String List with the symbol IDs of the newly created parameter symbols
+   *
+   * @param ctx     The current context to search for any parameter nodes
+   * @return        A String List of symbol IDs for the newly created parameter symbols
+   */
+  private List<String> getParameters(ParserRuleContext ctx) {
+    if(ctx == null) {
+      return Collections.emptyList();
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ParameterListContext)
+            .map(context -> (CclGrammarParser.ParameterListContext)context)
+            .map(this::visitParameterList)
+            .map(val -> (List<String>)val)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+  }
+
+  /**
+   * This will get the children from the context and then traverse any class name nodes 
+   * and return a class name if found
+   *
+   * @param ctx     The current context to search for any class name nodes
+   * @return        The class name if found, null if not
+   */
+  private String getClassName(ParserRuleContext ctx) {
+    if(ctx == null) {
+      return null;
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ClassNameContext)
+            .map(context -> (CclGrammarParser.ClassNameContext)context)
+            .map(this::visitClassName)
+            .map(val -> (String)val)
+            .findFirst()
+            .orElse(null);
+  }
+
+  /**
+   * This will get the children from the context and then traverse any name nodes 
+   * and return the name if found
+   *
+   * @param ctx     The current context to search for any name nodes
+   * @return        The name of the node if found, null if not
+   */
+  private String getName(ParserRuleContext ctx) {
+    if(ctx == null) {
+      return null;
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.NameContext)
+            .map(context -> (CclGrammarParser.NameContext)context)
+            .map(this::visitName)
+            .map(val -> (String)val)
+            .findFirst()
+            .orElse(null);
+  }
+
+  /**
+   * This will get the children from the context and then traverse any method body nodes 
+   *
+   * @param ctx     The current context to search for any method body nodes
+   */
+  private void visitMethodBody(ParserRuleContext ctx) {
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
+            .map(context -> (CclGrammarParser.MethodBodyContext)context)
+            .forEach(this::visitMethodBody);
+  }
+
+  /**
+   * This will get the children from the context and then traverse any assignment expression nodes 
+   *
+   * @param ctx     The current context to search for any assignment expression nodes
+   */
+  private void visitAssignmentExpression(ParserRuleContext ctx) {
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.AssignmentExpressionContext)
+            .map(context -> (CclGrammarParser.AssignmentExpressionContext)context)
+            .forEach(this::visitAssignmentExpression);
+  }
+
+  /**
+   * This will get the children from the context and then check for any array nodes 
+   * and return true if any are found
+   *
+   * @param ctx     The current context to search for any array nodes
+   * @return        Boolean, if array nodes were found
+   */
+  private boolean isArray(ParserRuleContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ArrayOperatorContext)
+            .count() > 0;
+  }
+
+  /**
+   * This will get the children from the context and then check for any template nodes 
+   * and return true if any are found
+   *
+   * @param ctx     The current context to search for any template nodes
+   * @return        Boolean, if template nodes were found
+   */
+  private boolean isTemplate(ParserRuleContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
+            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
+            .count() > 0;
+  }
+
+  /**
+   * This will get the children from the context and then traverse any template nodes and
+   * return a String List with all of the found template placeholders
+   *
+   * @param ctx     The current context to search for any template nodes
+   * @return        A String List of found template placeholders 
+   */
+  private List<String> getTemplatePlaceHolders(ParserRuleContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
+            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
+            .map(this::visitTemplateDeclaration)
+            .flatMap(val -> ((List<String>)val).stream())
+            .collect(Collectors.toList());
   }
 }

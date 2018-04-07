@@ -11,3 +11,4 @@ TODO List
 
     Add Unit tests for the following:
         Compiler
+        SymbolTableUtils
