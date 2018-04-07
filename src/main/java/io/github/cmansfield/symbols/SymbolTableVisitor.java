@@ -1,7 +1,6 @@
 package io.github.cmansfield.symbols;
 
 import io.github.cmansfield.parser.language.CclGrammarBaseVisitor;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.symbols.data.AccessModifier;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,21 +19,12 @@ public class SymbolTableVisitor extends CclGrammarBaseVisitor {
   private BidiMap<String, Symbol> symbols;
   private String scope;
 
-  
-  public SymbolTableVisitor() {
-    scope = GLOBAL_SCOPE;
-    symbols = new DualHashBidiMap<>();
-  }
 
   public SymbolTableVisitor(BidiMap<String, Symbol> symbols, String packageName) {
     String packageId = SymbolIdGenerator.generateId(SymbolKind.PACKAGE);
     scope = GLOBAL_SCOPE + "." + packageId;
     this.symbols = symbols;
     addNewSymbol(packageName, SymbolKind.PACKAGE, GLOBAL_SCOPE, new Data(), packageId);
-  }
-
-  public String getScope() {
-    return scope;
   }
 
   public BidiMap<String, Symbol> getSymbols() {

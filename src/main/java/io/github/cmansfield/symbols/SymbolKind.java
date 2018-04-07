@@ -20,7 +20,7 @@ public enum SymbolKind {
   
   private String prefix;
   
-  private SymbolKind(String prefix) {
+  SymbolKind(String prefix) {
     this.prefix = prefix;
   }
   

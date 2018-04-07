@@ -3,9 +3,6 @@ TODO List
     Other
         Update README.md
 
-    Data
-        Update toString to use a StingBuilder
-        
     Symbol
         Add jackson deserialization
 
