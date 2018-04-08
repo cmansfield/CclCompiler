@@ -95,9 +95,9 @@ public void main() {
 :: 	is defined as  
 | 	alternative definition
 ; 	end of rule  
-[ ] optional
-{ } zero or more occurrences
-( ) grouping
+[ ]	optional
+{ } 	zero or more occurrences
+( ) 	grouping
 ```
 **_Atomic_**
 ```
