@@ -26,7 +26,11 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters))
+            .data(new Data().new DataBuilder()
+                    .returnType("int")
+                    .accessModifier(AccessModifier.PRIVATE)
+                    .parameters(parameters)
+                    .build())
             .build();
   }
 
@@ -41,7 +45,11 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), moreParameters))
+            .data(new Data().new DataBuilder()
+                    .returnType("int")
+                    .accessModifier(AccessModifier.PRIVATE)
+                    .parameters(moreParameters)
+                    .build())
             .build();
 
     assertTrue(symbol.equals(anotherSymbol));
@@ -76,7 +84,11 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), moreParameters))
+            .data(new Data().new DataBuilder()
+                    .returnType("int")
+                    .accessModifier(AccessModifier.PRIVATE)
+                    .parameters(moreParameters)
+                    .build())
             .build();
 
     assertFalse(symbol.equals(anotherSymbol));
@@ -129,7 +141,11 @@ public class SymbolTest {
             .symbolId("M010")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), moreParameters))
+            .data(new Data().new DataBuilder()
+                    .returnType("int")
+                    .accessModifier(AccessModifier.PRIVATE)
+                    .parameters(moreParameters)
+                    .build())
             .build();
 
     assertEquals(symbol.hashCode(), anotherSymbol.hashCode());
@@ -146,7 +162,11 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), moreParameters))
+            .data(new Data().new DataBuilder()
+                    .returnType("int")
+                    .accessModifier(AccessModifier.PRIVATE)
+                    .parameters(moreParameters)
+                    .build())
             .build();
 
     assertNotEquals(symbol.hashCode(), anotherSymbol.hashCode());

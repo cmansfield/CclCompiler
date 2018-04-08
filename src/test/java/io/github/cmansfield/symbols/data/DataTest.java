@@ -4,7 +4,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.List;
@@ -17,11 +16,13 @@ public class DataTest {
 
   @BeforeMethod
   public void setUp() {
-    List<String> parameters = new ArrayList<>();
-    parameters.add("P104");
-    parameters.add("P105");
-    parameters.add("P106");
-    data = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
+    data = new Data().new DataBuilder()
+            .returnType("int")
+            .accessModifier(AccessModifier.PRIVATE)
+            .parameter("P104")
+            .parameter("P105")
+            .parameter("P106")
+            .build();
   }
 
   @Test
@@ -53,52 +54,71 @@ public class DataTest {
 
   @Test
   public void test_equals() {
-    List<String> parameters = new ArrayList<>();
-    parameters.add("P104");
-    parameters.add("P105");
-    parameters.add("P106");
-    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
+    Data otherData = new Data().new DataBuilder()
+            .returnType("int")
+            .accessModifier(AccessModifier.PRIVATE)
+            .parameter("P104")
+            .parameter("P105")
+            .parameter("P106")
+            .build();
 
     assertTrue(data.equals(otherData));
   }
 
   @Test
   public void test_notEquals_parameters() {
-    List<String> parameters = new ArrayList<>();
-    parameters.add("P104");
-    parameters.add("P105");
-    parameters.add("P100");
-    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
+    Data otherData = new Data().new DataBuilder()
+            .returnType("int")
+            .accessModifier(AccessModifier.PRIVATE)
+            .parameter("P104")
+            .parameter("P105")
+            .parameter("P100")
+            .build();
 
     assertFalse(data.equals(otherData));
   }
 
   @Test
   public void test_notEquals_parameterSize() {
-    List<String> parameters = new ArrayList<>();
-    parameters.add("P104");
-    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
+    Data otherData = new Data().new DataBuilder()
+            .returnType("int")
+            .accessModifier(AccessModifier.PRIVATE)
+            .parameter("P104")
+            .build();
 
     assertFalse(data.equals(otherData));
   }
 
   @Test
   public void test_notEquals_accessModifier() {
-    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PUBLIC), data.getParameters());
+    Data otherData = new Data().new DataBuilder()
+            .returnType("int")
+            .accessModifier(AccessModifier.PUBLIC)
+            .parameters(data.getParameters())
+            .build();
 
     assertFalse(data.equals(otherData));
   }
 
   @Test
   public void test_notEquals_returnType() {
-    Data otherData = new Data("", "void", data.getAccessModifiers(), data.getParameters());
+    Data otherData = new Data().new DataBuilder()
+            .returnType("void")
+            .accessModifiers(data.getAccessModifiers())
+            .parameters(data.getParameters())
+            .build();
 
     assertFalse(data.equals(otherData));
   }
 
   @Test
   public void test_notEquals_type() {
-    Data otherData = new Data("bool", "int", data.getAccessModifiers(), data.getParameters());
+    Data otherData = new Data().new DataBuilder()
+            .type("bool")
+            .returnType("int")
+            .accessModifiers(data.getAccessModifiers())
+            .parameters(data.getParameters())
+            .build();
 
     assertFalse(data.equals(otherData));
   }
@@ -115,29 +135,37 @@ public class DataTest {
 
   @Test
   public void test_hashCode() {
-    List<String> parameters = new ArrayList<>();
-    parameters.add("P104");
-    parameters.add("P105");
-    parameters.add("P106");
-    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
+    Data otherData = new Data().new DataBuilder()
+            .returnType("int")
+            .accessModifier(AccessModifier.PRIVATE)
+            .parameter("P104")
+            .parameter("P105")
+            .parameter("P106")
+            .build();
 
     assertEquals(data.hashCode(), otherData.hashCode());
   }
 
   @Test
   public void test_failed_hashCode_parameters() {
-    List<String> parameters = new ArrayList<>();
-    parameters.add("P104");
-    parameters.add("P105");
-    parameters.add("P107");
-    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PRIVATE), parameters);
+    Data otherData = new Data().new DataBuilder()
+            .returnType("int")
+            .accessModifier(AccessModifier.PRIVATE)
+            .parameter("P104")
+            .parameter("P105")
+            .parameter("P107")
+            .build();
 
     assertNotEquals(data.hashCode(), otherData.hashCode());
   }
 
   @Test
   public void test_failed_hashCode_accessModifier() {
-    Data otherData = new Data("", "int", Collections.singletonList(AccessModifier.PUBLIC), data.getParameters());
+    Data otherData = new Data().new DataBuilder()
+            .returnType("int")
+            .accessModifier(AccessModifier.PUBLIC)
+            .parameters(data.getParameters())
+            .build();
 
     assertNotEquals(data.hashCode(), otherData.hashCode());
   }

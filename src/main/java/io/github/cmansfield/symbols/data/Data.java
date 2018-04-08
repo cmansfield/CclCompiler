@@ -17,31 +17,15 @@ public class Data {
   private List<String> templatePlaceHolders;
   private List<String> parameters;
   private boolean isArray = false;
-  
-  public Data() {
-    accessModifiers = new ArrayList<>();
-    accessModifiers.add(AccessModifier.PROJECT);
-    parameters = new ArrayList<>();
-  }
 
-  public Data(final String type, List<AccessModifier> accessModifiers) {
-    this.accessModifiers = accessModifiers;
+  public Data() {}
+
+  private Data(final String type, final String returnType, List<AccessModifier> accessModifiers, List<String> parameters, boolean isArray, List<String> templatePlaceHolders) {
     this.type = type;
-  }
-  
-  public Data(final String type, final String returnType, List<AccessModifier> accessModifiers, List<String> parameters) {
-    this(type, accessModifiers);
     this.returnType = returnType;
+    this.accessModifiers = accessModifiers;
     this.parameters = parameters;
-  }
-
-  public Data(final String type, final String returnType, List<AccessModifier> accessModifiers, List<String> parameters, boolean isArray) {
-    this(type, returnType, accessModifiers, parameters);
     this.isArray = isArray;
-  }
-
-  public Data(final String type, final String returnType, List<AccessModifier> accessModifiers, List<String> parameters, boolean isArray, List<String> templatePlaceHolders) {
-    this(type, returnType, accessModifiers, parameters, isArray);
     this.templatePlaceHolders = templatePlaceHolders;
   }
   
@@ -167,7 +151,7 @@ public class Data {
     return new HashCodeBuilder(17, 37)
             .append(type)
             .append(returnType)
-            .append(accessModifiers.toString())
+            .append(getAccessModifiers().toString())
             .append(parameters)
             .append(templatePlaceHolders)
             .append(isArray)

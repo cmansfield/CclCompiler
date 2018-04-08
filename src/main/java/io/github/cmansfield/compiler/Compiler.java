@@ -53,6 +53,7 @@ public class Compiler {
       return false;
     }
     if(options.contains(CompilerOptions.FIRST_PASS_ONLY)) {
+      SymbolTableUtils.checkSymbolTable(symbolTable);
       return true;
     }
     if(!runSecondPass(fileName)) {
@@ -119,10 +120,6 @@ public class Compiler {
     if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
       SymbolTableWriter.exportSymbolTable(symbolTable);
     }
-
-    // TODO - Remove this after implementing semantics
-    SymbolTableUtils.checkSymbolTable(symbolTable);
-
     this.symbolTable = symbolTable;
 
     return true;
