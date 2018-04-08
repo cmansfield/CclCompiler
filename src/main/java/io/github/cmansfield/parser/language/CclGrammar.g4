@@ -56,7 +56,7 @@ statementWithScope
     ;
 
 assignmentExpression 
-    : NEW type newDeclaration
+    : NEW type templateDeclaration? newDeclaration
     | typeCast expression
     | braceEnclosedInitializer
     | expression

@@ -1,0 +1,104 @@
+
+private class Node(T) {
+    private T value;
+    private Node nextNode;
+
+    public Node(T value) {
+        this.value = value;
+    }
+
+    public Node(T value, Node nextNode) {
+        this.value = value;
+        this.nextNode = nextNode;
+    }
+
+    public T get() {
+        return value;
+    }
+
+    public void setNext(Node nextNode) {
+        this.nextNode = nextNode;
+    }
+
+    public Node next() {
+        return nextNode;
+    }
+}
+
+public class List(T) {
+    private Node head;
+    private Node last;
+    private int size;
+
+    public List() {
+        size = 0;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public void add(T value) {
+        Node node = new Node(value);
+        size = size + 1;
+
+        if(head == null) {
+            head = node;
+            last = node;
+            return;
+        }
+
+        last.setNext(node);
+        last = node;
+    }
+
+    public void clear() {
+        head = null;
+        last = null;
+        size = 0;
+    }
+
+    public T get(int index) {
+        Node node = head;
+        for(int i = 0; i < index; i + 1) {
+            node = node.next();
+        }
+        return node.get();
+    }
+
+    public void remove(int index) {
+        Node node = head;
+        Node previous = node;
+        for(int i = 0; i < index; i + 1) {
+            previous = node;
+            node = node.next();
+        }
+        if(node == head) {
+            head = head.next();
+            if(head == null) {
+                last = null;
+            }
+        }
+        else if(node == last) {
+            last = previous;
+            last.setNext(null);
+        }
+    }
+
+    public bool contains(T value) {
+        Node node = head;
+
+        while(node != null) {
+            if(node.get() == value) {
+                return true;
+            }
+            node = node.next();
+        }
+
+        return false;
+    }
+
+    public bool isEmpty() {
+        return size == 0;
+    }
+}

@@ -1,8 +1,5 @@
 
 TODO List
-    Other
-        Update README.md
-
     Symbol
         Add jackson deserialization
 
