@@ -1,23 +1,26 @@
 package io.github.cmansfield.compiler;
 
+import io.github.cmansfield.firstpass.symbols.SymbolTableVisitor;
+import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.include.ImportGrammarLexer;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.language.CclGrammarLexer;
-import io.github.cmansfield.symbols.SymbolTableVisitor;
-import io.github.cmansfield.symbols.SymbolTableUtils;
+import io.github.cmansfield.secondpass.SemanticsVisitor;
+import io.github.cmansfield.parser.CclCompilerVisitor;
+import io.github.cmansfield.firstpass.symbols.Symbol;
 import io.github.cmansfield.io.SymbolTableWriter;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.CommonTokenStream;
 import io.github.cmansfield.io.ImportVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
-import io.github.cmansfield.symbols.Symbol;
 import org.antlr.v4.runtime.CharStreams;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.*;
 import java.io.*;
@@ -54,6 +57,10 @@ public class Compiler {
     }
     if(options.contains(CompilerOptions.FIRST_PASS_ONLY)) {
       SymbolTableUtils.checkSymbolTable(symbolTable);
+
+      if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
+        SymbolTableWriter.exportSymbolTable(symbolTable);
+      }
       return true;
     }
     if(!runSecondPass(fileName)) {
@@ -71,6 +78,31 @@ public class Compiler {
    * @return          A boolean true if everything ran correctly
    */
   private boolean runFirstPass(final String fileName) throws IOException {
+    return runPass(fileName, SymbolTableVisitor::new);
+  }
+
+  /**
+   * This method will house all of the logic for the second pass; this includes
+   * the creating the template classes, iCode, and tCode
+   *
+   * @param fileName  The code file to compile
+   * @return          A boolean true if everything ran correctly
+   */
+  private boolean runSecondPass(final String fileName) throws IOException {
+    return runPass(fileName, SemanticsVisitor::new);
+  }
+
+  /**
+   * This will create visitors of the supplied type and have them visit the
+   * grammar tree
+   *
+   * @param fileName Root file to be traversed
+   * @param creator  A constructor method that will be used to create
+   *                 multiple instances of the supplied visitor
+   * @return         Boolean true if the visitor was able to visit the tree
+   *                 without issue
+   */
+  private boolean runPass(final String fileName, BiFunction<BidiMap<String, Symbol>, String, CclCompilerVisitor> creator) throws IOException {
     BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
     Map<String,InputStream> streams = new HashMap<>();
     Set<String> imports = new HashSet<>();
@@ -91,7 +123,7 @@ public class Compiler {
       for(Map.Entry<String, InputStream> entry : streams.entrySet()) {
         symbolTable = populateSymbolTable(
                 entry.getValue(),
-                new SymbolTableVisitor(symbolTable, entry.getKey()));
+                creator.apply(symbolTable, entry.getKey()));
       }
     }
     catch (FileNotFoundException e) {
@@ -99,7 +131,7 @@ public class Compiler {
       return false;
     }
     catch (IllegalStateException e) {
-      logger.error("There were syntax errors", e);
+      logger.error("There were errors", e);
       return false;
     }
     finally {
@@ -116,24 +148,9 @@ public class Compiler {
                       .map(Object::toString)
                       .collect(Collectors.joining("\n\t")));
     }
-
-    if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
-      SymbolTableWriter.exportSymbolTable(symbolTable);
-    }
     this.symbolTable = symbolTable;
 
     return true;
-  }
-
-  /**
-   * This method will house all of the logic for the second pass; this includes
-   * the creating the template classes, iCode, and tCode
-   *
-   * @param fileName  The code file to compile
-   * @return          A boolean true if everything ran correctly
-   */
-  private boolean runSecondPass(final String fileName) {
-    return false;
   }
 
   /**
@@ -185,7 +202,7 @@ public class Compiler {
    * @param visitor     The visitor to be used to traverse the newly created tree
    * @return            A Map with symbolIds as the key, and symbol objects as the value
    */
-  private BidiMap<String, Symbol> populateSymbolTable(InputStream inputStream, SymbolTableVisitor visitor) throws IOException {
+  private BidiMap<String, Symbol> populateSymbolTable(InputStream inputStream, CclCompilerVisitor visitor) throws IOException {
     if(inputStream == null) {
       logger.warn("Input stream was null");
       return null;

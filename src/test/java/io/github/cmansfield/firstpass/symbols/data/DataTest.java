@@ -1,4 +1,4 @@
-package io.github.cmansfield.symbols.data;
+package io.github.cmansfield.firstpass.symbols.data;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.testng.annotations.BeforeMethod;

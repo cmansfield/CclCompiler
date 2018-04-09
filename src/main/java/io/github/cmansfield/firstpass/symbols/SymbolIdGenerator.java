@@ -1,9 +1,9 @@
-package io.github.cmansfield.symbols;
+package io.github.cmansfield.firstpass.symbols;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-class SymbolIdGenerator {
+public class SymbolIdGenerator {
   private static Map<SymbolKind, Integer> indexes;
 
   static {
@@ -21,7 +21,7 @@ class SymbolIdGenerator {
    * @param symbolKind  The type of symbol being produced
    * @return            A String value of the new symbol ID
    */
-  static String generateId(SymbolKind symbolKind) {
+  public static String generateId(SymbolKind symbolKind) {
     indexes.put(symbolKind, indexes.get(symbolKind) + 1);
     return String.format("%S%05d", symbolKind.getPrefix(), indexes.get(symbolKind));
   }

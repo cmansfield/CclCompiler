@@ -1,12 +1,11 @@
-package io.github.cmansfield.symbols;
+package io.github.cmansfield.firstpass.symbols;
 
-import io.github.cmansfield.symbols.data.AccessModifier;
-import io.github.cmansfield.symbols.data.Data;
+import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
+import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.testng.Assert.*;

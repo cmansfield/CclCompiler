@@ -1,4 +1,4 @@
-package io.github.cmansfield.symbols.data;
+package io.github.cmansfield.firstpass.symbols.data;
 
 public enum AccessModifier {
   PUBLIC("public"),

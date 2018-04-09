@@ -1,4 +1,4 @@
-package io.github.cmansfield.symbols;
+package io.github.cmansfield.firstpass.symbols;
 
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;

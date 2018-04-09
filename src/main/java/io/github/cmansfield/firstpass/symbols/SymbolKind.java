@@ -1,4 +1,4 @@
-package io.github.cmansfield.symbols;
+package io.github.cmansfield.firstpass.symbols;
 
 public enum SymbolKind {
   MAIN("X"),

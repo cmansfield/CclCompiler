@@ -1,10 +1,10 @@
 package io.github.cmansfield.compiler.syntax;
 
 import io.github.cmansfield.compiler.CompilerOptions;
-import io.github.cmansfield.symbols.SymbolTableUtils;
+import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.compiler.Compiler;
-import io.github.cmansfield.symbols.Symbol;
+import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.testng.annotations.Test;
 
 import java.io.IOException;

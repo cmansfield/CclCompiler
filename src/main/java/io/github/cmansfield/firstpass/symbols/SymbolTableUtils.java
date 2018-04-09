@@ -1,7 +1,7 @@
-package io.github.cmansfield.symbols;
+package io.github.cmansfield.firstpass.symbols;
 
 import org.apache.commons.collections4.BidiMap;
-import io.github.cmansfield.symbols.data.Data;
+import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;

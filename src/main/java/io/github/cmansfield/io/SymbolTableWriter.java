@@ -4,7 +4,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.BidiMap;
-import io.github.cmansfield.symbols.Symbol;
+import io.github.cmansfield.firstpass.symbols.Symbol;
 
 import java.nio.charset.StandardCharsets;
 import java.io.OutputStreamWriter;
