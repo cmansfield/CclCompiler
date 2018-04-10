@@ -7,7 +7,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.stream.Collectors;
@@ -18,20 +17,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
 
   public SymbolTableVisitor(BidiMap<String, Symbol> symbols, String packageName) {
     super(symbols, packageName);
-  }
-
-  /**
-   * Gets the text from the first child in the context
-   * 
-   * @param ctx The current context to get the child's text from 
-   * @return    The text of the first child
-   */
-  private String getChildText(ParserRuleContext ctx) {
-    if(CollectionUtils.isEmpty(ctx.children)) {
-      throw new IllegalArgumentException("No children found in context");
-    }
-
-    return ctx.children.get(0).getText();
   }
   
   @Override
@@ -61,7 +46,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             data,
             symbolId);
 
-    visitMethodBody(ctx);
+    traverseMethodBody(ctx);
     scope = scopeOrig;
     
     return null;
@@ -74,11 +59,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     }
   
     return AccessModifier.find(ctx.children.get(0).getText());
-  }
-
-  @Override
-  public Object visitType(CclGrammarParser.TypeContext ctx) {
-    return getChildText(ctx);
   }
 
   @Override
@@ -105,16 +85,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     Symbol symbol = addNewSymbol(name, SymbolKind.PARAM, scope, data);
     
     return symbol.getSymbolId();
-  }
-
-  @Override
-  public Object visitName(CclGrammarParser.NameContext ctx) {
-    return getChildText(ctx);
-  }
-
-  @Override
-  public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
-    return getChildText(ctx);
   }
 
   @Override
@@ -168,7 +138,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .build();
     addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data, symbolId);
 
-    visitMethodBody(ctx);
+    traverseMethodBody(ctx);
     scope = scopeOrig;
 
     return null;
@@ -194,24 +164,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   }
 
   @Override
-  public Object visitVariableDeclaration(CclGrammarParser.VariableDeclarationContext ctx) {
-    String type = getType(ctx);
-    String name = getName(ctx);
-    boolean isArray = isArray(ctx);
-    
-    Data data = new Data().new DataBuilder()
-            .accessModifier(AccessModifier.PRIVATE)
-            .isTypeAnArray(isArray)
-            .type(type)
-            .build();
-    addNewSymbol(name, SymbolKind.LOCAL_VAR, scope, data);
-
-    visitAssignmentExpression(ctx);
-    
-    return null;
-  }
-
-  @Override
   public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
     SymbolKind symbolKind = SymbolKind.MAIN;
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
@@ -227,7 +179,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
         addNewSymbol("main", SymbolKind.MAIN, scope, data, symbolId);
         
         String scopeOrig = scope;
-        scope += "." + symbolId;         // NOSONAR - will only happen once
+        scope = scope + "." + symbolId;         // NOSONAR - will only happen once
         parseTree.accept(this);
         scope = scopeOrig;
       }
@@ -309,40 +261,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .collect(Collectors.toList());
   }
 
-  @Override
-  public Object visitStatementWithScope(CclGrammarParser.StatementWithScopeContext ctx) {
-    if(ctx.children == null || ctx.children.isEmpty()) {
-      throw new IllegalArgumentException("There must be child nodes at this point in the tree");
-    }
-    SymbolKind symbolKind = SymbolKind.UNKNOWN;
-    String symbolId;
-    String scopeOrig = scope;
-    ParseTree child = ctx.getChild(0);
-
-    if("{".equals(child.getText())) {
-      symbolKind = SymbolKind.BLOCK;
-    }
-    else if("for".equals(child.getText())) {
-      symbolKind = SymbolKind.FOR;
-    }
-    
-    if(symbolKind == SymbolKind.UNKNOWN) {
-      throw new IllegalStateException(
-              String.format("Unknown statement \"%s\" found", StringUtils.isBlank(child.getText()) ? "" : child.getText()));
-    }
-
-    symbolId = SymbolIdGenerator.generateId(symbolKind);
-    scope += "." + symbolId;
-    
-    Data data = new Data().new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
-    addNewSymbol(symbolId, symbolKind, scopeOrig, data, symbolId);
-    
-    super.visitStatementWithScope(ctx);
-    scope = scopeOrig;
-    
-    return null;
-  }
-
   /**
    * This will get the children from the context and then traverse any modifier nodes and
    * return a list of discovered access modifiers
@@ -361,38 +279,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .map(this::visitModifier)
             .map(am -> (AccessModifier)am)
             .collect(Collectors.toList());
-  }
-
-  /**
-   * This will get the children from the context and then traverse any type nodes and
-   * return a String
-   *
-   * @param ctx     The current context to search for type nodes
-   * @return        A String of the found type
-   */
-  private String getType(ParserRuleContext ctx) {
-    return getReturnType(ctx);
-  }
-
-  /**
-   * This will get the children from the context and then traverse any type nodes and
-   * return a String
-   *
-   * @param ctx     The current context to search for type nodes
-   * @return        A String of the found type
-   */
-  private String getReturnType(ParserRuleContext ctx) {
-    if(ctx == null) {
-      return null;
-    }
-
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TypeContext)
-            .map(context -> (CclGrammarParser.TypeContext)context)
-            .map(this::visitType)
-            .map(val -> (String)val)
-            .findFirst()
-            .orElse(null);
   }
 
   /**
@@ -417,82 +303,18 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   }
 
   /**
-   * This will get the children from the context and then traverse any class name nodes 
-   * and return a class name if found
-   *
-   * @param ctx     The current context to search for any class name nodes
-   * @return        The class name if found, null if not
-   */
-  private String getClassName(ParserRuleContext ctx) {
-    if(ctx == null) {
-      return null;
-    }
-
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ClassNameContext)
-            .map(context -> (CclGrammarParser.ClassNameContext)context)
-            .map(this::visitClassName)
-            .map(val -> (String)val)
-            .findFirst()
-            .orElse(null);
-  }
-
-  /**
-   * This will get the children from the context and then traverse any name nodes 
-   * and return the name if found
-   *
-   * @param ctx     The current context to search for any name nodes
-   * @return        The name of the node if found, null if not
-   */
-  private String getName(ParserRuleContext ctx) {
-    if(ctx == null) {
-      return null;
-    }
-
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.NameContext)
-            .map(context -> (CclGrammarParser.NameContext)context)
-            .map(this::visitName)
-            .map(val -> (String)val)
-            .findFirst()
-            .orElse(null);
-  }
-
-  /**
    * This will get the children from the context and then traverse any method body nodes 
    *
    * @param ctx     The current context to search for any method body nodes
    */
-  private void visitMethodBody(ParserRuleContext ctx) {
+  private void traverseMethodBody(ParserRuleContext ctx) {
+    if(ctx == null || ctx.children == null) {
+      return;
+    }
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
             .map(context -> (CclGrammarParser.MethodBodyContext)context)
             .forEach(this::visitMethodBody);
-  }
-
-  /**
-   * This will get the children from the context and then traverse any assignment expression nodes 
-   *
-   * @param ctx     The current context to search for any assignment expression nodes
-   */
-  private void visitAssignmentExpression(ParserRuleContext ctx) {
-    ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.AssignmentExpressionContext)
-            .map(context -> (CclGrammarParser.AssignmentExpressionContext)context)
-            .forEach(this::visitAssignmentExpression);
-  }
-
-  /**
-   * This will get the children from the context and then check for any array nodes 
-   * and return true if any are found
-   *
-   * @param ctx     The current context to search for any array nodes
-   * @return        Boolean, if array nodes were found
-   */
-  private boolean isArray(ParserRuleContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ArrayOperatorContext)
-            .count() > 0;
   }
 
   /**

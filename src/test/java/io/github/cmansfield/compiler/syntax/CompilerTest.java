@@ -1,10 +1,10 @@
 package io.github.cmansfield.compiler.syntax;
 
-import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
+import io.github.cmansfield.compiler.CompilerOptions;
+import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.compiler.Compiler;
-import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class CompilerTest {
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
-    assertEquals(symbolTable.size(), 70);
+    assertEquals(symbolTable.size(), 45);
     SymbolTableUtils.checkSymbolTable(symbolTable);
   }
 
@@ -31,7 +31,7 @@ public class CompilerTest {
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
-    assertEquals(symbolTable.size(), 40);
+    assertEquals(symbolTable.size(), 21);
     SymbolTableUtils.checkSymbolTable(symbolTable);
   }
 
@@ -48,7 +48,7 @@ public class CompilerTest {
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
-    assertEquals(symbolTable.size(), 4);
+    assertEquals(symbolTable.size(), 3);
     SymbolTableUtils.checkSymbolTable(symbolTable);
   }
 

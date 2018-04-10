@@ -67,6 +67,9 @@ public class Compiler {
       logger.error("Unable to complete the second pass at this time");
       return false;
     }
+    if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
+      SymbolTableWriter.exportSymbolTable(symbolTable);
+    }
     return true;
   }
 
@@ -78,6 +81,9 @@ public class Compiler {
    * @return          A boolean true if everything ran correctly
    */
   private boolean runFirstPass(final String fileName) throws IOException {
+    if(symbolTable != null) {
+      symbolTable.clear();
+    }
     return runPass(fileName, SymbolTableVisitor::new);
   }
 
@@ -103,7 +109,7 @@ public class Compiler {
    *                 without issue
    */
   private boolean runPass(final String fileName, BiFunction<BidiMap<String, Symbol>, String, CclCompilerVisitor> creator) throws IOException {
-    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    BidiMap<String, Symbol> workingSymbolTable = symbolTable == null ? new DualHashBidiMap<>() : symbolTable;
     Map<String,InputStream> streams = new HashMap<>();
     Set<String> imports = new HashSet<>();
 
@@ -121,16 +127,16 @@ public class Compiler {
         streams.put(file, new FileInputStream(new File(file)));
       }
       for(Map.Entry<String, InputStream> entry : streams.entrySet()) {
-        symbolTable = populateSymbolTable(
+        workingSymbolTable = populateSymbolTable(
                 entry.getValue(),
-                creator.apply(symbolTable, entry.getKey()));
+                creator.apply(workingSymbolTable, entry.getKey()));
       }
     }
     catch (FileNotFoundException e) {
       logger.error("Unable to load file", e);
       return false;
     }
-    catch (IllegalStateException e) {
+    catch (Exception e) {
       logger.error("There were errors", e);
       return false;
     }
@@ -142,13 +148,13 @@ public class Compiler {
       }
     }
 
-    if(logger.isDebugEnabled() && symbolTable != null) {
+    if(logger.isDebugEnabled() && workingSymbolTable != null) {
       logger.debug("SymbolTable:\n\t{}",
-              symbolTable.entrySet().stream()
+              workingSymbolTable.entrySet().stream()
                       .map(Object::toString)
                       .collect(Collectors.joining("\n\t")));
     }
-    this.symbolTable = symbolTable;
+    this.symbolTable = workingSymbolTable;
 
     return true;
   }

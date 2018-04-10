@@ -36,7 +36,7 @@ public class App {
       return;
     }
     
-    Compiler compiler = new Compiler(CompilerOptions.FIRST_PASS_ONLY);
+    Compiler compiler = new Compiler();
     if(!compiler.compile(fileName)) {
       return;
     }
