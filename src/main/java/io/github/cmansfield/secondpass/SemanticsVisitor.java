@@ -1,10 +1,11 @@
 package io.github.cmansfield.secondpass;
 
-import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import io.github.cmansfield.parser.CclCompilerVisitor;
+import io.github.cmansfield.firstpass.symbols.*;
+import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -91,7 +92,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if("{".equals(child.getText())) {
       symbolKind = SymbolKind.BLOCK;
     }
-    else if("for".equals(child.getText())) {
+    else if(ParserUtils.getLiteralName(CclGrammarParser.FOR).equals(child.getText())) {
       symbolKind = SymbolKind.FOR;
     }
 
@@ -185,7 +186,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     for(ParseTree parseTree: children) {
       if(parseTree instanceof CclGrammarParser.MethodBodyContext) {
-        String symbolId = findSymbolId("main", SymbolKind.MAIN);
+        String symbolId = findSymbolId(ParserUtils.getLiteralName(CclGrammarParser.MAIN), SymbolKind.MAIN);
         if(StringUtils.isBlank(symbolId)) {
           return null;
         }

@@ -140,7 +140,27 @@ numericliteral : NUMERIC_LITERAL ;
 
 // *************** Lexer ***************
 
+PRIMITIVE_TYPE
+    : INT
+    | CHAR
+    | BOOL
+    | STRING
+    | VOID
+    ;
+
+MODIFIER 
+    : 'public' 
+    | 'private' 
+    | 'static' 
+    | 'const' 
+    ;
+
 // Keywords
+INT : 'int' ;
+CHAR : 'char' ;
+BOOL : 'bool' ;
+STRING : 'string' ;
+VOID : 'void' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
 NULL : 'null' ;
@@ -179,21 +199,6 @@ GREATER : '>' ;
 ASSIGN : '=' ;
 QUESTION : '?' ;
 COLON : ':' ;
-
-MODIFIER 
-    : 'public' 
-    | 'private' 
-    | 'static' 
-    | 'const' 
-    ;
-    
-PRIMITIVE_TYPE
-    : 'int'
-    | 'char'
-    | 'bool'
-    | 'string'
-    | 'void'
-    ;
     
 IDENTIFIER : LETTER (LETTER | NUMBER | UNDERSCORE)* ;
 

@@ -5,6 +5,7 @@ import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
+import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -173,10 +174,10 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
       if(parseTree instanceof CclGrammarParser.MethodBodyContext) {
         List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
         Data data = new Data().new DataBuilder()
-                .returnType("void")
+                .returnType(ParserUtils.getLiteralName(CclGrammarParser.VOID))
                 .accessModifiers(accessModifiers)
                 .build();
-        addNewSymbol("main", SymbolKind.MAIN, scope, data, symbolId);
+        addNewSymbol(ParserUtils.getLiteralName(CclGrammarParser.MAIN), SymbolKind.MAIN, scope, data, symbolId);
         
         String scopeOrig = scope;
         scope = scope + "." + symbolId;         // NOSONAR - will only happen once
@@ -199,7 +200,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     }
     String value = child.getText();
     Data data = new Data().new DataBuilder()
-            .type("int")
+            .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PUBLIC)
             .build();
     addNewSymbol(value, SymbolKind.INT_LIT, GLOBAL_SCOPE, data);
@@ -217,7 +218,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     // Remove single quotes around the char
     value = value.substring(1, value.length() - 1);
     Data data = new Data().new DataBuilder()
-            .type("char")
+            .type(ParserUtils.getLiteralName(CclGrammarParser.CHAR))
             .accessModifier(AccessModifier.PUBLIC)
             .build();
     addNewSymbol(value, SymbolKind.CHAR_LIT, GLOBAL_SCOPE, data);
@@ -235,7 +236,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     // Remove quotes around the string
     value = value.substring(1, value.length() - 1);
     Data data = new Data().new DataBuilder()
-            .type("string")
+            .type(ParserUtils.getLiteralName(CclGrammarParser.STRING))
             .accessModifier(AccessModifier.PUBLIC)
             .build();
     addNewSymbol(value, SymbolKind.STR_LIT, GLOBAL_SCOPE, data);

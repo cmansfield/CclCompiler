@@ -1,6 +1,8 @@
 package io.github.cmansfield.firstpass.symbols.data;
 
+import io.github.cmansfield.parser.language.CclGrammarParser;
 import org.apache.commons.collections4.CollectionUtils;
+import io.github.cmansfield.parser.ParserUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -17,7 +19,7 @@ public class DataTest {
   @BeforeMethod
   public void setUp() {
     data = new Data().new DataBuilder()
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
             .parameter("P105")
@@ -31,7 +33,7 @@ public class DataTest {
 
     assertNotNull(returnType);
     assertTrue(returnType.isPresent());
-    assertEquals(returnType.get(), "int");
+    assertEquals(returnType.get(), ParserUtils.getLiteralName(CclGrammarParser.INT));
   }
 
   @Test
@@ -55,7 +57,7 @@ public class DataTest {
   @Test
   public void test_equals() {
     Data otherData = new Data().new DataBuilder()
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
             .parameter("P105")
@@ -68,7 +70,7 @@ public class DataTest {
   @Test
   public void test_notEquals_parameters() {
     Data otherData = new Data().new DataBuilder()
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
             .parameter("P105")
@@ -81,7 +83,7 @@ public class DataTest {
   @Test
   public void test_notEquals_parameterSize() {
     Data otherData = new Data().new DataBuilder()
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
             .build();
@@ -92,7 +94,7 @@ public class DataTest {
   @Test
   public void test_notEquals_accessModifier() {
     Data otherData = new Data().new DataBuilder()
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PUBLIC)
             .parameters(data.getParameters())
             .build();
@@ -103,7 +105,7 @@ public class DataTest {
   @Test
   public void test_notEquals_returnType() {
     Data otherData = new Data().new DataBuilder()
-            .returnType("void")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.VOID))
             .accessModifiers(data.getAccessModifiers())
             .parameters(data.getParameters())
             .build();
@@ -114,8 +116,8 @@ public class DataTest {
   @Test
   public void test_notEquals_type() {
     Data otherData = new Data().new DataBuilder()
-            .type("bool")
-            .returnType("int")
+            .type(ParserUtils.getLiteralName(CclGrammarParser.BOOL))
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifiers(data.getAccessModifiers())
             .parameters(data.getParameters())
             .build();
@@ -136,7 +138,7 @@ public class DataTest {
   @Test
   public void test_hashCode() {
     Data otherData = new Data().new DataBuilder()
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
             .parameter("P105")
@@ -149,7 +151,7 @@ public class DataTest {
   @Test
   public void test_failed_hashCode_parameters() {
     Data otherData = new Data().new DataBuilder()
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
             .parameter("P105")
@@ -162,7 +164,7 @@ public class DataTest {
   @Test
   public void test_failed_hashCode_accessModifier() {
     Data otherData = new Data().new DataBuilder()
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PUBLIC)
             .parameters(data.getParameters())
             .build();
@@ -173,12 +175,12 @@ public class DataTest {
   @Test
   public void test_equals_templatePlaceHolders() {
     Data data1 = new Data().new DataBuilder()
-            .type("int")
+            .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .templatePlaceHolder("T")
             .templatePlaceHolder("K")
             .build();
     Data data2 = new Data().new DataBuilder()
-            .type("int")
+            .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .templatePlaceHolder("T")
             .templatePlaceHolder("K")
             .build();
@@ -191,12 +193,12 @@ public class DataTest {
   @Test
   public void test_equals_failed_templatePlaceHolders_outOfOrder() {
     Data data1 = new Data().new DataBuilder()
-            .type("int")
+            .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .templatePlaceHolder("T")
             .templatePlaceHolder("K")
             .build();
     Data data2 = new Data().new DataBuilder()
-            .type("int")
+            .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .templatePlaceHolder("K")
             .templatePlaceHolder("T")
             .build();
@@ -210,7 +212,7 @@ public class DataTest {
   public void test_build() {
     Data data = new Data().new DataBuilder()
             .type("")
-            .returnType("int")
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.STATIC)
             .accessModifier(AccessModifier.CONST)
             .accessModifiers(Collections.singletonList(AccessModifier.PUBLIC))
@@ -222,7 +224,7 @@ public class DataTest {
     assertNotNull(data);
     assertFalse(data.getType().isPresent());
     assertTrue(data.getReturnType().isPresent());
-    assertEquals(data.getReturnType().get(), "int");
+    assertEquals(data.getReturnType().get(), ParserUtils.getLiteralName(CclGrammarParser.INT));
     
     List<AccessModifier> accessModifiers = data.getAccessModifiers();
     assertTrue(CollectionUtils.isNotEmpty(accessModifiers));
