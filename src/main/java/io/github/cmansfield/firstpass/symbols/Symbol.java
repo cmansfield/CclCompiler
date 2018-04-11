@@ -6,8 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.Optional;
-
 
 public class Symbol {
   private static final Logger LOGGER = LoggerFactory.getLogger(Symbol.class);
@@ -47,8 +45,8 @@ public class Symbol {
     return symbolKind == null ? SymbolKind.UNKNOWN : symbolKind;
   }
 
-  public Optional<Data> getData() {
-    return data == null ? Optional.empty() : Optional.of(data);
+  public Data getData() {
+    return data;
   }
 
   @Override
@@ -106,7 +104,7 @@ public class Symbol {
 
   @Override
   public String toString() {
-    return String.format("(%s \"%s\" scope:%s data:[%s])", symbolKind.toString(), text, scope, data.toString());
+    return String.format("(%s \"%s\" scope:%s data:[%s])", getSymbolKind().toString(), getText(), getScope(), getData().toString());
   }
 
   
@@ -145,8 +143,7 @@ public class Symbol {
     
     public Symbol build() {
       if(this.symbolKind == null || this.symbolKind == SymbolKind.UNKNOWN) {
-        LOGGER.error("Symbol {}'s kind is either null or UNKNOWN, it must have a known value", this.symbolId);
-        return null;
+        LOGGER.warn("Symbol {}'s kind is either null or UNKNOWN, it must have a known value", this.symbolId);
       }
       if(StringUtils.isEmpty(this.text)) {
         LOGGER.warn("Symbol text for symbol {} is empty", this.symbolId);

@@ -1,14 +1,14 @@
 
 TODO List
-    Add a Symbol filter to allow searching in any configuration
     Create a class of keyword constants
-
-    SemanticsVisitor
-        Fix bug with package symbol IDs not matching on the second pass
 
     Symbol
         Add jackson deserialization
 
+    SemanticsVisitor
+        Fix overloaded methods not finding the correct Symbol
+
     Add Unit tests for the following:
-        Compiler
+        syntax
         SymbolTableUtils
+        SymbolFilter

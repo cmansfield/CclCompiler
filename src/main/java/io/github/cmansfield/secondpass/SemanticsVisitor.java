@@ -1,13 +1,10 @@
 package io.github.cmansfield.secondpass;
 
+import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
-import io.github.cmansfield.firstpass.symbols.SymbolIdGenerator;
-import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
 import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import io.github.cmansfield.parser.CclCompilerVisitor;
-import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -34,18 +31,23 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   private String findSymbolId(String name, SymbolKind symbolKind) {
-    return findSymbolId(name, symbolKind, true);
+    return findSymbolId(
+            new Symbol().new SymbolBuilder()
+              .text(name)
+              .symbolKind(symbolKind)
+              .build(),
+            true);
   }
   
-  private String findSymbolId(String name, SymbolKind symbolKind, boolean errorOnFail) {
-    Symbol symbol = SymbolTableUtils.findSymbol(symbols, name, symbolKind, scope);
-    if(symbol == null && errorOnFail) {
-      String message = String.format("Could not find the symbol for %s %s", symbolKind.toString(), name);
+  private String findSymbolId(Symbol filter, boolean errorOnFail) {
+    List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
+    if(foundSymbols.size() != 1 && errorOnFail) {
+      String message = String.format("Could not find the symbol for %s", filter.toString());
       logger.error(message);
       throw new IllegalStateException(message);
     }
     
-    return symbol == null ? null : symbol.getSymbolId();
+    return foundSymbols.isEmpty() ? null : foundSymbols.get(0).getSymbolId();
   }
   
   /**
@@ -114,8 +116,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
     String name = getClassName(ctx);
     String scopeOrig = scope;
-    
-    String symbolId = findSymbolId(name, SymbolKind.CLASS, false);
+
+    String symbolId = findSymbolId(
+            new Symbol().new SymbolBuilder()
+              .text(name)
+              .symbolKind(SymbolKind.CLASS)
+              .build(),
+            false);
     if(StringUtils.isBlank(symbolId)) {
       symbolId = findSymbolId(name, SymbolKind.TEMPLATE_CLASS);
     }
@@ -152,7 +159,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String name = getName(ctx);
     String scopeOrig = scope;
 
-    String symbolId = findSymbolId(name, SymbolKind.METHOD, false);
+    String symbolId = findSymbolId(
+            new Symbol().new SymbolBuilder()
+              .text(name)
+              .symbolKind(SymbolKind.METHOD)
+              .build(),
+            false);
     if(StringUtils.isBlank(symbolId)) {
       symbolId = findSymbolId(name, SymbolKind.TEMPLATE_METHOD);
     }
@@ -169,14 +181,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
-    String symbolId = findSymbolId("main", SymbolKind.MAIN);
-    if(StringUtils.isBlank(symbolId)) {
-      return null;
-    }
     List<ParseTree> children = new ArrayList<>(ctx.children);
     
     for(ParseTree parseTree: children) {
       if(parseTree instanceof CclGrammarParser.MethodBodyContext) {
+        String symbolId = findSymbolId("main", SymbolKind.MAIN);
+        if(StringUtils.isBlank(symbolId)) {
+          return null;
+        }
         String scopeOrig = scope;
         scope = scope + "." + symbolId;         // NOSONAR - will only happen once
         parseTree.accept(this);

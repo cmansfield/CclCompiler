@@ -59,7 +59,7 @@ public class CompilerTest {
    * @param fileName  The name of the file to try and produce a symbol table for
    * @return          The symbol table if it was successfully produced
    */
-  private BidiMap<String, Symbol> compile(String fileName) throws IOException {
+  public BidiMap<String, Symbol> compile(String fileName) throws IOException {
     File file = new File(getClass()
             .getClassLoader()
             .getResource(fileName).getFile());

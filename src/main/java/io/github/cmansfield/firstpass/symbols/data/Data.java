@@ -38,7 +38,7 @@ public class Data {
   }
 
   public List<AccessModifier> getAccessModifiers() {
-    return accessModifiers == null ? Collections.singletonList(AccessModifier.PROJECT) : accessModifiers;
+    return accessModifiers == null ? Collections.emptyList() : accessModifiers;
   }
 
   public List<String> getParameters() {

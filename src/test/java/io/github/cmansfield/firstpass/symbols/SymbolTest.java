@@ -66,7 +66,7 @@ public class SymbolTest {
             .symbolId("M010")
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(symbol.getData().isPresent() ? symbol.getData().get() : null)
+            .data(symbol.getData())
             .build();
 
     assertTrue(symbol.equals(anotherSymbol));
@@ -110,7 +110,7 @@ public class SymbolTest {
             .symbolId("M004")
             .text("MyClass")
             .symbolKind(SymbolKind.CLASS)
-            .data(symbol.getData().isPresent() ? symbol.getData().get() : null)
+            .data(symbol.getData())
             .build();
 
     assertFalse(symbol.equals(anotherSymbol));
@@ -123,7 +123,7 @@ public class SymbolTest {
             .symbolId("M004")
             .text("YourClass")
             .symbolKind(SymbolKind.METHOD)
-            .data(symbol.getData().isPresent() ? symbol.getData().get() : null)
+            .data(symbol.getData())
             .build();
 
     assertFalse(symbol.equals(anotherSymbol));

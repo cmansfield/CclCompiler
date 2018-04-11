@@ -77,10 +77,10 @@ public class SymbolTableUtils {
    * @return            The unmodified Symbol object
    */
   private static Symbol checkParameters(BidiMap<String, Symbol> symbolTable, Symbol symbol) {
-    if(symbol == null || symbol.getData() == null || !symbol.getData().isPresent()) {
+    if(symbol == null || symbol.getData() == null) {
       return symbol;
     }
-    Data data = symbol.getData().get();
+    Data data = symbol.getData();
     data.getParameters().forEach(parameter -> {
       if(!symbolTable.containsKey(parameter)) {
         throw new IllegalStateException(
