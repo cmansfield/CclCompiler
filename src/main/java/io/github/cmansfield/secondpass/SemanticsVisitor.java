@@ -3,6 +3,7 @@ package io.github.cmansfield.secondpass;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.parser.ParserUtils;
@@ -21,14 +22,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   
   public SemanticsVisitor(BidiMap<String, Symbol> symbols, String packageName) {
     super(symbols);
-    Symbol symbol = SymbolTableUtils.findSymbol(symbols, packageName, SymbolKind.PACKAGE, GLOBAL_SCOPE);
+    List<Symbol> foundSymbols = SymbolFilter.filter(symbols, new Symbol().new SymbolBuilder()
+            .text(packageName)
+            .symbolKind(SymbolKind.PACKAGE)
+            .scope(GLOBAL_SCOPE)
+            .build());
     
-    if(symbol == null) {
+    if(CollectionUtils.isEmpty(foundSymbols) || foundSymbols.size() > 1) {
       String message = String.format("Could not find the Symbol for package %s", packageName); 
       logger.error(message);
       throw new IllegalStateException(message);
     }
-    scope = GLOBAL_SCOPE + "." + symbol.getSymbolId();
+    scope = GLOBAL_SCOPE + "." + foundSymbols.get(0).getSymbolId();
   }
 
   private String findSymbolId(String name, SymbolKind symbolKind) {
@@ -216,5 +221,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitStringLiteral(CclGrammarParser.StringLiteralContext ctx) {
     return super.visitStringLiteral(ctx);
+  }
+
+  @Override
+  public Object visitBooleanLiteral(CclGrammarParser.BooleanLiteralContext ctx) {
+    return super.visitBooleanLiteral(ctx);
+  }
+
+  @Override
+  public Object visitSpecialLiteral(CclGrammarParser.SpecialLiteralContext ctx) {
+    return super.visitSpecialLiteral(ctx);
   }
 }

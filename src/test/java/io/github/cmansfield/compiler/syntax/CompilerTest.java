@@ -1,20 +1,20 @@
 package io.github.cmansfield.compiler.syntax;
 
+import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
+import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolFilter;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
-import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import io.github.cmansfield.parser.ParserUtils;
-import io.github.cmansfield.parser.language.CclGrammarParser;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.compiler.Compiler;
-import org.apache.commons.collections4.CollectionUtils;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.io.File;
 import java.util.List;
+import java.io.File;
 
 import static org.testng.Assert.*;
 

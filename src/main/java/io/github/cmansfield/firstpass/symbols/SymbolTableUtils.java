@@ -1,11 +1,10 @@
 package io.github.cmansfield.firstpass.symbols;
 
-import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.firstpass.symbols.data.Data;
+import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class SymbolTableUtils {
@@ -39,33 +38,6 @@ public class SymbolTableUtils {
             .filter(Objects::nonNull)
             .map(symbol -> checkParameters(symbolTable, symbol))
             .forEach(symbol -> checkScope(symbolTable, symbol));
-  }
-
-  /**
-   * This method will search the supplied symbol table for a Symbol that matches all
-   * of the criteria 
-   * 
-   * @param symbolTable The symbol table to search for symbols
-   * @param text        The text of the symbol we are interested in
-   * @param symbolKind  The type of symbol we're searching for
-   * @param scope       The scope of the symbol
-   * @return            A Symbol object if found, or null if not found or if too many were found
-   */
-  public static Symbol findSymbol(BidiMap<String, Symbol> symbolTable, String text, SymbolKind symbolKind, String scope) {
-    if(StringUtils.isBlank(text) || StringUtils.isBlank(scope) || symbolKind == null || symbolTable == null) {
-      return null;
-    }
-    List<Symbol> symbols = symbolTable.entrySet().stream()
-            .map(Map.Entry::getValue)
-            .filter(symbol -> symbolKind == symbol.getSymbolKind())
-            .filter(symbol -> scope.equals(symbol.getScope()))
-            .filter(symbol -> text.equals(symbol.getText()))
-            .collect(Collectors.toList());
-    if(symbols.size() != 1) {
-      return null;
-    }
-    
-    return symbols.get(0);
   }
   
   /**
