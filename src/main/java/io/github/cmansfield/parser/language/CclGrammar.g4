@@ -75,9 +75,9 @@ expression
     : '(' expression ')' expressionz?
     |  (TRUE | FALSE | NULL) expressionz?
     |  THIS memberRefz? expressionz?
-    | numericliteral expressionz?
-    | characterliteral expressionz?
-    | stringliteral
+    | numericLiteral expressionz?
+    | characterLiteral expressionz?
+    | stringLiteral
     | name fnArrMember? memberRefz? expressionz?
     | expression QUESTION expression COLON expression
     | NOT expression
@@ -132,11 +132,11 @@ className : IDENTIFIER ;
 
 name : IDENTIFIER ;
 
-stringliteral : STRING_LITERAL ;
+stringLiteral : STRING_LITERAL ;
 
-characterliteral : CHARACTER_LITERAL ;
+characterLiteral : CHARACTER_LITERAL ;
 
-numericliteral : NUMERIC_LITERAL ;
+numericLiteral : NUMERIC_LITERAL ;
 
 // *************** Lexer ***************
 

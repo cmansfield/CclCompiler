@@ -1,10 +1,13 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.parser.language;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class CclGrammarParser extends Parser {
@@ -34,8 +37,8 @@ public class CclGrammarParser extends Parser {
 		RULE_memberRefz = 21, RULE_expressionz = 22, RULE_assignmentOperation = 23, 
 		RULE_booleanOperation = 24, RULE_mathOperation = 25, RULE_invokeOperator = 26, 
 		RULE_arrayOperator = 27, RULE_argumentList = 28, RULE_modifier = 29, RULE_type = 30, 
-		RULE_className = 31, RULE_name = 32, RULE_stringliteral = 33, RULE_characterliteral = 34, 
-		RULE_numericliteral = 35;
+		RULE_className = 31, RULE_name = 32, RULE_stringLiteral = 33, RULE_characterLiteral = 34, 
+		RULE_numericLiteral = 35;
 	public static final String[] ruleNames = {
 		"compilationUnit", "importDeclaration", "classDeclaration", "templateDeclaration", 
 		"templateList", "classMemberDeclaration", "methodDeclaration", "fieldDeclaration", 
@@ -44,7 +47,7 @@ public class CclGrammarParser extends Parser {
 		"typeCast", "braceEnclosedInitializer", "newDeclaration", "expression", 
 		"fnArrMember", "memberRefz", "expressionz", "assignmentOperation", "booleanOperation", 
 		"mathOperation", "invokeOperator", "arrayOperator", "argumentList", "modifier", 
-		"type", "className", "name", "stringliteral", "characterliteral", "numericliteral"
+		"type", "className", "name", "stringLiteral", "characterLiteral", "numericLiteral"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
@@ -1710,14 +1713,14 @@ public class CclGrammarParser extends Parser {
 		public MemberRefzContext memberRefz() {
 			return getRuleContext(MemberRefzContext.class,0);
 		}
-		public NumericliteralContext numericliteral() {
-			return getRuleContext(NumericliteralContext.class,0);
+		public NumericLiteralContext numericLiteral() {
+			return getRuleContext(NumericLiteralContext.class,0);
 		}
-		public CharacterliteralContext characterliteral() {
-			return getRuleContext(CharacterliteralContext.class,0);
+		public CharacterLiteralContext characterLiteral() {
+			return getRuleContext(CharacterLiteralContext.class,0);
 		}
-		public StringliteralContext stringliteral() {
-			return getRuleContext(StringliteralContext.class,0);
+		public StringLiteralContext stringLiteral() {
+			return getRuleContext(StringLiteralContext.class,0);
 		}
 		public NameContext name() {
 			return getRuleContext(NameContext.class,0);
@@ -1833,7 +1836,7 @@ public class CclGrammarParser extends Parser {
 			case NUMERIC_LITERAL:
 				{
 				setState(365);
-				numericliteral();
+				numericLiteral();
 				setState(367);
 				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,42,_ctx) ) {
@@ -1849,7 +1852,7 @@ public class CclGrammarParser extends Parser {
 			case CHARACTER_LITERAL:
 				{
 				setState(369);
-				characterliteral();
+				characterLiteral();
 				setState(371);
 				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,43,_ctx) ) {
@@ -1865,7 +1868,7 @@ public class CclGrammarParser extends Parser {
 			case STRING_LITERAL:
 				{
 				setState(373);
-				stringliteral();
+				stringLiteral();
 				}
 				break;
 			case IDENTIFIER:
@@ -2679,22 +2682,22 @@ public class CclGrammarParser extends Parser {
 		return _localctx;
 	}
 
-	public static class StringliteralContext extends ParserRuleContext {
+	public static class StringLiteralContext extends ParserRuleContext {
 		public TerminalNode STRING_LITERAL() { return getToken(CclGrammarParser.STRING_LITERAL, 0); }
-		public StringliteralContext(ParserRuleContext parent, int invokingState) {
+		public StringLiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_stringliteral; }
+		@Override public int getRuleIndex() { return RULE_stringLiteral; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitStringliteral(this);
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitStringLiteral(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final StringliteralContext stringliteral() throws RecognitionException {
-		StringliteralContext _localctx = new StringliteralContext(_ctx, getState());
-		enterRule(_localctx, 66, RULE_stringliteral);
+	public final StringLiteralContext stringLiteral() throws RecognitionException {
+		StringLiteralContext _localctx = new StringLiteralContext(_ctx, getState());
+		enterRule(_localctx, 66, RULE_stringLiteral);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
@@ -2713,22 +2716,22 @@ public class CclGrammarParser extends Parser {
 		return _localctx;
 	}
 
-	public static class CharacterliteralContext extends ParserRuleContext {
+	public static class CharacterLiteralContext extends ParserRuleContext {
 		public TerminalNode CHARACTER_LITERAL() { return getToken(CclGrammarParser.CHARACTER_LITERAL, 0); }
-		public CharacterliteralContext(ParserRuleContext parent, int invokingState) {
+		public CharacterLiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_characterliteral; }
+		@Override public int getRuleIndex() { return RULE_characterLiteral; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitCharacterliteral(this);
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitCharacterLiteral(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final CharacterliteralContext characterliteral() throws RecognitionException {
-		CharacterliteralContext _localctx = new CharacterliteralContext(_ctx, getState());
-		enterRule(_localctx, 68, RULE_characterliteral);
+	public final CharacterLiteralContext characterLiteral() throws RecognitionException {
+		CharacterLiteralContext _localctx = new CharacterLiteralContext(_ctx, getState());
+		enterRule(_localctx, 68, RULE_characterLiteral);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
@@ -2747,22 +2750,22 @@ public class CclGrammarParser extends Parser {
 		return _localctx;
 	}
 
-	public static class NumericliteralContext extends ParserRuleContext {
+	public static class NumericLiteralContext extends ParserRuleContext {
 		public TerminalNode NUMERIC_LITERAL() { return getToken(CclGrammarParser.NUMERIC_LITERAL, 0); }
-		public NumericliteralContext(ParserRuleContext parent, int invokingState) {
+		public NumericLiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_numericliteral; }
+		@Override public int getRuleIndex() { return RULE_numericLiteral; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitNumericliteral(this);
+			if ( visitor instanceof CclGrammarVisitor ) return ((CclGrammarVisitor<? extends T>)visitor).visitNumericLiteral(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final NumericliteralContext numericliteral() throws RecognitionException {
-		NumericliteralContext _localctx = new NumericliteralContext(_ctx, getState());
-		enterRule(_localctx, 70, RULE_numericliteral);
+	public final NumericLiteralContext numericLiteral() throws RecognitionException {
+		NumericLiteralContext _localctx = new NumericLiteralContext(_ctx, getState());
+		enterRule(_localctx, 70, RULE_numericLiteral);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{

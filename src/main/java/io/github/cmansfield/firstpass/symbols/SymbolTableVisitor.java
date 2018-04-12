@@ -193,7 +193,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   }
 
   @Override
-  public Object visitNumericliteral(CclGrammarParser.NumericliteralContext ctx) {
+  public Object visitNumericLiteral(CclGrammarParser.NumericLiteralContext ctx) {
     ParseTree child = ctx.getChild(0);
     if(child == null) {
       throw new IllegalArgumentException("There are no child nodes");
@@ -205,11 +205,11 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .build();
     addNewSymbol(value, SymbolKind.INT_LIT, GLOBAL_SCOPE, data);
     
-    return super.visitNumericliteral(ctx);
+    return super.visitNumericLiteral(ctx);
   }
 
   @Override
-  public Object visitCharacterliteral(CclGrammarParser.CharacterliteralContext ctx) {
+  public Object visitCharacterLiteral(CclGrammarParser.CharacterLiteralContext ctx) {
     ParseTree child = ctx.getChild(0);
     if(child == null) {
       throw new IllegalArgumentException("There should be at least one child node");
@@ -223,11 +223,11 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .build();
     addNewSymbol(value, SymbolKind.CHAR_LIT, GLOBAL_SCOPE, data);
     
-    return super.visitCharacterliteral(ctx);
+    return super.visitCharacterLiteral(ctx);
   }
 
   @Override
-  public Object visitStringliteral(CclGrammarParser.StringliteralContext ctx) {
+  public Object visitStringLiteral(CclGrammarParser.StringLiteralContext ctx) {
     ParseTree child = ctx.getChild(0);
     if(child == null) {
       throw new IllegalArgumentException("There should be at least one child node");
@@ -241,7 +241,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .build();
     addNewSymbol(value, SymbolKind.STR_LIT, GLOBAL_SCOPE, data);
 
-    return super.visitStringliteral(ctx);
+    return super.visitStringLiteral(ctx);
   }
 
   @Override

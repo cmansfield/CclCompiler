@@ -1,4 +1,5 @@
 
+/*
 public class TestClass {
     public void someMethod() {
         int number;
@@ -8,8 +9,10 @@ public class TestClass {
         }
     }
 }
+*/
 
 public void main() {
-    string test;    
+    int y;
+    int x = y;
 }
 
