@@ -11,6 +11,8 @@ public enum SymbolKind {
   INT_LIT("I"),           // Integer literal
   CHAR_LIT("A"),          // Character literal
   STR_LIT("S"),           // String literal
+  BOOL_LIT("G"),          // Boolean literal
+  SPECIAL_LIT("E"),       // Special literals (null)
   TEMPLATE_CLASS("T"),
   TEMPLATE_METHOD("K"),
   FOR("F"),
@@ -39,6 +41,12 @@ public enum SymbolKind {
       return true;
     }
     if(this.name().equals(CHAR_LIT.toString())) {
+      return true;
+    }
+    if(this.name().equals(BOOL_LIT.toString())) {
+      return true;
+    }
+    if(this.name().equals(SPECIAL_LIT.toString())) {
       return true;
     }
     return this.name().equals(STR_LIT.toString());

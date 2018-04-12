@@ -1,14 +1,20 @@
 package io.github.cmansfield.compiler.syntax;
 
+import io.github.cmansfield.firstpass.symbols.SymbolFilter;
+import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
 import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.Symbol;
+import io.github.cmansfield.parser.ParserUtils;
+import io.github.cmansfield.parser.language.CclGrammarParser;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.compiler.Compiler;
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.File;
+import java.util.List;
 
 import static org.testng.Assert.*;
 
@@ -21,7 +27,7 @@ public class CompilerTest {
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
-    assertEquals(symbolTable.size(), 45);
+    assertEquals(symbolTable.size(), 47);
     SymbolTableUtils.checkSymbolTable(symbolTable);
   }
 
@@ -50,6 +56,55 @@ public class CompilerTest {
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 3);
     SymbolTableUtils.checkSymbolTable(symbolTable);
+  }
+
+  @Test
+  public void test_duplicateBooleanValues() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compile("test5.ccl");
+
+    assertNotNull(symbolTable);
+    assertFalse(symbolTable.isEmpty());
+    assertEquals(symbolTable.size(), 4);
+    SymbolTableUtils.checkSymbolTable(symbolTable);
+    List<Symbol> foundSymbols = SymbolFilter.filter(symbolTable, new Symbol().new SymbolBuilder()
+            .symbolKind(SymbolKind.BOOL_LIT)
+            .build());
+    assertTrue(CollectionUtils.isNotEmpty(foundSymbols));
+    assertEquals(foundSymbols.size(), 2);
+
+    Symbol literalTrue;
+    Symbol literalFalse;
+    if(ParserUtils.getLiteralName(CclGrammarParser.TRUE).equals(foundSymbols.get(0).getText())) {
+      literalTrue = foundSymbols.get(0);
+      literalFalse = foundSymbols.get(1);
+    }
+    else {
+      literalFalse = foundSymbols.get(0);
+      literalTrue = foundSymbols.get(1);
+    }
+
+    assertEquals(literalTrue.getText(), ParserUtils.getLiteralName(CclGrammarParser.TRUE));
+    assertEquals(literalTrue.getData().getType().get(), ParserUtils.getLiteralName(CclGrammarParser.BOOL));
+    assertEquals(literalFalse.getText(), ParserUtils.getLiteralName(CclGrammarParser.FALSE));
+    assertEquals(literalFalse.getData().getType().get(), ParserUtils.getLiteralName(CclGrammarParser.BOOL));
+  }
+
+  @Test
+  public void test_duplicateNullValues() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compile("test6.ccl");
+
+    assertNotNull(symbolTable);
+    assertFalse(symbolTable.isEmpty());
+    assertEquals(symbolTable.size(), 3);
+    SymbolTableUtils.checkSymbolTable(symbolTable);
+    List<Symbol> foundSymbols = SymbolFilter.filter(symbolTable, new Symbol().new SymbolBuilder()
+            .symbolKind(SymbolKind.SPECIAL_LIT)
+            .build());
+    assertTrue(CollectionUtils.isNotEmpty(foundSymbols));
+    assertEquals(foundSymbols.size(), 1);
+    Symbol literalNull = foundSymbols.get(0);
+    assertEquals(literalNull.getText(), ParserUtils.getLiteralName(CclGrammarParser.NULL));
+    assertEquals(literalNull.getData().getType().get(), ParserUtils.getLiteralName(CclGrammarParser.NULL));
   }
 
   /**

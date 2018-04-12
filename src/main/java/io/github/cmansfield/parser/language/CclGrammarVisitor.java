@@ -226,4 +226,16 @@ public interface CclGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNumericLiteral(CclGrammarParser.NumericLiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#booleanLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBooleanLiteral(CclGrammarParser.BooleanLiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#specialLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSpecialLiteral(CclGrammarParser.SpecialLiteralContext ctx);
 }

@@ -1,0 +1,7 @@
+
+public void main() {
+    MyClass myClass = null;
+    MyClass myClass2 = null;
+    MyClass myClass3 = null;
+}
+

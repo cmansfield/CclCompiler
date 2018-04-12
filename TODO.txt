@@ -1,7 +1,5 @@
 
 TODO List
-    Create a class of keyword constants
-
     Symbol
         Add jackson deserialization
 

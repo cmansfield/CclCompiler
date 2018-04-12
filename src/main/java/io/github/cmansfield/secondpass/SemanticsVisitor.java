@@ -202,4 +202,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     return null;
   }
+
+  @Override
+  public Object visitNumericLiteral(CclGrammarParser.NumericLiteralContext ctx) {
+    return super.visitNumericLiteral(ctx);
+  }
+
+  @Override
+  public Object visitCharacterLiteral(CclGrammarParser.CharacterLiteralContext ctx) {
+    return super.visitCharacterLiteral(ctx);
+  }
+
+  @Override
+  public Object visitStringLiteral(CclGrammarParser.StringLiteralContext ctx) {
+    return super.visitStringLiteral(ctx);
+  }
 }

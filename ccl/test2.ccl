@@ -12,7 +12,8 @@ public class TestClass {
 */
 
 public void main() {
-    int y;
-    int x = y;
+    MyClass myClass = null;
+    MyClass myClass2 = null;
+
 }
 

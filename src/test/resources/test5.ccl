@@ -1,0 +1,8 @@
+
+public void main() {
+    bool test = true;
+    bool test2 = true;
+    bool test3 = false;
+    bool test4 = false;
+}
+

@@ -9,6 +9,7 @@ import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.stream.Collectors;
 import java.util.*;
@@ -194,54 +195,37 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitNumericLiteral(CclGrammarParser.NumericLiteralContext ctx) {
-    ParseTree child = ctx.getChild(0);
-    if(child == null) {
-      throw new IllegalArgumentException("There are no child nodes");
-    }
-    String value = child.getText();
-    Data data = new Data().new DataBuilder()
-            .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
-            .accessModifier(AccessModifier.PUBLIC)
-            .build();
-    addNewSymbol(value, SymbolKind.INT_LIT, GLOBAL_SCOPE, data);
+    visitLiteral(ctx, CclGrammarParser.INT, SymbolKind.INT_LIT);
     
     return super.visitNumericLiteral(ctx);
   }
 
   @Override
   public Object visitCharacterLiteral(CclGrammarParser.CharacterLiteralContext ctx) {
-    ParseTree child = ctx.getChild(0);
-    if(child == null) {
-      throw new IllegalArgumentException("There should be at least one child node");
-    }
-    String value = child.getText();
-    // Remove single quotes around the char
-    value = value.substring(1, value.length() - 1);
-    Data data = new Data().new DataBuilder()
-            .type(ParserUtils.getLiteralName(CclGrammarParser.CHAR))
-            .accessModifier(AccessModifier.PUBLIC)
-            .build();
-    addNewSymbol(value, SymbolKind.CHAR_LIT, GLOBAL_SCOPE, data);
-    
+    visitLiteral(ctx, CclGrammarParser.CHAR, SymbolKind.CHAR_LIT);
+
     return super.visitCharacterLiteral(ctx);
   }
 
   @Override
   public Object visitStringLiteral(CclGrammarParser.StringLiteralContext ctx) {
-    ParseTree child = ctx.getChild(0);
-    if(child == null) {
-      throw new IllegalArgumentException("There should be at least one child node");
-    }
-    String value = child.getText();
-    // Remove quotes around the string
-    value = value.substring(1, value.length() - 1);
-    Data data = new Data().new DataBuilder()
-            .type(ParserUtils.getLiteralName(CclGrammarParser.STRING))
-            .accessModifier(AccessModifier.PUBLIC)
-            .build();
-    addNewSymbol(value, SymbolKind.STR_LIT, GLOBAL_SCOPE, data);
+    visitLiteral(ctx, CclGrammarParser.STRING, SymbolKind.STR_LIT);
 
     return super.visitStringLiteral(ctx);
+  }
+
+  @Override
+  public Object visitBooleanLiteral(CclGrammarParser.BooleanLiteralContext ctx) {
+    visitLiteral(ctx, CclGrammarParser.BOOL, SymbolKind.BOOL_LIT);
+
+    return super.visitBooleanLiteral(ctx);
+  }
+
+  @Override
+  public Object visitSpecialLiteral(CclGrammarParser.SpecialLiteralContext ctx) {
+    visitLiteral(ctx, CclGrammarParser.NULL, SymbolKind.SPECIAL_LIT);
+
+    return super.visitSpecialLiteral(ctx);
   }
 
   @Override
@@ -346,5 +330,30 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .map(this::visitTemplateDeclaration)
             .flatMap(val -> ((List<String>)val).stream())
             .collect(Collectors.toList());
+  }
+
+  /**
+   * This method will create a new literal Symbol given the supplied type
+   *
+   * @param ctx                 The context to get the text from
+   * @param grammarParserIndex  The index that references the keyword in
+   *                            the CclGrammarParser's vocabulary
+   * @param symbolKind          They type of literal being created
+   */
+  private void visitLiteral(ParserRuleContext ctx, int grammarParserIndex, SymbolKind symbolKind) {
+    ParseTree child = ctx.getChild(0);
+    if(child == null) {
+      throw new IllegalArgumentException("There should be at least one child node");
+    }
+    String value = child.getText();
+    // Remove quotes around the string
+    if(StringUtils.isNotBlank(value) && (value.charAt(0) == '\'' || value.charAt(0) == '\"')) {
+      value = value.substring(1, value.length() - 1);
+    }
+    Data data = new Data().new DataBuilder()
+            .type(ParserUtils.getLiteralName(grammarParserIndex))
+            .accessModifier(AccessModifier.PUBLIC)
+            .build();
+    addNewSymbol(value, symbolKind, GLOBAL_SCOPE, data);
   }
 }

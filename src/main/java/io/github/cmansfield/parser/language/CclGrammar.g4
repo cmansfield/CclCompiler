@@ -78,6 +78,8 @@ expression
     | numericLiteral expressionz?
     | characterLiteral expressionz?
     | stringLiteral
+    | booleanLiteral expressionz?
+    | specialLiteral expressionz?
     | name fnArrMember? memberRefz? expressionz?
     | expression QUESTION expression COLON expression
     | NOT expression
@@ -138,6 +140,10 @@ characterLiteral : CHARACTER_LITERAL ;
 
 numericLiteral : NUMERIC_LITERAL ;
 
+booleanLiteral : BOOLEAN_LITERAL;
+
+specialLiteral : SPECIAL_LITERAL ;
+
 // *************** Lexer ***************
 
 PRIMITIVE_TYPE
@@ -149,13 +155,24 @@ PRIMITIVE_TYPE
     ;
 
 MODIFIER 
-    : 'public' 
-    | 'private' 
-    | 'static' 
-    | 'const' 
+    : PUBLIC
+    | PRIVATE
+    | STATIC
+    | CONST
+    ;
+
+SPECIAL_LITERAL : NULL ;
+
+BOOLEAN_LITERAL
+    : TRUE
+    | FALSE
     ;
 
 // Keywords
+PUBLIC : 'public' ;
+PRIVATE : 'private' ;
+STATIC : 'static' ;
+CONST : 'const' ;
 INT : 'int' ;
 CHAR : 'char' ;
 BOOL : 'bool' ;
