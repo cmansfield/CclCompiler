@@ -2,6 +2,7 @@ package io.github.cmansfield.parser;
 
 import io.github.cmansfield.parser.language.CclGrammarBaseVisitor;
 import io.github.cmansfield.firstpass.symbols.SymbolIdGenerator;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.data.Data;
@@ -9,14 +10,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
-  protected static final String GLOBAL_SCOPE = "g";
+  public static final String GLOBAL_SCOPE = "g";
   protected BidiMap<String, Symbol> symbols;
   protected String scope;
 
   protected CclCompilerVisitor(BidiMap<String, Symbol> symbols) {
-    this.symbols = symbols;
+    this.symbols = symbols == null ? new DualHashBidiMap<>() : new DualHashBidiMap<>(symbols);
   }
   
   protected CclCompilerVisitor(BidiMap<String, Symbol> symbols, String packageName) {
@@ -154,7 +156,12 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
     if(CollectionUtils.isEmpty(ctx.children)) {
       throw new IllegalArgumentException("No children found in context");
     }
-
+    ParseTree child = ctx.children.get(0);
+    String text = child.getText();
+    if(text.charAt(0) == '\"' || text.charAt(0) == '\'') {
+      return text.substring(1, text.length() - 1);
+    }
+    
     return ctx.children.get(0).getText();
   }
 

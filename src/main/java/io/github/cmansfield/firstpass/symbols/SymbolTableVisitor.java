@@ -17,6 +17,10 @@ import java.util.*;
 
 public class SymbolTableVisitor extends CclCompilerVisitor {
 
+  public SymbolTableVisitor(SymbolTableVisitor symbolTableVisitor, String packageName) {
+    this(symbolTableVisitor.getSymbols(), packageName);
+  }
+  
   public SymbolTableVisitor(BidiMap<String, Symbol> symbols, String packageName) {
     super(symbols, packageName);
   }

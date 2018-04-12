@@ -3,39 +3,55 @@ package io.github.cmansfield.secondpass;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
-import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
+  private Deque<SAR> sas;
+  
+  public SemanticsVisitor(SemanticsVisitor semanticsVisitor, String packageName) {
+    this(semanticsVisitor.getSymbols(), packageName);
+    sas = new ArrayDeque<>();
+    sas.addAll(semanticsVisitor.getSemanticActionStack());
+  }
   
   public SemanticsVisitor(BidiMap<String, Symbol> symbols, String packageName) {
     super(symbols);
-    List<Symbol> foundSymbols = SymbolFilter.filter(symbols, new Symbol().new SymbolBuilder()
-            .text(packageName)
-            .symbolKind(SymbolKind.PACKAGE)
-            .scope(GLOBAL_SCOPE)
-            .build());
+    sas = new ArrayDeque<>();
     
-    if(CollectionUtils.isEmpty(foundSymbols) || foundSymbols.size() > 1) {
-      String message = String.format("Could not find the Symbol for package %s", packageName); 
-      logger.error(message);
-      throw new IllegalStateException(message);
-    }
-    scope = GLOBAL_SCOPE + "." + foundSymbols.get(0).getSymbolId();
+    String symbolId = findSymbolId(
+            new Symbol().new SymbolBuilder()
+              .text(packageName)
+              .symbolKind(SymbolKind.PACKAGE)
+              .scope(GLOBAL_SCOPE)
+              .build(),
+            true);
+
+    scope = GLOBAL_SCOPE + "." + symbolId;
   }
 
+  public Deque<SAR> getSemanticActionStack() {
+    return sas == null ? new ArrayDeque<>() : sas;
+  }
+  
+  /**
+   * This method is used to find Symbols in the symbol table
+   * 
+   * @param name        The Symbol text to find
+   * @param symbolKind  The type of Symbol to find
+   * @return            The found Symbol's ID
+   */
   private String findSymbolId(String name, SymbolKind symbolKind) {
     return findSymbolId(
             new Symbol().new SymbolBuilder()
@@ -44,7 +60,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               .build(),
             true);
   }
-  
+
+  /**
+   * This will find a Symbol that matches the supplied filter object
+   * 
+   * @param filter      The Symbol object to match against
+   * @param errorOnFail Should this method produce an error if a Symbol was not found?
+   * @return            The ID of the found Symbol
+   */
   private String findSymbolId(Symbol filter, boolean errorOnFail) {
     List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
     if(foundSymbols.size() != 1 && errorOnFail) {
@@ -54,6 +77,41 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     
     return foundSymbols.isEmpty() ? null : foundSymbols.get(0).getSymbolId();
+  }
+
+  /**
+   * This method will create a simple filter object for searching
+   * 
+   * @param text        Match the Symbol with this text
+   * @param symbolKind  Match Symbols of this kind
+   * @param scope       Match Symbols within this scope
+   * @return            The Symbol filter used to find Symbols in the symbol table
+   */
+  private Symbol generateFilter(String text, SymbolKind symbolKind, String scope) {
+    return new Symbol().new SymbolBuilder()
+            .text(text)
+            .symbolKind(symbolKind)
+            .scope(scope)
+            .build();
+  }
+
+  /**
+   * #literalPush
+   * This method will push a new literal semantic action record onto the SAS
+   *
+   * @param ctx         The context of where int the tree the visitor currently is
+   * @param symbolKind  The type of literal being pushed onto the SAS
+   */
+  private void literalPush(ParserRuleContext ctx, SymbolKind symbolKind) {
+    String symbolId = findSymbolId(
+            generateFilter(
+                    getChildText(ctx),
+                    symbolKind,
+                    GLOBAL_SCOPE),
+            true);
+
+    // literalPush
+    sas.push(new SAR(SarType.LITERAL, symbolId, symbols.get(symbolId).getText(), ctx.start.getLine()));
   }
   
   /**
@@ -210,26 +268,31 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitNumericLiteral(CclGrammarParser.NumericLiteralContext ctx) {
+    literalPush(ctx, SymbolKind.INT_LIT);
     return super.visitNumericLiteral(ctx);
   }
 
   @Override
   public Object visitCharacterLiteral(CclGrammarParser.CharacterLiteralContext ctx) {
+    literalPush(ctx, SymbolKind.CHAR_LIT);
     return super.visitCharacterLiteral(ctx);
   }
 
   @Override
   public Object visitStringLiteral(CclGrammarParser.StringLiteralContext ctx) {
+    literalPush(ctx, SymbolKind.STR_LIT);
     return super.visitStringLiteral(ctx);
   }
 
   @Override
   public Object visitBooleanLiteral(CclGrammarParser.BooleanLiteralContext ctx) {
+    literalPush(ctx, SymbolKind.BOOL_LIT);
     return super.visitBooleanLiteral(ctx);
   }
 
   @Override
   public Object visitSpecialLiteral(CclGrammarParser.SpecialLiteralContext ctx) {
+    literalPush(ctx, SymbolKind.SPECIAL_LIT);
     return super.visitSpecialLiteral(ctx);
   }
 }

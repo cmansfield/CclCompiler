@@ -3,10 +3,16 @@ TODO List
     Symbol
         Add jackson deserialization
 
+    Compiler
+        Rather than passing the symbol table, use the object's copy
+            constructor to create a new visitor for the stream.
+
     SemanticsVisitor
         Fix overloaded methods not finding the correct Symbol
 
-    Add Unit tests for the following:
-        syntax
+    Add more unit tests for the following:
+        SymbolTableVisitor
+        SemanticsVisitor
         SymbolTableUtils
         SymbolFilter
+        syntax
