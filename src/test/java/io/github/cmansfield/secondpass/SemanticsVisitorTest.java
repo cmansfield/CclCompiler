@@ -120,7 +120,8 @@ public class SemanticsVisitorTest {
             .symbolKind(symbolKind)
             .text(symbolText)
             .build());
-    SemanticsVisitor semanticsVisitor = new SemanticsVisitor(symbols, fakePackageName);
+    SemanticsVisitor semanticsVisitor = new SemanticsVisitor(symbols);
+    semanticsVisitor.resetToNewPackage(fakePackageName);
     
     CommonToken startToken = new CommonToken(parserIndex);
     startToken.setLine(lineNumber);

@@ -4,32 +4,65 @@ import io.github.cmansfield.parser.language.CclGrammarBaseVisitor;
 import io.github.cmansfield.firstpass.symbols.SymbolIdGenerator;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
+import io.github.cmansfield.firstpass.symbols.SymbolFilter;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
+import java.util.List;
+
 
 public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
+  private final Logger logger = LoggerFactory.getLogger(CclCompilerVisitor.class);
   public static final String GLOBAL_SCOPE = "g";
   protected BidiMap<String, Symbol> symbols;
   protected String scope;
 
+  protected CclCompilerVisitor() {
+    this.symbols = new DualHashBidiMap<>();
+    this.scope = GLOBAL_SCOPE;
+  }
+
   protected CclCompilerVisitor(BidiMap<String, Symbol> symbols) {
     this.symbols = symbols == null ? new DualHashBidiMap<>() : new DualHashBidiMap<>(symbols);
-  }
-  
-  protected CclCompilerVisitor(BidiMap<String, Symbol> symbols, String packageName) {
-    String packageId = SymbolIdGenerator.generateId(SymbolKind.PACKAGE);
-    scope = GLOBAL_SCOPE + "." + packageId;
-    this.symbols = symbols;
-    addNewSymbol(packageName, SymbolKind.PACKAGE, GLOBAL_SCOPE, new Data(), packageId);
+    this.scope = GLOBAL_SCOPE;
   }
 
   public BidiMap<String, Symbol> getSymbols() {
     return symbols;
+  }
+
+  /**
+   * This will reset the scope to the new package and create a
+   * new Symbol for the package if one does not already exist
+   *
+   * @param packageName The name of the next package to visit
+   */
+  public void resetToNewPackage(String packageName) {
+    if(StringUtils.isBlank(packageName)) {
+      throw new IllegalArgumentException("Package name cannot be blank");
+    }
+
+    String symbolId = findSymbolId(
+            new Symbol().new SymbolBuilder()
+                    .text(packageName)
+                    .symbolKind(SymbolKind.PACKAGE)
+                    .scope(GLOBAL_SCOPE)
+                    .build(),
+            false);
+
+    if(StringUtils.isBlank(symbolId)) {
+      symbolId = SymbolIdGenerator.generateId(SymbolKind.PACKAGE);
+      addNewSymbol(packageName, SymbolKind.PACKAGE, GLOBAL_SCOPE, new Data(), symbolId);
+    }
+    scope = GLOBAL_SCOPE + "." + symbolId;
   }
 
   protected Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data) {
@@ -185,7 +218,42 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
             .findFirst()
             .orElse(null);
   }
-  
+
+  /**
+   * This method is used to find Symbols in the symbol table
+   *
+   * @param name        The Symbol text to find
+   * @param symbolKind  The type of Symbol to find
+   * @return            The found Symbol's ID
+   */
+  protected String findSymbolId(String name, SymbolKind symbolKind) {
+    return findSymbolId(
+            new Symbol().new SymbolBuilder()
+                    .text(name)
+                    .symbolKind(symbolKind)
+                    .build(),
+            true);
+  }
+
+  /**
+   * This will find a Symbol that matches the supplied filter object
+   *
+   * @param filter      The Symbol object to match against
+   * @param errorOnFail Should this method produce an error if a Symbol was not found?
+   * @return            The ID of the found Symbol
+   */
+  protected String findSymbolId(Symbol filter, boolean errorOnFail) {
+    List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
+    if(foundSymbols.size() != 1 && errorOnFail) {
+      String message = String.format("Could not find the symbol for %s", filter.toString());
+      logger.error(message);
+      throw new IllegalStateException(message);
+    }
+
+    return foundSymbols.isEmpty() ? null : foundSymbols.get(0).getSymbolId();
+  }
+
+  // TODO - These will likely be overloaded in the SemanticsVisitor class
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {
     return getChildText(ctx);

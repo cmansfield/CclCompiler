@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.*;
 import java.io.*;
@@ -70,6 +69,10 @@ public class Compiler {
     if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
       SymbolTableWriter.exportSymbolTable(symbolTable);
     }
+
+    // TODO - Remove this when ready
+    SymbolTableUtils.checkSymbolTable(symbolTable);
+
     return true;
   }
 
@@ -84,7 +87,7 @@ public class Compiler {
     if(symbolTable != null) {
       symbolTable.clear();
     }
-    return runPass(fileName, SymbolTableVisitor::new);
+    return runPass(fileName, new SymbolTableVisitor());
   }
 
   /**
@@ -95,21 +98,19 @@ public class Compiler {
    * @return          A boolean true if everything ran correctly
    */
   private boolean runSecondPass(final String fileName) throws IOException {
-    return runPass(fileName, SemanticsVisitor::new);
+    return runPass(fileName, new SemanticsVisitor(symbolTable));
   }
 
   /**
    * This will create visitors of the supplied type and have them visit the
    * grammar tree
    *
-   * @param fileName Root file to be traversed
-   * @param creator  A constructor method that will be used to create
-   *                 multiple instances of the supplied visitor
-   * @return         Boolean true if the visitor was able to visit the tree
-   *                 without issue
+   * @param fileName  Root file to be traversed
+   * @param visitor   An instance of the type of visitor we want at this time
+   * @return          Boolean true if the visitor was able to visit the tree
+   *                  without issue
    */
-  private boolean runPass(final String fileName, BiFunction<BidiMap<String, Symbol>, String, CclCompilerVisitor> creator) throws IOException {
-    BidiMap<String, Symbol> workingSymbolTable = symbolTable == null ? new DualHashBidiMap<>() : symbolTable;
+  private boolean runPass(final String fileName, CclCompilerVisitor visitor) throws IOException {
     Map<String,InputStream> streams = new HashMap<>();
     Set<String> imports = new HashSet<>();
 
@@ -127,9 +128,8 @@ public class Compiler {
         streams.put(file, new FileInputStream(new File(file)));
       }
       for(Map.Entry<String, InputStream> entry : streams.entrySet()) {
-        workingSymbolTable = populateSymbolTable(
-                entry.getValue(),
-                creator.apply(workingSymbolTable, entry.getKey()));
+        visitor.resetToNewPackage(entry.getKey());
+        visitCodeTree(entry.getValue(), visitor);
       }
     }
     catch (FileNotFoundException e) {
@@ -148,13 +148,14 @@ public class Compiler {
       }
     }
 
-    if(logger.isDebugEnabled() && workingSymbolTable != null) {
+    symbolTable = visitor.getSymbols();
+
+    if(logger.isDebugEnabled() && symbolTable != null) {
       logger.debug("SymbolTable:\n\t{}",
-              workingSymbolTable.entrySet().stream()
+              symbolTable.entrySet().stream()
                       .map(Object::toString)
                       .collect(Collectors.joining("\n\t")));
     }
-    this.symbolTable = workingSymbolTable;
 
     return true;
   }
@@ -201,17 +202,15 @@ public class Compiler {
   }
 
   /**
-   * This will parse and traverse the input stream to try and populate the symbol table 
-   * with the token produced
-   * 
+   * This will parse and traverse the input stream
+   *
    * @param inputStream A stream to pull code characters from
    * @param visitor     The visitor to be used to traverse the newly created tree
-   * @return            A Map with symbolIds as the key, and symbol objects as the value
    */
-  private BidiMap<String, Symbol> populateSymbolTable(InputStream inputStream, CclCompilerVisitor visitor) throws IOException {
+  private void visitCodeTree(InputStream inputStream, CclCompilerVisitor visitor) throws IOException {
     if(inputStream == null) {
       logger.warn("Input stream was null");
-      return null;
+      return;
     }
 
     CclGrammarLexer lexer = new CclGrammarLexer(
@@ -228,6 +227,5 @@ public class Compiler {
     }
 
     visitor.visit(tree);
-    return visitor.getSymbols();
   }
 }

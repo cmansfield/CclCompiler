@@ -6,10 +6,9 @@ import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.parser.ParserUtils;
-import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.stream.Collectors;
 import java.util.*;
@@ -17,14 +16,6 @@ import java.util.*;
 
 public class SymbolTableVisitor extends CclCompilerVisitor {
 
-  public SymbolTableVisitor(SymbolTableVisitor symbolTableVisitor, String packageName) {
-    this(symbolTableVisitor.getSymbols(), packageName);
-  }
-  
-  public SymbolTableVisitor(BidiMap<String, Symbol> symbols, String packageName) {
-    super(symbols, packageName);
-  }
-  
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
     boolean isTemplate = isTemplate(ctx);

@@ -10,73 +10,20 @@ import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 import java.util.*;
 
 
 public class SemanticsVisitor extends CclCompilerVisitor {
-  private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
   private Deque<SAR> sas;
-  
-  public SemanticsVisitor(SemanticsVisitor semanticsVisitor, String packageName) {
-    this(semanticsVisitor.getSymbols(), packageName);
-    sas = new ArrayDeque<>();
-    sas.addAll(semanticsVisitor.getSemanticActionStack());
-  }
-  
-  public SemanticsVisitor(BidiMap<String, Symbol> symbols, String packageName) {
+
+  public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
     super(symbols);
     sas = new ArrayDeque<>();
-    
-    String symbolId = findSymbolId(
-            new Symbol().new SymbolBuilder()
-              .text(packageName)
-              .symbolKind(SymbolKind.PACKAGE)
-              .scope(GLOBAL_SCOPE)
-              .build(),
-            true);
-
-    scope = GLOBAL_SCOPE + "." + symbolId;
   }
 
   public Deque<SAR> getSemanticActionStack() {
     return sas == null ? new ArrayDeque<>() : sas;
-  }
-  
-  /**
-   * This method is used to find Symbols in the symbol table
-   * 
-   * @param name        The Symbol text to find
-   * @param symbolKind  The type of Symbol to find
-   * @return            The found Symbol's ID
-   */
-  private String findSymbolId(String name, SymbolKind symbolKind) {
-    return findSymbolId(
-            new Symbol().new SymbolBuilder()
-              .text(name)
-              .symbolKind(symbolKind)
-              .build(),
-            true);
-  }
-
-  /**
-   * This will find a Symbol that matches the supplied filter object
-   * 
-   * @param filter      The Symbol object to match against
-   * @param errorOnFail Should this method produce an error if a Symbol was not found?
-   * @return            The ID of the found Symbol
-   */
-  private String findSymbolId(Symbol filter, boolean errorOnFail) {
-    List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
-    if(foundSymbols.size() != 1 && errorOnFail) {
-      String message = String.format("Could not find the symbol for %s", filter.toString());
-      logger.error(message);
-      throw new IllegalStateException(message);
-    }
-    
-    return foundSymbols.isEmpty() ? null : foundSymbols.get(0).getSymbolId();
   }
 
   /**
