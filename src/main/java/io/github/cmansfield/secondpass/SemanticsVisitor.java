@@ -58,7 +58,29 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             true);
 
     // literalPush
-    sas.push(new SAR(SarType.LITERAL, symbolId, symbols.get(symbolId).getText(), ctx.start.getLine()));
+    sas.push(new SAR(
+            SarType.LITERAL, 
+            symbolId, 
+            symbols.get(symbolId).getText(), 
+            ctx.start.getLine()));
+  }
+
+  /**
+   * #identifierPush
+   * This method wil push a new identifier semantic action record onto the SAS
+   * 
+   * @param ctx   The context of where int the tree the visitor currently is
+   * @param text  The name of the identifier to be pushed
+   */
+  private void identifierPush(ParserRuleContext ctx, String text) {
+    // identifierPush
+    SAR sar = new SAR(SarType.IDENTIFIER, text);
+    sar.setLineNumber(ctx.start.getLine());
+    sas.push(sar);
+  }
+
+  private void identifierExist() {
+    
   }
   
   /**
@@ -191,7 +213,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   @Override
-  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
+  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {     // NOSONAR
     List<ParseTree> children = new ArrayList<>(ctx.children);
     
     for(ParseTree parseTree: children) {

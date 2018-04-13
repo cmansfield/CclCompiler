@@ -236,9 +236,19 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   @Override
   public Object visitTemplateList(CclGrammarParser.TemplateListContext ctx) {
     return ctx.children.stream()
-            .filter(node -> !",".equals(node.getText()))
-            .map(ParseTree::getText)
+            .filter(node -> node instanceof CclGrammarParser.TemplatePlaceHolderContext)
+            .map(context -> (CclGrammarParser.TemplatePlaceHolderContext)context)
+            .map(this::visitTemplatePlaceHolder)
+            .map(value -> (String)value)
             .collect(Collectors.toList());
+  }
+  
+  @Override
+  public Object visitTemplatePlaceHolder(CclGrammarParser.TemplatePlaceHolderContext ctx) {
+    return ctx.children.stream()
+            .map(ParseTree::getText)
+            .findFirst()
+            .orElse("");
   }
 
   /**

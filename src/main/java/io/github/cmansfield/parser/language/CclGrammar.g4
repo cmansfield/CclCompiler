@@ -12,7 +12,7 @@ classDeclaration : modifier* CLASS className templateDeclaration?
 
 templateDeclaration : '(' templateList ')' ;
 
-templateList : IDENTIFIER (',' IDENTIFIER)* ;
+templateList : templatePlaceHolder (',' templatePlaceHolder)* ;
 
 classMemberDeclaration 
     : methodDeclaration
@@ -129,6 +129,8 @@ modifier : MODIFIER ;
 type 
     : PRIMITIVE_TYPE
     | className ;
+
+templatePlaceHolder : IDENTIFIER ;
 
 className : IDENTIFIER ;
 
