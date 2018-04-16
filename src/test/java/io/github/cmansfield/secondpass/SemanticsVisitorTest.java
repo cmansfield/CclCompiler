@@ -2,6 +2,7 @@ package io.github.cmansfield.secondpass;
 
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
+import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.SymbolFilter;
 import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
@@ -116,7 +117,7 @@ public class SemanticsVisitorTest {
 
     BidiMap<String, Symbol> symbolTable = compilerTest.compile(fileName);
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .symbolKind(symbolKind)
             .text(text)
             .build();
@@ -157,7 +158,7 @@ public class SemanticsVisitorTest {
 
     BidiMap<String, Symbol> symbolTable = compilerTest.compile(fileName);
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .symbolKind(SymbolKind.LOCAL_VAR)
             .text("last")
             .build();
@@ -203,13 +204,13 @@ public class SemanticsVisitorTest {
     final String symbolId = "Z00001";
     final Integer lineNumber = 10;
     BidiMap<String, Symbol> symbols = new DualHashBidiMap<>();
-    symbols.put("D00001", new Symbol().new SymbolBuilder()
+    symbols.put("D00001", new SymbolBuilder()
             .scope(CclCompilerVisitor.GLOBAL_SCOPE)
             .symbolId("D00001")
             .symbolKind(SymbolKind.PACKAGE)
             .text(fakePackageName)
             .build());
-    symbols.put(symbolId, new Symbol().new SymbolBuilder()
+    symbols.put(symbolId, new SymbolBuilder()
             .scope(CclCompilerVisitor.GLOBAL_SCOPE)
             .symbolId(symbolId)
             .symbolKind(symbolKind)

@@ -1,14 +1,11 @@
 package io.github.cmansfield.parser;
 
 import io.github.cmansfield.parser.language.CclGrammarBaseVisitor;
-import io.github.cmansfield.firstpass.symbols.SymbolIdGenerator;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.firstpass.symbols.SymbolFilter;
-import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
-import io.github.cmansfield.firstpass.symbols.Symbol;
+import io.github.cmansfield.firstpass.symbols.*;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +48,7 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
     }
 
     String symbolId = findSymbolId(
-            new Symbol().new SymbolBuilder()
+            new SymbolBuilder()
                     .text(packageName)
                     .symbolKind(SymbolKind.PACKAGE)
                     .scope(GLOBAL_SCOPE)
@@ -81,7 +78,7 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
    *                    original symbol object from the symbol table
    */
   protected Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data, String symbolId) {
-    Symbol.SymbolBuilder symbolBuilder = new Symbol().new SymbolBuilder()
+    SymbolBuilder symbolBuilder = new SymbolBuilder()
             .scope(scope)
             .text(identifier)
             .symbolKind(symbolKind)
@@ -249,7 +246,7 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
    */
   protected String findSymbolId(String name, SymbolKind symbolKind) {
     return findSymbolId(
-            new Symbol().new SymbolBuilder()
+            new SymbolBuilder()
                     .text(name)
                     .symbolKind(symbolKind)
                     .build(),

@@ -44,7 +44,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @return            The Symbol filter used to find Symbols in the symbol table
    */
   private Symbol generateFilter(String text, SymbolKind symbolKind, String scope) {
-    return new Symbol().new SymbolBuilder()
+    return new SymbolBuilder()
             .text(text)
             .symbolKind(symbolKind)
             .scope(scope)
@@ -85,7 +85,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
     }
 
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .text(text)
             .scope(currentScope)
             .build();
@@ -221,7 +221,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param symbolKind  The Symbol type of of the element to check 
    */
   void duplicate(String name, SymbolKind symbolKind) {
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .text(name)
             .symbolKind(symbolKind)
             .scope(scope)
@@ -310,7 +310,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String scopeOrig = scope;
 
     String symbolId = findSymbolId(
-            new Symbol().new SymbolBuilder()
+            new SymbolBuilder()
               .text(name)
               .symbolKind(SymbolKind.CLASS)
               .build(),
@@ -355,7 +355,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String scopeOrig = scope;
 
     String symbolId = findSymbolId(
-            new Symbol().new SymbolBuilder()
+            new SymbolBuilder()
               .text(name)
               .symbolKind(SymbolKind.METHOD)
               .build(),

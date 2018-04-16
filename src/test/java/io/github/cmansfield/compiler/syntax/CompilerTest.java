@@ -1,12 +1,9 @@
 package io.github.cmansfield.compiler.syntax;
 
-import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
 import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.firstpass.symbols.SymbolFilter;
-import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.compiler.CompilerOptions;
-import io.github.cmansfield.firstpass.symbols.Symbol;
+import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.compiler.Compiler;
@@ -66,7 +63,7 @@ public class CompilerTest {
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 4);
     SymbolTableUtils.checkSymbolTable(symbolTable);
-    List<Symbol> foundSymbols = SymbolFilter.filter(symbolTable, new Symbol().new SymbolBuilder()
+    List<Symbol> foundSymbols = SymbolFilter.filter(symbolTable, new SymbolBuilder()
             .symbolKind(SymbolKind.BOOL_LIT)
             .build());
     assertTrue(CollectionUtils.isNotEmpty(foundSymbols));
@@ -97,7 +94,7 @@ public class CompilerTest {
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 3);
     SymbolTableUtils.checkSymbolTable(symbolTable);
-    List<Symbol> foundSymbols = SymbolFilter.filter(symbolTable, new Symbol().new SymbolBuilder()
+    List<Symbol> foundSymbols = SymbolFilter.filter(symbolTable, new SymbolBuilder()
             .symbolKind(SymbolKind.SPECIAL_LIT)
             .build());
     assertTrue(CollectionUtils.isNotEmpty(foundSymbols));

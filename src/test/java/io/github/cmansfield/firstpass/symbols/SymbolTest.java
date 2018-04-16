@@ -22,7 +22,7 @@ public class SymbolTest {
     parameters.add("P104");
     parameters.add("P105");
     parameters.add("P106");
-    symbol = new Symbol().new SymbolBuilder()
+    symbol = new SymbolBuilder()
             .scope("g.MyClass_package.MyClass")
             .symbolId("M004")
             .text("MyClass")
@@ -41,7 +41,7 @@ public class SymbolTest {
     moreParameters.add("P104");
     moreParameters.add("P105");
     moreParameters.add("P106");
-    Symbol anotherSymbol = new Symbol().new SymbolBuilder()
+    Symbol anotherSymbol = new SymbolBuilder()
             .scope("g.MyClass_package.MyClass")
             .symbolId("M004")
             .text("MyClass")
@@ -63,7 +63,7 @@ public class SymbolTest {
 
   @Test
   public void test_equals_differentSymbolIds() {
-    Symbol anotherSymbol = new Symbol().new SymbolBuilder()
+    Symbol anotherSymbol = new SymbolBuilder()
             .scope("g.MyClass_package.MyClass")
             .symbolId("M010")
             .text("MyClass")
@@ -80,7 +80,7 @@ public class SymbolTest {
     moreParameters.add("P104");
     moreParameters.add("P105");
     moreParameters.add("P107");
-    Symbol anotherSymbol = new Symbol().new SymbolBuilder()
+    Symbol anotherSymbol = new SymbolBuilder()
             .scope("g.MyClass_package.MyClass")
             .symbolId("M004")
             .text("MyClass")
@@ -107,7 +107,7 @@ public class SymbolTest {
 
   @Test
   public void test_notEquals_symbolKind() {
-    Symbol anotherSymbol = new Symbol().new SymbolBuilder()
+    Symbol anotherSymbol = new SymbolBuilder()
             .scope("g.MyClass_package.MyClass")
             .symbolId("M004")
             .text("MyClass")
@@ -120,7 +120,7 @@ public class SymbolTest {
 
   @Test
   public void test_notEquals_text() {
-    Symbol anotherSymbol = new Symbol().new SymbolBuilder()
+    Symbol anotherSymbol = new SymbolBuilder()
             .scope("g.MyClass_package.MyClass")
             .symbolId("M004")
             .text("YourClass")
@@ -137,7 +137,7 @@ public class SymbolTest {
     moreParameters.add("P104");
     moreParameters.add("P105");
     moreParameters.add("P106");
-    Symbol anotherSymbol = new Symbol().new SymbolBuilder()
+    Symbol anotherSymbol = new SymbolBuilder()
             .scope("g.MyClass_package.MyClass")
             .symbolId("M010")
             .text("MyClass")
@@ -158,7 +158,7 @@ public class SymbolTest {
     moreParameters.add("P104");
     moreParameters.add("P105");
     moreParameters.add("P114");
-    Symbol anotherSymbol = new Symbol().new SymbolBuilder()
+    Symbol anotherSymbol = new SymbolBuilder()
             .scope("g.MyClass_package.MyClass")
             .symbolId("M004")
             .text("MyClass")

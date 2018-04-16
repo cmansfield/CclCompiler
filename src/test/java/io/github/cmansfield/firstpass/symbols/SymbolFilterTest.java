@@ -30,7 +30,7 @@ public class SymbolFilterTest {
 
   @Test
   public void test_filter() {
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .text("TestClass")
             .symbolKind(SymbolKind.CLASS)
             .build();
@@ -47,14 +47,14 @@ public class SymbolFilterTest {
 
   @Test
   public void test_filter_everythingWithInScope() {
-    Symbol classFilter = new Symbol().new SymbolBuilder()
+    Symbol classFilter = new SymbolBuilder()
             .text("YourClass")
             .symbolKind(SymbolKind.CLASS)
             .build();
     Symbol classSymbol = SymbolFilter.filter(
             symbolTable,
             classFilter).get(0);
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .scope(classSymbol.getScope() + "." + classSymbol.getSymbolId())
             .build();
     List<Symbol> symbols = SymbolFilter.filter(
@@ -71,7 +71,7 @@ public class SymbolFilterTest {
             .templatePlaceHolder("T")
             .templatePlaceHolder("V")
             .build();
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .data(filterData)
             .build();
     List<Symbol> symbols = SymbolFilter.filter(
@@ -90,14 +90,14 @@ public class SymbolFilterTest {
     Data filterData = new Data().new DataBuilder()
             .accessModifier(AccessModifier.PRIVATE)
             .build();
-    Symbol classFilter = new Symbol().new SymbolBuilder()
+    Symbol classFilter = new SymbolBuilder()
             .text("YourClass")
             .symbolKind(SymbolKind.CLASS)
             .build();
     Symbol classSymbol = SymbolFilter.filter(
             symbolTable,
             classFilter).get(0);
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .scope(classSymbol.getScope() + "." + classSymbol.getSymbolId())
             .data(filterData)
             .build();
@@ -113,7 +113,7 @@ public class SymbolFilterTest {
   public void test_filter_findEmptyStringLiteral() throws IOException {
     CompilerTest compilerTest = new CompilerTest();
     BidiMap<String, Symbol> symbolTable = compilerTest.compile("test9.ccl", CompilerOptions.FIRST_PASS_ONLY);
-    Symbol filter = new Symbol().new SymbolBuilder()
+    Symbol filter = new SymbolBuilder()
             .text("")
             .symbolKind(SymbolKind.STR_LIT)
             .build();

@@ -2,13 +2,9 @@ package io.github.cmansfield.firstpass.symbols;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import io.github.cmansfield.firstpass.symbols.data.Data;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-
 
 public class Symbol {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Symbol.class);
+
   private String scope;
   private String symbolId;
   private String text;
@@ -17,7 +13,7 @@ public class Symbol {
   
   public Symbol() {}
   
-  private Symbol(String scope, String symbolId, String text, SymbolKind symbolKind, Data data) {
+  Symbol(String scope, String symbolId, String text, SymbolKind symbolKind, Data data) {
     this.scope = scope;
     this.symbolId = symbolId;
     this.text = text;
@@ -105,48 +101,5 @@ public class Symbol {
   @Override
   public String toString() {
     return String.format("(%s \"%s\" scope:%s data:[%s])", getSymbolKind().toString(), getText(), getScope(), getData().toString());
-  }
-
-  
-  public class SymbolBuilder {
-    private String scope;
-    private String symbolId;
-    private String text;
-    private SymbolKind symbolKind;
-    private Data data;
-
-
-    public SymbolBuilder scope(String scope) {
-      this.scope = scope;
-      return this;
-    }
-
-    public SymbolBuilder symbolId(String symbolId) {
-      this.symbolId = symbolId;
-      return this;
-    }
-
-    public SymbolBuilder text(String text) {
-      this.text = text;
-      return this;
-    }
-
-    public SymbolBuilder symbolKind(SymbolKind symbolKind) {
-      this.symbolKind = symbolKind;
-      return this;
-    }
-
-    public SymbolBuilder data(Data data) {
-      this.data = data;
-      return this;
-    }
-    
-    public Symbol build() {
-      if(this.data == null) {
-        this.data = new Data();
-      }
-
-      return new Symbol(this.scope, this.symbolId, this.text, this.symbolKind, this.data);
-    }
   }
 }

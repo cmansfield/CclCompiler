@@ -2,8 +2,7 @@
 TODO List
     Symbol
         Add jackson deserialization
-        Move the SymbolBuilder class out of the Symbol class
-        
+
     Data
         Move the DataBuilder class out of the Data class
 
