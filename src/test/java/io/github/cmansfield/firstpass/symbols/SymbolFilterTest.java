@@ -1,17 +1,20 @@
 package io.github.cmansfield.firstpass.symbols;
 
-import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
+import io.github.cmansfield.parser.CclCompilerVisitor;
+import io.github.cmansfield.compiler.CompilerOptions;
 import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.List;
 
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -78,7 +81,7 @@ public class SymbolFilterTest {
     assertTrue(CollectionUtils.isNotEmpty(symbols));
     assertEquals(symbols.size(), 1);
     Symbol found = symbols.get(0);
-    assertEquals(found.getSymbolKind(), SymbolKind.TEMPLATE_METHOD);
+    assertEquals(found.getSymbolKind(), SymbolKind.METHOD);
     assertEquals(found.getText(), "doSomething");
   }
 
@@ -104,5 +107,29 @@ public class SymbolFilterTest {
 
     assertTrue(CollectionUtils.isNotEmpty(symbols));
     assertEquals(symbols.size(), 2);
+  }
+  
+  @Test
+  public void test_filter_findEmptyStringLiteral() throws IOException {
+    CompilerTest compilerTest = new CompilerTest();
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test9.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    Symbol filter = new Symbol().new SymbolBuilder()
+            .text("")
+            .symbolKind(SymbolKind.STR_LIT)
+            .build();
+    
+    List<Symbol> symbols = SymbolFilter.filter(symbolTable, filter);
+
+    assertNotNull(symbols);
+    assertEquals(symbols.size(), 1);
+    Symbol symbol = symbols.get(0);
+    assertNotNull(symbol);
+    assertEquals(symbol.getText(), "");
+    assertTrue(StringUtils.isNotBlank(symbol.getSymbolId()));
+    assertEquals(symbol.getScope(), CclCompilerVisitor.GLOBAL_SCOPE);
+    assertEquals(symbol.getSymbolKind(), SymbolKind.STR_LIT);
+    Data data = symbol.getData();
+    assertNotNull(data);
+    assertEquals(data.getAccessModifiers().get(0), AccessModifier.PUBLIC);
   }
 }

@@ -19,7 +19,8 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
     boolean isTemplate = isTemplate(ctx);
-    SymbolKind symbolKind = isTemplate ? SymbolKind.TEMPLATE_METHOD : SymbolKind.METHOD;
+    // TODO - Add template placeholders if there are any
+    SymbolKind symbolKind = SymbolKind.METHOD;
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
@@ -86,9 +87,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
-    SymbolKind symbolKind = isTemplate(ctx)
-            ? SymbolKind.TEMPLATE_CLASS
-            : SymbolKind.CLASS;
+    SymbolKind symbolKind = SymbolKind.CLASS;
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
@@ -102,9 +101,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .build();
     addNewSymbol(
             name,
-            templatePlaceHolders.isEmpty()
-                    ? SymbolKind.CLASS
-                    : SymbolKind.TEMPLATE_CLASS,
+            SymbolKind.CLASS,
             scopeOrig,
             data,
             symbolId);

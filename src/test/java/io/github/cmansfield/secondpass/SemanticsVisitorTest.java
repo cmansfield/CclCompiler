@@ -6,6 +6,7 @@ import io.github.cmansfield.firstpass.symbols.SymbolFilter;
 import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.parser.CclCompilerVisitor;
+import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.collections4.BidiMap;
@@ -170,6 +171,26 @@ public class SemanticsVisitorTest {
     assertEquals(symbol.getSymbolKind(), symbolKind);
   }
 
+  @Test
+  public void test_duplicate() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test10.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+
+    symbolTable.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .forEach(symbol -> {
+              SymbolKind symbolKind = symbol.getSymbolKind();
+              if(        symbolKind == SymbolKind.METHOD 
+                      || symbolKind == SymbolKind.CLASS 
+                      || symbolKind == SymbolKind.CONSTRUCTOR) {
+                visitor.setScope(symbol.getScope());
+                visitor.duplicate(symbol.getText(), symbol.getSymbolKind());
+              }
+            });
+  }
+  
+  // TODO - Add more unit tests for the duplicate method
+  
   /**
    * This is a template method for testing each of the different type of literals
    * 

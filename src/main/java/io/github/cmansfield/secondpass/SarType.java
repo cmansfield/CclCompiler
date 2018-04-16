@@ -12,7 +12,7 @@ public enum SarType {
   ARG_LIST,
   END_ARG_LIST,
   ARRAY,
-  TEMP,
+  TEMPLATE,
   UNKNOWN;
 
   /**
@@ -23,9 +23,9 @@ public enum SarType {
    */
   public static SarType getSarType(SymbolKind symbolKind) {
     switch (symbolKind) {
-      case INSTANCE_VAR:
       case PARAM:
       case LOCAL_VAR:
+      case INSTANCE_VAR:
         return SarType.IDENTIFIER;
       case CLASS:
         return SarType.TYPE;
@@ -34,14 +34,11 @@ public enum SarType {
       case CONSTRUCTOR:
         return SarType.METHOD;
       case INT_LIT:
-      case CHAR_LIT:
       case STR_LIT:
+      case CHAR_LIT:
       case BOOL_LIT:
       case SPECIAL_LIT:
         return SarType.LITERAL;
-      case TEMPLATE_CLASS:
-      case TEMPLATE_METHOD:
-        return SarType.TEMP;
       case FOR:
       case BLOCK:
       case PACKAGE:

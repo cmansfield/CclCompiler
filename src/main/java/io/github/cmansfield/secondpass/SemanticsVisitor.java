@@ -14,8 +14,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.*;
 import java.util.stream.Collectors;
+import java.util.*;
 
 
 public class SemanticsVisitor extends CclCompilerVisitor {
@@ -31,6 +31,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     return sas == null ? new ArrayDeque<>() : sas;
   }
 
+  void setScope(String scope) {
+    this.scope = scope;
+  }
+  
   /**
    * This method will create a simple filter object for searching
    * 
@@ -79,11 +83,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     if(StringUtils.isBlank(currentScope)) {
       throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
-    }
-
-    if("g.D00001.C00001".equals(currentScope) && "name".equals(text)) {
-      System.out.println(this.toString());
-      System.out.printf("");
     }
 
     Symbol filter = new Symbol().new SymbolBuilder()
@@ -212,6 +211,34 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     sar.setSymbolId(symbolId);
     sas.push(sar);
   }
+
+  /**
+   * #duplicate
+   * This method will check to make sure there isn't a duplicate element of the same 
+   * type in the same scope
+   * 
+   * @param name        The name of the Symbol to check for duplicates
+   * @param symbolKind  The Symbol type of of the element to check 
+   */
+  void duplicate(String name, SymbolKind symbolKind) {
+    Symbol filter = new Symbol().new SymbolBuilder()
+            .text(name)
+            .symbolKind(symbolKind)
+            .scope(scope)
+            .build();
+    List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
+    
+    if(CollectionUtils.isEmpty(foundSymbols)) {
+      throw new IllegalStateException(String.format("There should have been at least one Symbol of %s, found none", name));
+    }
+    if(foundSymbols.size() > 1) {
+      throw new IllegalStateException(String.format(
+              "There are duplicate %s %s in scope %s",
+              symbolKind.toString(),
+              name,
+              scope));
+    }
+  }
   
   /**
    * Move this method from SymbolTableVisitor to this class because we don't want to create
@@ -232,6 +259,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     addNewSymbol(name, SymbolKind.LOCAL_VAR, scope, data);
 
     getName(ctx);     // This adds the identifier to the SAS and verifies it
+    // TODO - check to make sure I don't need to make a duplicate call here
     visitAssignmentExpression(ctx);
 
     return null;
@@ -277,7 +305,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   @Override
-  public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
+  public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {     // NOSONAR
     String name = getClassName(ctx);
     String scopeOrig = scope;
 
@@ -288,21 +316,21 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               .build(),
             false);
     if(StringUtils.isBlank(symbolId)) {
-      symbolId = findSymbolId(name, SymbolKind.TEMPLATE_CLASS);
-    }
-    if(StringUtils.isBlank(symbolId)) {
       return null;
     }
     
     scope = scope + "." + symbolId;
-    Object result = super.visitClassDeclaration(ctx);
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ClassMemberDeclarationContext)
+            .map(context -> (CclGrammarParser.ClassMemberDeclarationContext)context)
+            .forEach(this::visitClassMemberDeclaration);
     scope = scopeOrig;
     
-    return result; 
+    return null; 
   }
 
   @Override
-  public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
+  public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {   // NOSONAR
     String name = getMethodName(ctx);
     String scopeOrig = scope;
 
@@ -312,14 +340,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
 
     scope = scope + "." + symbolId;
-    Object result = super.visitConstructorDeclaration(ctx);
+    traverseMethodBody(ctx);
     scope = scopeOrig;
 
-    return result;
+    return null;
   }
 
   @Override
-  public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
+  public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {     // NOSONAR
     String name = getMethodName(ctx);
     if(name == null) {
       throw new IllegalStateException("Method name came back null, should not be null after the first pass");
@@ -333,17 +361,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               .build(),
             false);
     if(StringUtils.isBlank(symbolId)) {
-      symbolId = findSymbolId(name, SymbolKind.TEMPLATE_METHOD);
-    }
-    if(StringUtils.isBlank(symbolId)) {
       return null;
     }
 
     scope = scope + "." + symbolId;
-    Object result = super.visitMethodDeclaration(ctx);
+    traverseMethodBody(ctx);
     scope = scopeOrig;
 
-    return result;
+    return null;
   }
 
   @Override
@@ -390,16 +415,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
     String name = getChildText(ctx);
-
-    // #isDuplicate(name);
+    duplicate(name, SymbolKind.CLASS);
     return getChildText(ctx);
   }
 
   @Override
   public Object visitMethodName(CclGrammarParser.MethodNameContext ctx) {
     String name = getChildText(ctx);
-
-    // #isDuplicate(name);
+    duplicate(
+            name, 
+            ctx.parent instanceof CclGrammarParser.ConstructorDeclarationContext 
+                    ? SymbolKind.CONSTRUCTOR 
+                    : SymbolKind.METHOD);
     return getChildText(ctx);
   }
 
@@ -423,6 +450,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitMemberRefz(CclGrammarParser.MemberRefzContext ctx) {
     String name = getNameWithoutVisiting(ctx);
+    if(ctx == null) {
+      throw new IllegalStateException("Member reference cannot be null");
+    }
     identifierPush(ctx, name);
 
     ctx.children.stream()

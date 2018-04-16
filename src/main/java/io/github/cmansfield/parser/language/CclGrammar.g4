@@ -78,7 +78,7 @@ expression
     |  THIS memberRefz? expressionz?
     | numericLiteral expressionz?
     | characterLiteral expressionz?
-    | stringLiteral
+    | stringLiteral expressionz?
     | booleanLiteral expressionz?
     | specialLiteral expressionz?
     | name fnArrMember? memberRefz? expressionz?

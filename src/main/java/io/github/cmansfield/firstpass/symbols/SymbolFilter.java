@@ -106,7 +106,7 @@ public class SymbolFilter {
     if(StringUtils.isNotBlank(filter.getSymbolId())) {
       map.put(filter.getSymbolId(), Symbol::getSymbolId);
     }
-    if(StringUtils.isNotBlank(filter.getText())) {
+    if(StringUtils.isNotBlank(filter.getText()) || filter.getSymbolKind() == SymbolKind.STR_LIT) {
       map.put(filter.getText(), Symbol::getText);
     }
     if(filter.getSymbolKind() != SymbolKind.UNKNOWN) {

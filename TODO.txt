@@ -2,6 +2,10 @@
 TODO List
     Symbol
         Add jackson deserialization
+        Move the SymbolBuilder class out of the Symbol class
+        
+    Data
+        Move the DataBuilder class out of the Data class
 
     SymbolFilter
         Create a filter method with a method signature of
@@ -10,11 +14,15 @@ TODO List
 
     SemanticsVisitor
         Fix overloaded methods not finding the correct Symbol
-        Fix string literal ""
+            This is happening because the SemanticsVisitor::visitMethodDeclaration 
+            findSymbolId cannot find methods bases on the different parameters
         Fix template classes/methods on the second pass
         Have traceScopeToFindSymbolId method use the new filter method where
             a list of Symbols matching the supplied text is filtered on rather
             than filtering on the entire Symbol map each time
+
+    CompilerTest
+        Move the compile methods out of this class into their own TestingUtils class
 
     Add more unit tests for the following:
         SymbolTableVisitor

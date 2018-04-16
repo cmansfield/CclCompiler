@@ -13,8 +13,6 @@ public enum SymbolKind {
   STR_LIT("S"),           // String literal
   BOOL_LIT("G"),          // Boolean literal
   SPECIAL_LIT("E"),       // Special literals (null)
-  TEMPLATE_CLASS("T"),
-  TEMPLATE_METHOD("K"),
   FOR("F"),
   BLOCK("B"),
   PACKAGE("D"),

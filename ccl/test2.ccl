@@ -12,8 +12,9 @@ public class TestClass {
 
 
 public void main() {
-    int x = 5;
+    int num = 5;
 }
+
 
 private class Employee {
     private string name;

@@ -107,6 +107,14 @@ public class CompilerTest {
     assertEquals(literalNull.getData().getType().get(), ParserUtils.getLiteralName(CclGrammarParser.NULL));
   }
 
+  @Test
+  public void test_stringLiteralsWithOtherExpressions() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compile("test9.ccl", CompilerOptions.FIRST_PASS_ONLY);
+
+    assertNotNull(symbolTable);
+    assertEquals(symbolTable.size(), 4);
+  }
+  
   /**
    * This method is used to reduce the amount of code needed to test the
    * different code files
