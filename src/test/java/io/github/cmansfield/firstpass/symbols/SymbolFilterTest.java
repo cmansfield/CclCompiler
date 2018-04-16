@@ -1,6 +1,7 @@
 package io.github.cmansfield.firstpass.symbols;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
+import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -67,7 +68,7 @@ public class SymbolFilterTest {
 
   @Test
   public void test_filter_Data() {
-    Data filterData = new Data().new DataBuilder()
+    Data filterData = new DataBuilder()
             .templatePlaceHolder("T")
             .templatePlaceHolder("V")
             .build();
@@ -87,7 +88,7 @@ public class SymbolFilterTest {
 
   @Test
   public void test_filter_allPrivateWithInScope() {
-    Data filterData = new Data().new DataBuilder()
+    Data filterData = new DataBuilder()
             .accessModifier(AccessModifier.PRIVATE)
             .build();
     Symbol classFilter = new SymbolBuilder()

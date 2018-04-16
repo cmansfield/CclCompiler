@@ -18,7 +18,7 @@ public class DataTest {
 
   @BeforeMethod
   public void setUp() {
-    data = new Data().new DataBuilder()
+    data = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
@@ -56,7 +56,7 @@ public class DataTest {
 
   @Test
   public void test_equals() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
@@ -69,7 +69,7 @@ public class DataTest {
 
   @Test
   public void test_notEquals_parameters() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
@@ -82,7 +82,7 @@ public class DataTest {
 
   @Test
   public void test_notEquals_parameterSize() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
@@ -93,7 +93,7 @@ public class DataTest {
 
   @Test
   public void test_notEquals_accessModifier() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PUBLIC)
             .parameters(data.getParameters())
@@ -104,7 +104,7 @@ public class DataTest {
 
   @Test
   public void test_notEquals_returnType() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.VOID))
             .accessModifiers(data.getAccessModifiers())
             .parameters(data.getParameters())
@@ -115,7 +115,7 @@ public class DataTest {
 
   @Test
   public void test_notEquals_type() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .type(ParserUtils.getLiteralName(CclGrammarParser.BOOL))
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifiers(data.getAccessModifiers())
@@ -137,7 +137,7 @@ public class DataTest {
 
   @Test
   public void test_hashCode() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
@@ -150,7 +150,7 @@ public class DataTest {
 
   @Test
   public void test_failed_hashCode_parameters() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PRIVATE)
             .parameter("P104")
@@ -163,7 +163,7 @@ public class DataTest {
 
   @Test
   public void test_failed_hashCode_accessModifier() {
-    Data otherData = new Data().new DataBuilder()
+    Data otherData = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.PUBLIC)
             .parameters(data.getParameters())
@@ -174,12 +174,12 @@ public class DataTest {
   
   @Test
   public void test_equals_templatePlaceHolders() {
-    Data data1 = new Data().new DataBuilder()
+    Data data1 = new DataBuilder()
             .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .templatePlaceHolder("T")
             .templatePlaceHolder("K")
             .build();
-    Data data2 = new Data().new DataBuilder()
+    Data data2 = new DataBuilder()
             .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .templatePlaceHolder("T")
             .templatePlaceHolder("K")
@@ -192,12 +192,12 @@ public class DataTest {
 
   @Test
   public void test_equals_failed_templatePlaceHolders_outOfOrder() {
-    Data data1 = new Data().new DataBuilder()
+    Data data1 = new DataBuilder()
             .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .templatePlaceHolder("T")
             .templatePlaceHolder("K")
             .build();
-    Data data2 = new Data().new DataBuilder()
+    Data data2 = new DataBuilder()
             .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .templatePlaceHolder("K")
             .templatePlaceHolder("T")
@@ -210,7 +210,7 @@ public class DataTest {
   
   @Test
   public void test_build() {
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .type("")
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
             .accessModifier(AccessModifier.STATIC)
@@ -243,7 +243,7 @@ public class DataTest {
   
   @Test (expectedExceptions = IllegalArgumentException.class)
   public void test_build_fail_duplicateAccessModifiers() {
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .accessModifier(AccessModifier.PRIVATE)
             .accessModifier(AccessModifier.PRIVATE)
             .accessModifier(AccessModifier.STATIC)

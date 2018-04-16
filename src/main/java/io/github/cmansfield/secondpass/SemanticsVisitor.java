@@ -1,6 +1,7 @@
 package io.github.cmansfield.secondpass;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
+import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -251,7 +252,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String name = getNameWithoutVisiting(ctx);
     boolean isArray = isArray(ctx);
 
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .accessModifier(AccessModifier.PRIVATE)
             .isTypeAnArray(isArray)
             .type(type)
@@ -295,7 +296,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     symbolId = SymbolIdGenerator.generateId(symbolKind);
     scope = scope + "." + symbolId;
 
-    Data data = new Data().new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
+    Data data = new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
     addNewSymbol(symbolId, symbolKind, scopeOrig, data, symbolId);
 
     super.visitStatementWithScope(ctx);

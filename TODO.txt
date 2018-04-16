@@ -3,9 +3,6 @@ TODO List
     Symbol
         Add jackson deserialization
 
-    Data
-        Move the DataBuilder class out of the Data class
-
     SymbolFilter
         Create a filter method with a method signature of
             List<Symbol> filter(List<Symbol> symbols, Symbol filter)

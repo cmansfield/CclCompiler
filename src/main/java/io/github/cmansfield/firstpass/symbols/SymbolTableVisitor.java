@@ -1,6 +1,7 @@
 package io.github.cmansfield.firstpass.symbols;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
+import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,7 +32,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String returnType = getReturnType(ctx);
     List<String> parameters = getParameters(ctx);
 
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .returnType(returnType)
             .accessModifiers(accessModifiers)
             .parameters(parameters)
@@ -75,7 +76,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String name = ctx.children.get(1).getText();
     boolean isArray = isArray(ctx);
     
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .type(type)
             .accessModifier(AccessModifier.PRIVATE)
             .isTypeAnArray(isArray)
@@ -95,7 +96,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String name = getClassName(ctx);
     List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .accessModifiers(accessModifiers)
             .templatePlaceHolders(templatePlaceHolders)
             .build();
@@ -126,7 +127,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     List<String> parameters = getParameters(ctx);
 
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .accessModifiers(accessModifiers)
             .parameters(parameters)
             .build();
@@ -145,7 +146,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String type = getType(ctx);
     boolean isArray = isArray(ctx);
                         
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .accessModifiers(accessModifiers)
             .type(type)
             .isTypeAnArray(isArray)
@@ -162,7 +163,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     SymbolKind symbolKind = SymbolKind.MAIN;
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .returnType(ParserUtils.getLiteralName(CclGrammarParser.VOID))
             .accessModifiers(accessModifiers)
             .build();
@@ -328,7 +329,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     if(StringUtils.isNotBlank(value) && (value.charAt(0) == '\'' || value.charAt(0) == '\"')) {
       value = value.substring(1, value.length() - 1);
     }
-    Data data = new Data().new DataBuilder()
+    Data data = new DataBuilder()
             .type(ParserUtils.getLiteralName(grammarParserIndex))
             .accessModifier(AccessModifier.PUBLIC)
             .build();
