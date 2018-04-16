@@ -1,5 +1,6 @@
 package io.github.cmansfield.firstpass.symbols;
 
+import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.data.Data;
@@ -21,7 +22,7 @@ public class SymbolFilterTest {
   @BeforeClass
   public void setUp() throws IOException {
     CompilerTest compilerTest = new CompilerTest();
-    symbolTable = compilerTest.compile("test1.ccl");
+    symbolTable = compilerTest.compile("test1.ccl", CompilerOptions.FIRST_PASS_ONLY);
   }
 
   @Test

@@ -142,12 +142,6 @@ public class Symbol {
     }
     
     public Symbol build() {
-      if(this.symbolKind == null || this.symbolKind == SymbolKind.UNKNOWN) {
-        LOGGER.warn("Symbol {}'s kind is either null or UNKNOWN, it must have a known value", this.symbolId);
-      }
-      if(StringUtils.isEmpty(this.text)) {
-        LOGGER.warn("Symbol text for symbol {} is empty", this.symbolId);
-      }
       if(this.data == null) {
         this.data = new Data();
       }

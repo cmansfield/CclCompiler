@@ -2,23 +2,34 @@ package io.github.cmansfield.secondpass;
 
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
+import io.github.cmansfield.firstpass.symbols.SymbolFilter;
+import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.apache.commons.lang3.StringUtils;
+import org.testng.annotations.BeforeClass;
 import org.antlr.v4.runtime.CommonToken;
 import org.testng.annotations.Test;
 
 import java.util.function.BiConsumer;
+import java.io.IOException;
 import java.util.*;
 
 import static org.testng.Assert.*;
 
 
 public class SemanticsVisitorTest {
-  
+  private CompilerTest compilerTest;
+
+  @BeforeClass
+  public void setUp() {
+    this.compilerTest = new CompilerTest();
+  }
+
   @Test
   public void test_copyConstructor() {
     List<SAR> testSars = Arrays.asList(
@@ -95,7 +106,70 @@ public class SemanticsVisitorTest {
             new CclGrammarParser.SpecialLiteralContext(null, 0),
             (visitor, ctx) -> visitor.visitSpecialLiteral((CclGrammarParser.SpecialLiteralContext) ctx));
   }
-  
+
+  @Test
+  public void test_traceScopeToFindSymbolId() throws IOException {
+    SymbolKind symbolKind = SymbolKind.LOCAL_VAR;
+    String fileName = "test7.ccl";
+    String text = "name";
+
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile(fileName);
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Symbol filter = new Symbol().new SymbolBuilder()
+            .symbolKind(symbolKind)
+            .text(text)
+            .build();
+    List<Symbol> found = SymbolFilter.filter(symbolTable, filter);
+    String scope = found.get(0).getScope();
+    String symbolId = visitor.traceScopeToFindSymbolId(text, SarType.IDENTIFIER, scope);
+    Symbol symbol = symbolTable.get(symbolId);
+
+    assertTrue(StringUtils.isNotBlank(symbolId));
+    assertNotNull(symbol);
+    assertEquals(symbol.getText(), text);
+    assertEquals(symbol.getSymbolKind(), symbolKind);
+  }
+
+  @Test (expectedExceptions = IllegalStateException.class)
+  public void test_traceScopeToFindSymbolId_notFound() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test7.ccl");
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    visitor.traceScopeToFindSymbolId("something", SarType.IDENTIFIER, "g.D00001.C00001.M00001");
+
+    fail("Should not get to this point");
+  }
+
+  @Test
+  public void test_traceScopeToFindSymbolId_noText() throws IOException {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    String symbolId = visitor.traceScopeToFindSymbolId("", SarType.IDENTIFIER, "g.D00001.C00001.M00001");
+
+    assertNotNull(symbolId);
+    assertTrue(StringUtils.isBlank(symbolId));
+  }
+
+  @Test
+  public void test_traceScopeToFindSymbolId_foundInParentScope() throws IOException {
+    SymbolKind symbolKind = SymbolKind.INSTANCE_VAR;
+    String fileName = "test8.ccl";
+    String text = "name";
+
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile(fileName);
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Symbol filter = new Symbol().new SymbolBuilder()
+            .symbolKind(SymbolKind.LOCAL_VAR)
+            .text("last")
+            .build();
+    List<Symbol> found = SymbolFilter.filter(symbolTable, filter);
+    String scope = found.get(0).getScope();
+    String symbolId = visitor.traceScopeToFindSymbolId(text, SarType.IDENTIFIER, scope);
+    Symbol symbol = symbolTable.get(symbolId);
+
+    assertNotNull(symbol);
+    assertEquals(symbol.getText(), text);
+    assertEquals(symbol.getSymbolKind(), symbolKind);
+  }
+
   /**
    * This is a template method for testing each of the different type of literals
    * 

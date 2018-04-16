@@ -1,0 +1,11 @@
+
+public void main() {}
+
+public class MyClass {
+    private string name = "John";
+
+    public string name() {
+        string name = " Doe";
+        return this.name;
+    }
+}

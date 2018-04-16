@@ -1,4 +1,4 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.parser.language;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -16,6 +16,12 @@ public interface CclGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#mainDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMainDeclaration(CclGrammarParser.MainDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CclGrammarParser#importDeclaration}.
 	 * @param ctx the parse tree
@@ -208,6 +214,12 @@ public interface CclGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitClassName(CclGrammarParser.ClassNameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#methodName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMethodName(CclGrammarParser.MethodNameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CclGrammarParser#name}.
 	 * @param ctx the parse tree

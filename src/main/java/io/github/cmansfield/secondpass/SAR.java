@@ -50,4 +50,14 @@ public class SAR {
   public String getText() {
     return text;
   }
+
+  @Override
+  public String toString() {
+    return String.format(
+            "SAR - type:%s SymbolId:\'%s\' lineNumber:%s text:\'%s\'",
+            type.toString(),
+            getSymbolId(),
+            getLineNumber().isPresent() ? getLineNumber().get() : "",
+            getText());
+  }
 }

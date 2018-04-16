@@ -2,8 +2,9 @@ grammar CclGrammar;
 
 // *************** Parser ***************
 
-compilationUnit : importDeclaration* classDeclaration* (modifier PRIMITIVE_TYPE MAIN '(' ')'
-        methodBody)? classDeclaration* EOF ;
+compilationUnit : importDeclaration* classDeclaration* mainDeclaration? classDeclaration* EOF ;
+
+mainDeclaration : modifier PRIMITIVE_TYPE MAIN '(' ')' methodBody ;
 
 importDeclaration : IMPORT IDENTIFIER ('.' IDENTIFIER)* ';' ;
 
@@ -20,7 +21,7 @@ classMemberDeclaration
     | constructorDeclaration
     ;
 
-methodDeclaration : modifier* templateDeclaration? type name '(' parameterList? ')' 
+methodDeclaration : modifier* templateDeclaration? type methodName '(' parameterList? ')'
         methodBody ;
 
 fieldDeclaration : modifier* type name (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
@@ -29,7 +30,7 @@ parameterList : parameter (',' parameter)* ;
 
 parameter : type name (arrayOperator)? ;
 
-constructorDeclaration : modifier? className '(' parameterList? ')' methodBody ;
+constructorDeclaration : modifier? methodName '(' parameterList? ')' methodBody ;
 
 methodBody : '{' (variableDeclaration | statement)* '}' ;
 
@@ -133,6 +134,8 @@ type
 templatePlaceHolder : IDENTIFIER ;
 
 className : IDENTIFIER ;
+
+methodName : IDENTIFIER ;
 
 name : IDENTIFIER ;
 

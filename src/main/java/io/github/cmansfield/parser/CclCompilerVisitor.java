@@ -168,6 +168,27 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
   }
 
   /**
+   * This will get the children from the context and then traverse any methodName nodes
+   * and return the name if found
+   *
+   * @param ctx     The current context to search for any name nodes
+   * @return        The name of the node if found, null if not
+   */
+  protected String getMethodName(ParserRuleContext ctx) {
+    if(ctx == null) {
+      return null;
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.MethodNameContext)
+            .map(context -> (CclGrammarParser.MethodNameContext)context)
+            .map(this::visitMethodName)
+            .map(val -> (String)val)
+            .findFirst()
+            .orElse(null);
+  }
+
+  /**
    * This will get the children from the context and then traverse any assignment expression nodes 
    *
    * @param ctx     The current context to search for any assignment expression nodes
@@ -253,19 +274,18 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
     return foundSymbols.isEmpty() ? null : foundSymbols.get(0).getSymbolId();
   }
 
-  // TODO - These will likely be overloaded in the SemanticsVisitor class
-  @Override
-  public Object visitType(CclGrammarParser.TypeContext ctx) {
-    return getChildText(ctx);
-  }
-
-  @Override
-  public Object visitName(CclGrammarParser.NameContext ctx) {
-    return getChildText(ctx);
-  }
-
-  @Override
-  public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
-    return getChildText(ctx);
+  /**
+   * This will get the children from the context and then traverse any method body nodes
+   *
+   * @param ctx     The current context to search for any method body nodes
+   */
+  protected void traverseMethodBody(ParserRuleContext ctx) {
+    if(ctx == null || ctx.children == null) {
+      return;
+    }
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
+            .map(context -> (CclGrammarParser.MethodBodyContext)context)
+            .forEach(this::visitMethodBody);
   }
 }

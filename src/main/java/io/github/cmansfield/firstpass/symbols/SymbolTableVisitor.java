@@ -24,7 +24,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
-    String name = getName(ctx);
+    String name = getMethodName(ctx);
     List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     String returnType = getReturnType(ctx);
@@ -125,7 +125,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
-    String name = getClassName(ctx);
+    String name = getMethodName(ctx);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     List<String> parameters = getParameters(ctx);
 
@@ -161,30 +161,21 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   }
 
   @Override
-  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
+  public Object visitMainDeclaration(CclGrammarParser.MainDeclarationContext ctx) {
     SymbolKind symbolKind = SymbolKind.MAIN;
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
-    List<ParseTree> children = new ArrayList<>(ctx.children);
+    List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
+    Data data = new Data().new DataBuilder()
+            .returnType(ParserUtils.getLiteralName(CclGrammarParser.VOID))
+            .accessModifiers(accessModifiers)
+            .build();
+    addNewSymbol(ParserUtils.getLiteralName(CclGrammarParser.MAIN), SymbolKind.MAIN, scope, data, symbolId);
 
-    for(ParseTree parseTree: children) {
-      if(parseTree instanceof CclGrammarParser.MethodBodyContext) {
-        List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
-        Data data = new Data().new DataBuilder()
-                .returnType(ParserUtils.getLiteralName(CclGrammarParser.VOID))
-                .accessModifiers(accessModifiers)
-                .build();
-        addNewSymbol(ParserUtils.getLiteralName(CclGrammarParser.MAIN), SymbolKind.MAIN, scope, data, symbolId);
-        
-        String scopeOrig = scope;
-        scope = scope + "." + symbolId;         // NOSONAR - will only happen once
-        parseTree.accept(this);
-        scope = scopeOrig;
-      }
-      else {
-        parseTree.accept(this);
-      }
-    }
-    
+    String scopeOrig = scope;
+    scope = scope + "." + symbolId;
+    traverseMethodBody(ctx);
+    scope = scopeOrig;
+
     return null;
   }
 
@@ -293,21 +284,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   }
 
   /**
-   * This will get the children from the context and then traverse any method body nodes 
-   *
-   * @param ctx     The current context to search for any method body nodes
-   */
-  private void traverseMethodBody(ParserRuleContext ctx) {
-    if(ctx == null || ctx.children == null) {
-      return;
-    }
-    ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.MethodBodyContext)
-            .map(context -> (CclGrammarParser.MethodBodyContext)context)
-            .forEach(this::visitMethodBody);
-  }
-
-  /**
    * This will get the children from the context and then check for any template nodes 
    * and return true if any are found
    *
@@ -360,5 +336,33 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .accessModifier(AccessModifier.PUBLIC)
             .build();
     addNewSymbol(value, symbolKind, GLOBAL_SCOPE, data);
+  }
+
+  @Override
+  public Object visitType(CclGrammarParser.TypeContext ctx) {
+    return getChildText(ctx);
+  }
+
+  @Override
+  public Object visitName(CclGrammarParser.NameContext ctx) {
+    return getChildText(ctx);
+  }
+
+  @Override
+  public Object visitMethodName(CclGrammarParser.MethodNameContext ctx) {
+    return getChildText(ctx);
+  }
+
+  @Override
+  public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
+    return getChildText(ctx);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("SymbolTable:%n\t%s",
+            symbols.entrySet().stream()
+                    .map(Object::toString)
+                    .collect(Collectors.joining("\n\t")));
   }
 }

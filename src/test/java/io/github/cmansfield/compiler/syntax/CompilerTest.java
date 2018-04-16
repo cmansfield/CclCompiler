@@ -23,7 +23,7 @@ public class CompilerTest {
 
   @Test
   public void test_validSymbolTable() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compile("test1.ccl");
+    BidiMap<String, Symbol> symbolTable = compile("test1.ccl", CompilerOptions.FIRST_PASS_ONLY);
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
@@ -33,7 +33,7 @@ public class CompilerTest {
 
   @Test
   public void test_validCharacters() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compile("test2.ccl");
+    BidiMap<String, Symbol> symbolTable = compile("test2.ccl", CompilerOptions.FIRST_PASS_ONLY);
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
@@ -43,14 +43,14 @@ public class CompilerTest {
 
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_invalidCharacter() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compile("test4.ccl");
+    BidiMap<String, Symbol> symbolTable = compile("test4.ccl", CompilerOptions.FIRST_PASS_ONLY);
 
     fail("Should have received an exception before now");
   }
 
   @Test
   public void test_validStringCharacters() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compile("test3.ccl");
+    BidiMap<String, Symbol> symbolTable = compile("test3.ccl", CompilerOptions.FIRST_PASS_ONLY);
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
@@ -60,7 +60,7 @@ public class CompilerTest {
 
   @Test
   public void test_duplicateBooleanValues() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compile("test5.ccl");
+    BidiMap<String, Symbol> symbolTable = compile("test5.ccl", CompilerOptions.FIRST_PASS_ONLY);
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
@@ -91,7 +91,7 @@ public class CompilerTest {
 
   @Test
   public void test_duplicateNullValues() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compile("test6.ccl");
+    BidiMap<String, Symbol> symbolTable = compile("test6.ccl", CompilerOptions.FIRST_PASS_ONLY);
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
@@ -109,16 +109,34 @@ public class CompilerTest {
 
   /**
    * This method is used to reduce the amount of code needed to test the
-   * syntax of different code files
+   * different code files
    *
    * @param fileName  The name of the file to try and produce a symbol table for
    * @return          The symbol table if it was successfully produced
    */
   public BidiMap<String, Symbol> compile(String fileName) throws IOException {
+    return compile(fileName, null);
+  }
+
+  /**
+   * This method is used to reduce the amount of code needed to test the
+   * different code files
+   *
+   * @param fileName  The name of the file to try and produce a symbol table for
+   * @param option    The additional compiler option for compiling
+   * @return          The symbol table if it was successfully produced
+   */
+  public BidiMap<String, Symbol> compile(String fileName, CompilerOptions option) throws IOException {
     File file = new File(getClass()
             .getClassLoader()
             .getResource(fileName).getFile());
-    Compiler compiler = new Compiler(CompilerOptions.FIRST_PASS_ONLY);
+    Compiler compiler;
+    if(option == null) {
+      compiler = new Compiler();
+    }
+    else {
+      compiler = new Compiler(option);
+    }
     if(!compiler.compile(file.getAbsolutePath())) {
       throw new IllegalStateException("The compiler failed to produce the symbol table");
     }

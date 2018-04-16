@@ -1,5 +1,5 @@
 
-/*
+
 public class TestClass {
     public void someMethod() {
         int number;
@@ -9,9 +9,20 @@ public class TestClass {
         }
     }
 }
-*/
+
 
 public void main() {
     int x = 5;
 }
 
+private class Employee {
+    private string name;
+
+    public Employee(string name) {
+        this.name = name;
+    }
+
+    public string getName() {
+        return name;
+    }
+}

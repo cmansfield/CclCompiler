@@ -150,11 +150,8 @@ public class Compiler {
 
     symbolTable = visitor.getSymbols();
 
-    if(logger.isDebugEnabled() && symbolTable != null) {
-      logger.debug("SymbolTable:\n\t{}",
-              symbolTable.entrySet().stream()
-                      .map(Object::toString)
-                      .collect(Collectors.joining("\n\t")));
+    if(logger.isDebugEnabled()) {
+      logger.debug(visitor.toString());
     }
 
     return true;

@@ -1,5 +1,7 @@
 package io.github.cmansfield.secondpass;
 
+import io.github.cmansfield.firstpass.symbols.SymbolKind;
+
 public enum SarType {
   IDENTIFIER,
   LITERAL,
@@ -11,5 +13,41 @@ public enum SarType {
   END_ARG_LIST,
   ARRAY,
   TEMP,
-  UNKNOWN
+  UNKNOWN;
+
+  /**
+   * This method will return the type of SAR given the Symbols type
+   *
+   * @param symbolKind  The type of Symbol
+   * @return            The matched SarType to Symbol type
+   */
+  public static SarType getSarType(SymbolKind symbolKind) {
+    switch (symbolKind) {
+      case INSTANCE_VAR:
+      case PARAM:
+      case LOCAL_VAR:
+        return SarType.IDENTIFIER;
+      case CLASS:
+        return SarType.TYPE;
+      case MAIN:
+      case METHOD:
+      case CONSTRUCTOR:
+        return SarType.METHOD;
+      case INT_LIT:
+      case CHAR_LIT:
+      case STR_LIT:
+      case BOOL_LIT:
+      case SPECIAL_LIT:
+        return SarType.LITERAL;
+      case TEMPLATE_CLASS:
+      case TEMPLATE_METHOD:
+        return SarType.TEMP;
+      case FOR:
+      case BLOCK:
+      case PACKAGE:
+        return SarType.UNKNOWN;
+      default:
+        return SarType.UNKNOWN;
+    }
+  }
 }

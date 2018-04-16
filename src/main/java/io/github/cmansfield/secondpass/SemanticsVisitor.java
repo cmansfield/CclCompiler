@@ -3,6 +3,7 @@ package io.github.cmansfield.secondpass;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.parser.ParserUtils;
@@ -10,11 +11,15 @@ import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class SemanticsVisitor extends CclCompilerVisitor {
+  private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
   private Deque<SAR> sas;
 
   public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
@@ -41,6 +46,112 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .scope(scope)
             .build();
   }
+
+  /**
+   * This will walk up from the current scope to try and find the
+   * Symbol Id of the Symbol that matches the supplied text
+   *
+   * @param text    Text of the Symbol to find
+   * @param sarType The SarType of the symbol we are searching for
+   * @return        The ID of the found Symbol
+   */
+  private String traceScopeToFindSymbolId(String text, SarType sarType) {
+    return traceScopeToFindSymbolId(text, sarType, scope);
+  }
+
+  /**
+   * This will walk up from the scope provided to try and find the
+   * Symbol Id of the Symbol that matches the supplied text
+   *
+   * @param text          The text of the Symbol we want to find
+   * @param sarType The SarType of the symbol we are searching for
+   * @param currentScope  The desired scope to search for a matching Symbol
+   * @return              The ID of the found Symbol
+   */
+  String traceScopeToFindSymbolId(String text, SarType sarType, String currentScope) {
+    if(StringUtils.isBlank(text)) {
+      logger.warn("Cannot find the symbolId of something with a blank text");
+      return "";
+    }
+    if(sarType == null || sarType == SarType.UNKNOWN) {
+      logger.warn("Unknown SarType provided");
+      return "";
+    }
+    if(StringUtils.isBlank(currentScope)) {
+      throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
+    }
+
+    if("g.D00001.C00001".equals(currentScope) && "name".equals(text)) {
+      System.out.println(this.toString());
+      System.out.printf("");
+    }
+
+    Symbol filter = new Symbol().new SymbolBuilder()
+            .text(text)
+            .scope(currentScope)
+            .build();
+    List<Symbol> found = SymbolFilter.filter(symbols, filter);
+
+    // We have to make sure we are only comparing SAR's of the same type otherwise
+    // a class instance var with the same name as the class' method would produce
+    // an error. We only want to produce an error if variables of the same scope
+    // have the same name
+    found = found.stream()
+            .filter(symbol -> sarType == SarType.getSarType(symbol.getSymbolKind()))
+            .collect(Collectors.toList());
+
+    if(CollectionUtils.isEmpty(found)) {
+      if(GLOBAL_SCOPE.equals(currentScope)) {
+        throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
+      }
+      String parentId = SymbolTableUtils.getParentScope(currentScope);
+      Symbol parentSymbol = symbols.get(parentId);
+      if(parentSymbol == null) {
+        throw new IllegalStateException(String.format(
+                "Bad scope \'%s\' symbolId \'%s\' not found",
+                currentScope,
+                parentId));
+      }
+      return traceScopeToFindSymbolId(
+              text,
+              sarType,
+              parentSymbol.getScope());
+    }
+    if(found.size() > 1) {
+      throw new IllegalStateException(String.format(
+                    "All of these Symbols have the same name/identifier in scope: %s%n%s",
+                    currentScope,
+                    found.stream()
+                            .map(Symbol::toString)
+                            .collect(Collectors.joining("\n"))));
+    }
+
+    return found.get(0).getSymbolId();
+  }
+
+  /**
+   * Get the method name or identifier name from the child node without
+   * running the visitName or visitMethodName methods
+   *
+   * @param ctx The context to get child text from
+   * @return    The child's name
+   */
+  private String getNameWithoutVisiting(ParserRuleContext ctx) {
+    if(ctx == null) {
+      return null;
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.NameContext
+                    || node instanceof CclGrammarParser.MethodNameContext)
+            .map(context -> context.getChild(0).getText())
+            .findFirst()
+            .orElse(null);
+  }
+
+  /*
+    ************ Semantic methods ************
+   */
 
   /**
    * #literalPush
@@ -79,8 +190,27 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     sas.push(sar);
   }
 
-  private void identifierExist() {
-    
+  /**
+   * #identifierExist
+   * This method will pop off the top SAR from the SAS and then check to make sure
+   * the identifier exists and does not conflict with other identifiers. If the
+   * identifier is found in the SymbolTable then the symbolId is added to the SAR
+   */
+  private void identifierExist(SarType sarType) {
+    if(sas.isEmpty()) {
+      throw new IllegalStateException("SAS is empty when trying to check if an identifier exists");
+    }
+    SAR sar = sas.pop();
+    String symbolId = traceScopeToFindSymbolId(sar.getText(), sarType);
+    if(StringUtils.isBlank(symbolId)) {
+      Optional<Integer> lineNumberOpt = sar.getLineNumber();
+      throw new IllegalStateException(String.format(
+              "The identifier \'%s\' on line %s does not exist!",
+              lineNumberOpt.isPresent() ? lineNumberOpt.get() : "UNKNOWN",
+              sar.getText()));
+    }
+    sar.setSymbolId(symbolId);
+    sas.push(sar);
   }
   
   /**
@@ -91,7 +221,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitVariableDeclaration(CclGrammarParser.VariableDeclarationContext ctx) {
     String type = getType(ctx);
-    String name = getName(ctx);
+    String name = getNameWithoutVisiting(ctx);
     boolean isArray = isArray(ctx);
 
     Data data = new Data().new DataBuilder()
@@ -101,6 +231,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .build();
     addNewSymbol(name, SymbolKind.LOCAL_VAR, scope, data);
 
+    getName(ctx);     // This adds the identifier to the SAS and verifies it
     visitAssignmentExpression(ctx);
 
     return null;
@@ -172,7 +303,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
-    String name = getClassName(ctx);
+    String name = getMethodName(ctx);
     String scopeOrig = scope;
 
     String symbolId = findSymbolId(name, SymbolKind.CONSTRUCTOR);
@@ -189,7 +320,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
-    String name = getName(ctx);
+    String name = getMethodName(ctx);
+    if(name == null) {
+      throw new IllegalStateException("Method name came back null, should not be null after the first pass");
+    }
     String scopeOrig = scope;
 
     String symbolId = findSymbolId(
@@ -213,25 +347,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   @Override
-  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {     // NOSONAR
-    List<ParseTree> children = new ArrayList<>(ctx.children);
-    
-    for(ParseTree parseTree: children) {
-      if(parseTree instanceof CclGrammarParser.MethodBodyContext) {
-        String symbolId = findSymbolId(ParserUtils.getLiteralName(CclGrammarParser.MAIN), SymbolKind.MAIN);
-        if(StringUtils.isBlank(symbolId)) {
-          return null;
-        }
-        String scopeOrig = scope;
-        scope = scope + "." + symbolId;         // NOSONAR - will only happen once
-        parseTree.accept(this);
-        scope = scopeOrig;
-      }
-      else {
-        parseTree.accept(this);
-      }
-    }
-    
+  public Object visitMainDeclaration(CclGrammarParser.MainDeclarationContext ctx) {
+    String symbolId = findSymbolId(ParserUtils.getLiteralName(CclGrammarParser.MAIN), SymbolKind.MAIN);
+    String scopeOrig = scope;
+    scope = String.format("%s.%s", scope, symbolId);
+    traverseMethodBody(ctx);
+    scope = scopeOrig;
+
     return null;
   }
 
@@ -263,5 +385,67 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitSpecialLiteral(CclGrammarParser.SpecialLiteralContext ctx) {
     literalPush(ctx, SymbolKind.SPECIAL_LIT);
     return super.visitSpecialLiteral(ctx);
+  }
+
+  @Override
+  public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
+    String name = getChildText(ctx);
+
+    // #isDuplicate(name);
+    return getChildText(ctx);
+  }
+
+  @Override
+  public Object visitMethodName(CclGrammarParser.MethodNameContext ctx) {
+    String name = getChildText(ctx);
+
+    // #isDuplicate(name);
+    return getChildText(ctx);
+  }
+
+  @Override
+  public Object visitName(CclGrammarParser.NameContext ctx) {
+    if(ctx == null) {
+      throw new IllegalStateException("NameContext cannot be null");
+    }
+    String name = getChildText(ctx);
+
+    identifierPush(ctx, name);
+    identifierExist(SarType.IDENTIFIER);
+    return getChildText(ctx);
+  }
+
+  @Override
+  public Object visitType(CclGrammarParser.TypeContext ctx) {
+    return getChildText(ctx);
+  }
+
+  @Override
+  public Object visitMemberRefz(CclGrammarParser.MemberRefzContext ctx) {
+    String name = getNameWithoutVisiting(ctx);
+    identifierPush(ctx, name);
+
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.FnArrMemberContext)
+            .map(context -> (CclGrammarParser.FnArrMemberContext)context)
+            .forEach(this::visitFnArrMember);
+    // TODO - #referenceExist
+
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.MemberRefzContext)
+            .map(context -> (CclGrammarParser.MemberRefzContext)context)
+            .forEach(this::visitMemberRefz);
+    return null;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("SymbolTable:%n\t%s%nSemantic Action Stack%n\t%s",
+            symbols.entrySet().stream()
+                    .map(Object::toString)
+                    .collect(Collectors.joining("\n\t")),
+            sas.stream()
+                    .map(Object::toString)
+                    .collect(Collectors.joining("\n\t")));
   }
 }
