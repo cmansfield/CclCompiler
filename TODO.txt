@@ -3,11 +3,6 @@ TODO List
     Symbol
         Add jackson deserialization
 
-    SymbolFilter
-        Create a filter method with a method signature of
-            List<Symbol> filter(List<Symbol> symbols, Symbol filter)
-            This will allow filtered lists to fed back into be filtered again
-
     SemanticsVisitor
         Fix overloaded methods not finding the correct Symbol
             This is happening because the SemanticsVisitor::visitMethodDeclaration 

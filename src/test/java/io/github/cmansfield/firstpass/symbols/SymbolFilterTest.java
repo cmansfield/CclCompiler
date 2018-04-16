@@ -12,8 +12,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.util.stream.Collectors;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
@@ -132,5 +134,29 @@ public class SymbolFilterTest {
     Data data = symbol.getData();
     assertNotNull(data);
     assertEquals(data.getAccessModifiers().get(0), AccessModifier.PUBLIC);
+  }
+
+  @Test
+  public void test_filter_chainedFiltering() throws IOException {
+    CompilerTest compilerTest = new CompilerTest();
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test1.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    List<Symbol> symbols = symbolTable.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
+
+    List<Symbol> found = SymbolFilter.filter(symbols, new SymbolBuilder()
+            .symbolKind(SymbolKind.METHOD)
+            .build());
+    Symbol foundSymbol = SymbolFilter.filter(found, new SymbolBuilder()
+            .text("doSomething")
+            .build()).get(0);
+    found = SymbolFilter.filter(found, new SymbolBuilder()
+            .scope(foundSymbol.getScope())
+            .build());
+
+    assertTrue(CollectionUtils.isNotEmpty(found));
+    assertEquals(found.size(), 2);
+    String scope = found.get(0).getScope();
+    assertEquals(found.get(1).getScope(), scope);
   }
 }

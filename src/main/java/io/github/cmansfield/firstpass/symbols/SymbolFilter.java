@@ -20,6 +20,32 @@ public class SymbolFilter {
    * elements of the filter object. If the filter object does not contain a
    * value then that value is not matched against the other Symbol
    *
+   * @param symbols The List of Symbols to iterate over
+   * @param filter  The Symbol object to match against
+   * @return        A list of all of the Symbols that matched against
+   *                the filter
+   */
+  public static List<Symbol> filter(List<Symbol> symbols, Symbol filter) {
+    Map<Object, Function<Symbol,Object>> filterMap = generateFilterMap(filter);
+
+    return symbols.stream()
+            .filter(symbol -> filterMap.entrySet().stream()
+                    .allMatch(entry -> {
+                      Object filterField = entry.getKey();
+                      Object symbolField = entry.getValue().apply(symbol);
+
+                      if(filterField instanceof Data) {
+                        return dataContains((Data)filterField, (Data)symbolField);
+                      }
+                      return filterField.equals(symbolField); }))
+            .collect(Collectors.toList());
+  }
+
+  /**
+   * This method will filter out a list of Symbols that match the supplied
+   * elements of the filter object. If the filter object does not contain a
+   * value then that value is not matched against the other Symbol
+   *
    * @param symbolTable The table object to get Symbols to iterate over
    * @param filter      The Symbol object to match against
    * @return            A list of all of the Symbols that matched against
