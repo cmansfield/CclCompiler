@@ -11,6 +11,7 @@ import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.collections4.BidiMap;
+import io.github.cmansfield.parser.ParserUtils;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
@@ -21,6 +22,7 @@ import java.util.function.BiConsumer;
 import java.io.IOException;
 import java.util.*;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.*;
 
 
@@ -236,6 +238,59 @@ public class SemanticsVisitorTest {
                 visitor.duplicate(symbol.getText(), symbol.getSymbolKind());
               }
             });
+  }
+  
+  @Test
+  public void test_typeExist_primitives() {
+    ParserRuleContext mockContext = mock(ParserRuleContext.class);
+    mockContext.start = new CommonToken(-1);
+    List<String> primitiveTypes = Arrays.asList(
+            ParserUtils.getLiteralName(CclGrammarParser.INT),
+            ParserUtils.getLiteralName(CclGrammarParser.CHAR),
+            ParserUtils.getLiteralName(CclGrammarParser.BOOL),
+            ParserUtils.getLiteralName(CclGrammarParser.STRING),
+            ParserUtils.getLiteralName(CclGrammarParser.VOID));
+
+    for(String type : primitiveTypes) {
+      SemanticsVisitor visitor = new SemanticsVisitor(null);
+      visitor.typePush(mockContext, type);
+      visitor.typeExist();
+      Deque<SAR> sas = visitor.getSemanticActionStack();
+
+      assertNotNull(sas);
+      assertEquals(sas.size(), 1);
+      SAR sar = sas.pop();
+      assertNotNull(sar);
+      assertEquals(sar.getType(), SarType.TYPE);
+      assertEquals(sar.getText(), type);
+    }
+  }
+  
+  @Test
+  public void test_typeExist_nonePrimitive() {
+    ParserRuleContext mockContext = mock(ParserRuleContext.class);
+    mockContext.start = new CommonToken(-1);
+    final String scope = "g.D00001";
+    final String text = "SomeClass";
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    symbolTable.put("C00001", new SymbolBuilder()
+            .symbolId("C00001")
+            .scope(scope)
+            .symbolKind(SymbolKind.CLASS)
+            .text(text)
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    visitor.setScope(scope);
+    
+    visitor.typePush(mockContext, text);
+    visitor.typeExist();
+    SAR sar = visitor.getSemanticActionStack().pop();
+
+    assertNotNull(sar);
+    assertEquals(sar.getText(), text);
+    assertEquals(sar.getType(), SarType.TYPE);
+    assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
+    assertNotNull(symbolTable.get(sar.getSymbolId()));
   }
   
   /**

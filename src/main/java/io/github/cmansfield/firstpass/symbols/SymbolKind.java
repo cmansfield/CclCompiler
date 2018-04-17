@@ -1,5 +1,7 @@
 package io.github.cmansfield.firstpass.symbols;
 
+import org.apache.commons.lang3.StringUtils;
+
 public enum SymbolKind {
   MAIN("X"),
   CLASS("C"),
@@ -48,5 +50,24 @@ public enum SymbolKind {
       return true;
     }
     return this.name().equals(STR_LIT.toString());
+  }
+
+  /**
+   * This will return a SymbolKind object that matches the string value passed in
+   * 
+   * @param value The string value of the SymbolKind to search for
+   * @return      A SymbolKind objec that matches the value passed in
+   */
+  public static SymbolKind find(String value) {
+    if(StringUtils.isBlank(value)) {
+      return SymbolKind.UNKNOWN;
+    }
+    for(SymbolKind symbolKind : SymbolKind.class.getEnumConstants()) {
+      if(symbolKind.toString().equalsIgnoreCase(value)) {
+        return symbolKind;
+      }
+    }
+
+    return SymbolKind.UNKNOWN;
   }
 }

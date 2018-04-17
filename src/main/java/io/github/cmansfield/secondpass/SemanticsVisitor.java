@@ -99,9 +99,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(CollectionUtils.isEmpty(symbolsToFilter)) {
       throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
     }
-    if(GLOBAL_SCOPE.equals(currentScope)) {
-      throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
-    }
     
     List<Symbol> found = SymbolFilter.filter(
             symbolsToFilter, 
@@ -118,6 +115,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
                       .collect(Collectors.joining("\n"))));
     }
     if(CollectionUtils.isEmpty(found)) {
+      if(GLOBAL_SCOPE.equals(currentScope)) {
+        throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
+      }
       String parentId = SymbolTableUtils.getParentScope(currentScope);
       Symbol parentSymbol = symbols.get(parentId);
       if(parentSymbol == null) {
@@ -190,8 +190,20 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param text  The name of the identifier to be pushed
    */
   private void identifierPush(ParserRuleContext ctx, String text) {
-    // identifierPush
     SAR sar = new SAR(SarType.IDENTIFIER, text);
+    sar.setLineNumber(ctx.start.getLine());
+    sas.push(sar);
+  }
+
+  /**
+   * #typePush
+   * This method will push a new type semantic action record onto the SAS
+   * 
+   * @param ctx   The context of where int the tree the visitor currently is
+   * @param text  The name of the type to be pushed
+   */
+  void typePush(ParserRuleContext ctx, String text) {
+    SAR sar = new SAR(SarType.TYPE, text);
     sar.setLineNumber(ctx.start.getLine());
     sas.push(sar);
   }
@@ -202,12 +214,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * the identifier exists and does not conflict with other identifiers. If the
    * identifier is found in the SymbolTable then the symbolId is added to the SAR
    */
-  private void identifierExist(SarType sarType) {
+  private void identifierExist() {
     if(sas.isEmpty()) {
       throw new IllegalStateException("SAS is empty when trying to check if an identifier exists");
     }
     SAR sar = sas.pop();
-    String symbolId = traceScopeToFindSymbolId(sar.getText(), sarType, scope);
+    String symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.IDENTIFIER, scope);
     if(StringUtils.isBlank(symbolId)) {
       Optional<Integer> lineNumberOpt = sar.getLineNumber();
       throw new IllegalStateException(String.format(
@@ -219,6 +231,34 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     sas.push(sar);
   }
 
+  /**
+   * #typeExist
+   * This method will pop off the top SAR from the SAS and then check to make sure
+   * the type exists and does not conflict with other types. If the type is found 
+   * in the SymbolTable then the symbolId is added to the SAR
+   */
+  void typeExist() {
+    if(sas.isEmpty()) {
+      throw new IllegalStateException("SAS is empty when trying to check if a type exists");
+    }
+    SAR sar = sas.pop();
+    if(ParserUtils.isPrimitiveType(sar.getText())) {
+      sas.push(sar);
+      return;
+    }
+    
+    String symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.TYPE, scope);
+    if(StringUtils.isBlank(symbolId)) {
+      Optional<Integer> lineNumberOpt = sar.getLineNumber();
+      throw new IllegalStateException(String.format(
+              "The type \'%s\' on line %s does not exist!",
+              lineNumberOpt.isPresent() ? lineNumberOpt.get() : "UNKNOWN",
+              sar.getText()));
+    }
+    sar.setSymbolId(symbolId);
+    sas.push(sar);
+  }
+  
   /**
    * #duplicate
    * This method will check to make sure there isn't a duplicate element of the same 
@@ -354,6 +394,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {     // NOSONAR
+    getType(ctx);
     String name = getMethodName(ctx);
     if(name == null) {
       throw new IllegalStateException("Method name came back null, should not be null after the first pass");
@@ -445,13 +486,16 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String name = getChildText(ctx);
 
     identifierPush(ctx, name);
-    identifierExist(SarType.IDENTIFIER);
+    identifierExist();
     return getChildText(ctx);
   }
 
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {
-    return getChildText(ctx);
+    String text = getChildText(ctx);
+    typePush(ctx, text);
+    typeExist();
+    return text;
   }
 
   @Override

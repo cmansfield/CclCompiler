@@ -25,4 +25,29 @@ public class ParserUtils {
     }
     return type;
   }
+
+  /**
+   * This will get a string representation of a type and check to see if it is a primitive type
+   * 
+   * @param type  The type to check against
+   * @return      Boolean true if it is a primitive 
+   */
+  public static boolean isPrimitiveType(String type) {
+    if(StringUtils.isBlank(type)) {
+      return false;
+    }
+    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.INT))) {
+      return true;
+    }
+    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.CHAR))) {
+      return true;
+    }
+    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.BOOL))) {
+      return true;
+    }
+    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.STRING))) {
+      return true;
+    }
+    return type.equals(ParserUtils.getLiteralName(CclGrammarParser.VOID));
+  }
 }
