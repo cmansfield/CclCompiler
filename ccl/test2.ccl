@@ -1,29 +1,9 @@
 
-
-public class TestClass {
-    public void someMethod() {
-        int number;
-        
-        for(int i = 0; i < number; i + 1) {
-            string name;
-        }
-    }
-}
-
-
 public void main() {
     int num = 5;
 }
 
-
 private class Employee {
-    private string name;
-
-    public Employee(string name) {
-        this.name = name;
-    }
-
-    public string getName() {
-        return name;
+    public void someMethod(int test, string test) {
     }
 }

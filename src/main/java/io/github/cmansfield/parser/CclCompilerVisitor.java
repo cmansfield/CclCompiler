@@ -285,4 +285,19 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
             .map(context -> (CclGrammarParser.MethodBodyContext)context)
             .forEach(this::visitMethodBody);
   }
+
+  /**
+   * This will get the children from the context and then traverse any parameter list nodes
+   *
+   * @param ctx     The current context to search for any parameter list nodes
+   */
+  protected void traverseParameterList(ParserRuleContext ctx) {
+    if(ctx == null || ctx.children == null) {
+      return;
+    }
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ParameterListContext)
+            .map(context -> (CclGrammarParser.ParameterListContext)context)
+            .forEach(this::visitParameterList);
+  }
 }

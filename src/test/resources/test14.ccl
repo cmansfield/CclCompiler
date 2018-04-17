@@ -1,0 +1,9 @@
+
+public void main() {}
+
+public class Employee {
+    private string name;
+    public int name;
+    
+    public Employee() {}
+}

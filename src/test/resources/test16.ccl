@@ -1,0 +1,10 @@
+
+public void main() {}
+
+public class Employee {
+    private string name;
+    
+    public Employee() {}
+    
+    public void calculate(int test, string test) {}
+}

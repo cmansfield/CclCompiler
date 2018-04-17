@@ -260,7 +260,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     addNewSymbol(name, SymbolKind.LOCAL_VAR, scope, data);
 
     getName(ctx);     // This adds the identifier to the SAS and verifies it
-    // TODO - check to make sure I don't need to make a duplicate call here
     visitAssignmentExpression(ctx);
 
     return null;
@@ -366,6 +365,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
 
     scope = scope + "." + symbolId;
+    traverseParameterList(ctx);
     traverseMethodBody(ctx);
     scope = scopeOrig;
 
