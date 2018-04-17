@@ -19,5 +19,3 @@ TODO List
         SymbolTableVisitor
         SemanticsVisitor
         SymbolTableUtils
-        SymbolFilter
-        syntax

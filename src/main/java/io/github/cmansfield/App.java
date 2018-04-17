@@ -1,7 +1,6 @@
 package io.github.cmansfield;
 
 import io.github.cmansfield.compiler.Compiler;
-import io.github.cmansfield.compiler.CompilerOptions;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.apache.log4j.Level;

@@ -189,8 +189,54 @@ public class SemanticsVisitorTest {
               }
             });
   }
-  
-  // TODO - Add more unit tests for the duplicate method
+
+  @Test (expectedExceptions = IllegalStateException.class)
+  public void test_duplicate_fail_duplicateClasses() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test11.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+
+    symbolTable.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .forEach(symbol -> {
+              SymbolKind symbolKind = symbol.getSymbolKind();
+              if(symbolKind == SymbolKind.CLASS) {
+                visitor.setScope(symbol.getScope());
+                visitor.duplicate(symbol.getText(), symbol.getSymbolKind());
+              }
+            });
+  }
+
+  @Test (expectedExceptions = IllegalStateException.class)
+  public void test_duplicate_fail_duplicateMethods() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test12.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+
+    symbolTable.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .forEach(symbol -> {
+              SymbolKind symbolKind = symbol.getSymbolKind();
+              if(symbolKind == SymbolKind.METHOD) {
+                visitor.setScope(symbol.getScope());
+                visitor.duplicate(symbol.getText(), symbol.getSymbolKind());
+              }
+            });
+  }
+
+  @Test (expectedExceptions = IllegalStateException.class)
+  public void test_duplicate_fail_duplicateConstructors() throws IOException {
+    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test13.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+
+    symbolTable.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .forEach(symbol -> {
+              SymbolKind symbolKind = symbol.getSymbolKind();
+              if(symbolKind == SymbolKind.CONSTRUCTOR) {
+                visitor.setScope(symbol.getScope());
+                visitor.duplicate(symbol.getText(), symbol.getSymbolKind());
+              }
+            });
+  }
   
   /**
    * This is a template method for testing each of the different type of literals

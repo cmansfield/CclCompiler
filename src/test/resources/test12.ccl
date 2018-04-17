@@ -1,0 +1,22 @@
+
+public void main() {
+    string name;
+}
+
+public class name {
+    string name;
+    
+    public name() {
+        this.name = "";
+    }
+
+    public string name() {
+        return name;
+    }
+    
+    public void printName() {
+        print(name);
+    }
+    
+    public void printName() {}
+}
