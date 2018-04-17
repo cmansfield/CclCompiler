@@ -60,19 +60,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param sarType The SarType of the symbol we are searching for
    * @return        The ID of the found Symbol
    */
-  private String traceScopeToFindSymbolId(String text, SarType sarType) {
-    return traceScopeToFindSymbolId(text, sarType, scope);
-  }
-
-  /**
-   * This will walk up from the scope provided to try and find the
-   * Symbol Id of the Symbol that matches the supplied text
-   *
-   * @param text          The text of the Symbol we want to find
-   * @param sarType The SarType of the symbol we are searching for
-   * @param currentScope  The desired scope to search for a matching Symbol
-   * @return              The ID of the found Symbol
-   */
   String traceScopeToFindSymbolId(String text, SarType sarType, String currentScope) {
     if(StringUtils.isBlank(text)) {
       logger.warn("Cannot find the symbolId of something with a blank text");
@@ -82,13 +69,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       logger.warn("Unknown SarType provided");
       return "";
     }
-    if(StringUtils.isBlank(currentScope)) {
-      throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
-    }
 
     Symbol filter = new SymbolBuilder()
             .text(text)
-            .scope(currentScope)
             .build();
     List<Symbol> found = SymbolFilter.filter(symbols, filter);
 
@@ -100,10 +83,41 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .filter(symbol -> sarType == SarType.getSarType(symbol.getSymbolKind()))
             .collect(Collectors.toList());
 
+    return traceScopeToFindSymbolId(text, found, currentScope);
+  }
+
+  /**
+   * This will walk up from the current scope to try and find the
+   * Symbol Id of the Symbol that matches the supplied text
+   * 
+   * @param text            Text of the Symbol to find
+   * @param symbolsToFilter A List of Symbols to filter through
+   * @param currentScope    The currentScope to check for the desired Symbol
+   * @return                The Symbol ID if found
+   */
+  private String traceScopeToFindSymbolId(String text, List<Symbol> symbolsToFilter, String currentScope) {
+    if(CollectionUtils.isEmpty(symbolsToFilter)) {
+      throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
+    }
+    if(GLOBAL_SCOPE.equals(currentScope)) {
+      throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
+    }
+    
+    List<Symbol> found = SymbolFilter.filter(
+            symbolsToFilter, 
+            new SymbolBuilder()
+              .scope(currentScope)
+              .build());
+    
+    if(found.size() > 1) {
+      throw new IllegalStateException(String.format(
+              "All of these Symbols have the same name/identifier in scope: %s%n%s",
+              currentScope,
+              found.stream()
+                      .map(Symbol::toString)
+                      .collect(Collectors.joining("\n"))));
+    }
     if(CollectionUtils.isEmpty(found)) {
-      if(GLOBAL_SCOPE.equals(currentScope)) {
-        throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
-      }
       String parentId = SymbolTableUtils.getParentScope(currentScope);
       Symbol parentSymbol = symbols.get(parentId);
       if(parentSymbol == null) {
@@ -114,18 +128,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       }
       return traceScopeToFindSymbolId(
               text,
-              sarType,
+              symbolsToFilter,
               parentSymbol.getScope());
     }
-    if(found.size() > 1) {
-      throw new IllegalStateException(String.format(
-                    "All of these Symbols have the same name/identifier in scope: %s%n%s",
-                    currentScope,
-                    found.stream()
-                            .map(Symbol::toString)
-                            .collect(Collectors.joining("\n"))));
-    }
-
+    
     return found.get(0).getSymbolId();
   }
 
@@ -201,7 +207,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       throw new IllegalStateException("SAS is empty when trying to check if an identifier exists");
     }
     SAR sar = sas.pop();
-    String symbolId = traceScopeToFindSymbolId(sar.getText(), sarType);
+    String symbolId = traceScopeToFindSymbolId(sar.getText(), sarType, scope);
     if(StringUtils.isBlank(symbolId)) {
       Optional<Integer> lineNumberOpt = sar.getLineNumber();
       throw new IllegalStateException(String.format(

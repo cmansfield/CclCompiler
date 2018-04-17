@@ -3,14 +3,17 @@ TODO List
     Symbol
         Add jackson deserialization
 
+    iCode
+        serialize and deserialize iCode objects
+    
+    tCode    
+        Use an interface with tCode manager to allow different types of tCode generation 
+
     SemanticsVisitor
         Fix overloaded methods not finding the correct Symbol
             This is happening because the SemanticsVisitor::visitMethodDeclaration 
-            findSymbolId cannot find methods bases on the different parameters
+            findSymbolId cannot find methods based on the different parameters
         Fix template classes/methods on the second pass
-        Have traceScopeToFindSymbolId method use the new filter method where
-            a list of Symbols matching the supplied text is filtered on rather
-            than filtering on the entire Symbol map each time
 
     CompilerTest
         Move the compile methods out of this class into their own TestingUtils class

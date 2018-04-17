@@ -4,6 +4,6 @@ public void main() {
 }
 
 private class Employee {
-    public void someMethod(int test, string test) {
+    public void someMethod(int test) {
     }
 }
