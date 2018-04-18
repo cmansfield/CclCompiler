@@ -1,19 +1,25 @@
 package io.github.cmansfield.secondpass;
 
+import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /*
 Semantic Action Record
  */
 public class SAR {
   private final SarType type;
+  private final String text;
+  private List<String> symbolIds;
   private String symbolId;
   private Integer lineNumber;
-  private String text;
 
   public SAR(SarType type, String text) {
     this.type = type == null ? SarType.UNKNOWN : type;
     this.text = text == null ? "" : text;
+    this.symbolIds = new ArrayList<>();
     this.symbolId = "";
   }
   
@@ -39,6 +45,24 @@ public class SAR {
     this.symbolId = symbolId;
   }
 
+  public List<String> getSymbolIds() {
+    return symbolIds == null ? Collections.emptyList() : symbolIds;
+  }
+
+  public void setSymbolIds(List<String> symbolIds) {
+    if(symbolIds == null) {
+      return;
+    }
+    this.symbolIds = symbolIds;
+  }
+  
+  public void addSymbolId(String symbolId) {
+    if(symbolIds == null) {
+      symbolIds = new ArrayList<>();
+    }
+    symbolIds.add(symbolId);
+  }
+  
   public Optional<Integer> getLineNumber() {
     return lineNumber == null ? Optional.empty() : Optional.of(lineNumber);
   }
@@ -54,10 +78,11 @@ public class SAR {
   @Override
   public String toString() {
     return String.format(
-            "SAR - type:%s SymbolId:\'%s\' lineNumber:%s text:\'%s\'",
+            "SAR - type:%s SymbolId:\'%s\' lineNumber:%s text:\'%s\' argIds(%s)",
             type.toString(),
             getSymbolId(),
             getLineNumber().isPresent() ? getLineNumber().get() : "",
-            getText());
+            getText(),
+            getSymbolIds().stream().collect(Collectors.joining(", ")));
   }
 }

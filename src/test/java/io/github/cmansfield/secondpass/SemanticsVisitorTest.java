@@ -1,5 +1,6 @@
 package io.github.cmansfield.secondpass;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
@@ -291,6 +292,67 @@ public class SemanticsVisitorTest {
     assertEquals(sar.getType(), SarType.TYPE);
     assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
     assertNotNull(symbolTable.get(sar.getSymbolId()));
+  }
+  
+  @Test
+  public void test_endOfArgumentList() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.BEGINNING_ARG_LIST, "", "", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "I00001", "", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "I00002", "", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "I00003", "", 5));
+    
+    visitor.endOfArgumentList();
+
+    assertTrue(CollectionUtils.isNotEmpty(sas));
+    assertEquals(sas.size(), 1);
+    SAR sar = sas.pop();
+    assertNotNull(sar);
+    assertTrue(sar.getLineNumber().isPresent());
+    assertEquals(sar.getLineNumber().get(), Integer.valueOf(5));
+    assertEquals(sar.getType(), SarType.ARG_LIST);
+    List<String> symbolIds = sar.getSymbolIds();
+    assertTrue(CollectionUtils.isNotEmpty(symbolIds));
+    assertEquals(symbolIds.size(), 3);
+    assertTrue(symbolIds.contains("I00001"));
+    assertTrue(symbolIds.contains("I00002"));
+    assertTrue(symbolIds.contains("I00003"));
+  }
+
+  @Test (expectedExceptions = IllegalStateException.class)
+  public void test_endOfArgumentList_emtpySas() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    
+    visitor.endOfArgumentList();
+  }
+
+  @Test (expectedExceptions = IllegalStateException.class)
+  public void test_endOfArgumentList_noBal() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.IDENTIFIER, "I00001", "", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "I00002", "", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "I00003", "", 5));
+
+    visitor.endOfArgumentList();
+  }
+
+  @Test
+  public void test_endOfArgumentList_missingSymbolId() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.BEGINNING_ARG_LIST, "", "", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "I00002", "", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "", "", 5));
+
+    try {
+      visitor.endOfArgumentList();
+      fail("Should have errored out");
+    }
+    catch(IllegalStateException e) {
+      assertTrue(e.getMessage().contains("Missing SymbolId for SAR"));
+    }
   }
   
   /**

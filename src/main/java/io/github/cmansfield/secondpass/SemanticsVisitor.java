@@ -221,13 +221,44 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * 
    * @param ctx   The context of where int the tree the visitor currently is
    */
-  void balPush(ParserRuleContext ctx) {
+  private void balPush(ParserRuleContext ctx) {
     // Beginning argument list Push
     sas.push(new SAR(
             SarType.BEGINNING_ARG_LIST,
             "",
             SarType.BEGINNING_ARG_LIST.toString(),
             ctx.start.getLine()));
+  }
+
+  /**
+   * #EAL
+   * End of argument list
+   * This will pop SARs from the SAS until a SarType.BEGINNING_ARG_LIST is found, all args
+   * popped off will be inserted into a single argumentList SAR
+   */
+  void endOfArgumentList() {
+    List<String> argIds = new ArrayList<>();
+    SAR sar = null;
+    SAR argListSar = new SAR(
+            SarType.ARG_LIST,
+            "");
+    
+    while(CollectionUtils.isNotEmpty(sas) && (sar = sas.pop()).getType() != SarType.BEGINNING_ARG_LIST) {
+      String symbolId = sar.getSymbolId();
+      if(StringUtils.isBlank(symbolId)) {
+        throw new IllegalStateException(String.format("Missing SymbolId for SAR: %s", sar));
+      }
+      argIds.add(symbolId);
+    }
+    
+    if(sar == null || sar.getType() != SarType.BEGINNING_ARG_LIST) {
+      throw new IllegalStateException("End of Argument List called but the SAS is either empty or does not contain a BEGINNING_ARG_LIST Semantic Action Record");
+    }
+
+    Collections.reverse(argIds);
+    argListSar.setSymbolIds(argIds);
+    sar.getLineNumber().ifPresent(argListSar::setLineNumber);
+    sas.push(argListSar);
   }
   
   /**
@@ -588,6 +619,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitArgumentList(CclGrammarParser.ArgumentListContext ctx) {
     balPush(ctx);
-    return super.visitArgumentList(ctx);
+    Object result = super.visitArgumentList(ctx);
+    endOfArgumentList();
+    return result;
   }
 }
