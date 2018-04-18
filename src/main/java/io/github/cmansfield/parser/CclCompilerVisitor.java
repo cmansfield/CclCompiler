@@ -186,15 +186,15 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
   }
 
   /**
-   * This will get the children from the context and then traverse any assignment expression nodes 
+   * This will get the children from the context and then traverse any assignment operation nodes
    *
    * @param ctx     The current context to search for any assignment expression nodes
    */
-  protected void visitAssignmentExpression(ParserRuleContext ctx) {
+  protected void traverseAssignmentOperation(ParserRuleContext ctx) {
     ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.AssignmentExpressionContext)
-            .map(context -> (CclGrammarParser.AssignmentExpressionContext)context)
-            .forEach(this::visitAssignmentExpression);
+            .filter(node -> node instanceof CclGrammarParser.AssignmentOperationContext)
+            .map(context -> (CclGrammarParser.AssignmentOperationContext)context)
+            .forEach(this::visitAssignmentOperation);
   }
 
   /**

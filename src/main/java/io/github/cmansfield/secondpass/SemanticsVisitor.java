@@ -21,15 +21,21 @@ import java.util.*;
 
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
+  private Deque<String> operatorStack;
   private Deque<SAR> sas;
 
   public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
     super(symbols);
-    sas = new ArrayDeque<>();
+    sas = new LinkedList<>();
+    operatorStack = new LinkedList<>();
   }
 
-  public Deque<SAR> getSemanticActionStack() {
-    return sas == null ? new ArrayDeque<>() : sas;
+  Deque<SAR> getSemanticActionStack() {
+    return sas == null ? new LinkedList<>() : sas;
+  }
+
+  Deque<String> getOperatorStack() {
+    return operatorStack == null ? new LinkedList() : operatorStack;
   }
 
   void setScope(String scope) {
@@ -306,7 +312,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     addNewSymbol(name, SymbolKind.LOCAL_VAR, scope, data);
 
     getName(ctx);     // This adds the identifier to the SAS and verifies it
-    visitAssignmentExpression(ctx);
+    traverseAssignmentOperation(ctx);
 
     return null;
   }
@@ -521,12 +527,44 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public String toString() {
-    return String.format("SymbolTable:%n\t%s%nSemantic Action Stack%n\t%s",
+    return String.format("SymbolTable:%n\t%s%nSemantic Action Stack%n\t%s%nOperator Stack%n\t%s",
             symbols.entrySet().stream()
                     .map(Object::toString)
                     .collect(Collectors.joining("\n\t")),
             sas.stream()
                     .map(Object::toString)
+                    .collect(Collectors.joining("\n\t")),
+            operatorStack.stream()
                     .collect(Collectors.joining("\n\t")));
+  }
+
+  @Override
+  public Object visitAssignmentOperation(CclGrammarParser.AssignmentOperationContext ctx) {
+    operatorStack.push(getChildText(ctx));
+    return super.visitAssignmentOperation(ctx);
+  }
+
+  @Override
+  public Object visitBooleanOperation(CclGrammarParser.BooleanOperationContext ctx) {
+    operatorStack.push(getChildText(ctx));
+    return super.visitBooleanOperation(ctx);
+  }
+
+  @Override
+  public Object visitMathOperation(CclGrammarParser.MathOperationContext ctx) {
+    operatorStack.push(getChildText(ctx));
+    return super.visitMathOperation(ctx);
+  }
+
+  @Override
+  public Object visitInvokeOperator(CclGrammarParser.InvokeOperatorContext ctx) {
+    operatorStack.push(getChildText(ctx));
+    return super.visitInvokeOperator(ctx);
+  }
+
+  @Override
+  public Object visitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx) {
+    operatorStack.push(getChildText(ctx));
+    return super.visitArrayOperator(ctx);
   }
 }

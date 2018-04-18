@@ -153,7 +153,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .build();
     addNewSymbol(name, SymbolKind.INSTANCE_VAR, scope, data);
 
-    visitAssignmentExpression(ctx);
+    traverseAssignmentOperation(ctx);
     
     return null;
   }

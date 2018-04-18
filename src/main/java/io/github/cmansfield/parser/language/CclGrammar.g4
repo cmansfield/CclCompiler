@@ -24,26 +24,26 @@ classMemberDeclaration
 methodDeclaration : modifier* templateDeclaration? type methodName '(' parameterList? ')'
         methodBody ;
 
-fieldDeclaration : modifier* type name (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
+fieldDeclaration : modifier* type name ('[' ']')? (assignmentOperation)? ';' ;
 
 parameterList : parameter (',' parameter)* ;
 
-parameter : type name (arrayOperator)? ;
+parameter : type name ('[' ']')? ;
 
 constructorDeclaration : modifier? methodName '(' parameterList? ')' methodBody ;
 
 methodBody : '{' (variableDeclaration | statement)* '}' ;
 
-variableDeclaration : type name (arrayOperator)? (ASSIGN assignmentExpression)? ';' ;
+variableDeclaration : type name ('[' ']')? (assignmentOperation)? ';' ;
 
 statement 
-    : IF '(' expression ')' statement (ELSE statement)?
-    | WHILE '(' expression ')' statement
+    : IF invokeOperator expression ')' statement (ELSE statement)?
+    | WHILE invokeOperator expression ')' statement
     | RETURN expression? ';'
-    | PRINT '(' expression ')' ';'
-    | READ invokeOperator ';'
+    | PRINT invokeOperator expression ')' ';'
+    | READ invokeOperator ')' ';'
     | SPAWN expression SET name ';'
-    | BLOCK invokeOperator ';'
+    | BLOCK invokeOperator ')' ';'
     | LOCK name ';'
     | UNLOCK name ';'
     | statementWithScope
@@ -51,7 +51,7 @@ statement
     ;
     
 statementWithScope 
-    : FOR '(' (variableDeclaration | expression ';' | ';') expression? ';' expression? ')'
+    : FOR invokeOperator (variableDeclaration | expression ';' | ';') expression? ';' expression? ')'
       statement
     | '{' (statement | variableDeclaration)* '}'
     ;
@@ -68,12 +68,12 @@ typeCast : '(' PRIMITIVE_TYPE ')' ;
 braceEnclosedInitializer : '{' argumentList? '}' ;
 
 newDeclaration 
-    : '(' argumentList? ')'
-    | '[' expression ']'
+    : invokeOperator argumentList? ')'
+    | arrayOperator expression ']'
     ;
 
 expression 
-    : '(' expression ')' expressionz?
+    : invokeOperator expression ')' expressionz?
     |  (TRUE | FALSE | NULL) expressionz?
     |  THIS memberRefz? expressionz?
     | numericLiteral expressionz?
@@ -87,8 +87,8 @@ expression
     ;
 
 fnArrMember 
-    : '(' argumentList? ')'
-    | '[' expression ']'
+    : invokeOperator argumentList? ')'
+    | arrayOperator expression ']'
     ;
 
 memberRefz : '.' name fnArrMember? memberRefz? ;
@@ -119,9 +119,9 @@ mathOperation
     | DIV expression
     ;
     
-invokeOperator : '(' ')' ;
+invokeOperator : '(' ;
 
-arrayOperator : '[' ']' ;
+arrayOperator : '[' ;
 
 argumentList : expression (',' expression)* ;
 
