@@ -1,20 +1,20 @@
 package io.github.cmansfield.secondpass;
 
+import java.util.stream.Collectors;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /*
 Semantic Action Record
  */
 public class SAR {
-  private final SarType type;
   private final String text;
   private List<String> symbolIds;
-  private String symbolId;
   private Integer lineNumber;
+  private String symbolId;
+  private SarType type;
 
   public SAR(SarType type, String text) {
     this.type = type == null ? SarType.UNKNOWN : type;
@@ -37,6 +37,10 @@ public class SAR {
     return type;
   }
 
+  public void setType(SarType type) {
+    this.type = type;
+  }
+  
   public String getSymbolId() {
     return symbolId == null ? "" : symbolId;
   }

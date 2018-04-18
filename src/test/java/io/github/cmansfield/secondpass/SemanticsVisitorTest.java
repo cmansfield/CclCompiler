@@ -135,13 +135,13 @@ public class SemanticsVisitorTest {
     assertEquals(symbol.getSymbolKind(), symbolKind);
   }
 
-  @Test (expectedExceptions = IllegalStateException.class)
+  @Test
   public void test_traceScopeToFindSymbolId_notFound() throws IOException {
     BidiMap<String, Symbol> symbolTable = compilerTest.compile("test7.ccl");
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
-    visitor.traceScopeToFindSymbolId("something", SarType.IDENTIFIER, "g.D00001.C00001.M00001");
+    String symbolId = visitor.traceScopeToFindSymbolId("something", SarType.IDENTIFIER, "g.D00001.C00001.M00001");
 
-    fail("Should not get to this point");
+    assertNull(symbolId);
   }
 
   @Test

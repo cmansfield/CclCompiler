@@ -1,5 +1,14 @@
 
 public void main() {
-    int numbers[] = {3, 5, 1, 7};
+    Employee employee = new Employee();
+    // employee.getName();
+    Employee.companyId = 5;
 }
 
+public class Employee {
+    static public int companyId;    
+    
+    public string getName() {
+        return "John";
+    }
+}

@@ -103,7 +103,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private String traceScopeToFindSymbolId(String text, List<Symbol> symbolsToFilter, String currentScope) {
     if(CollectionUtils.isEmpty(symbolsToFilter)) {
-      throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
+      logger.info(String.format("Could not find Symbol \'%s\'", text));
+      return null;
     }
     
     List<Symbol> found = SymbolFilter.filter(
@@ -274,6 +275,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     SAR sar = sas.pop();
     String symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.IDENTIFIER, scope);
     if(StringUtils.isBlank(symbolId)) {
+      symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.TYPE, scope);
+      sar.setType(SarType.TYPE);
+    }
+    if(StringUtils.isBlank(symbolId)) {
       Optional<Integer> lineNumberOpt = sar.getLineNumber();
       throw new IllegalStateException(String.format(
               "The identifier \'%s\' on line %s does not exist!",
@@ -304,12 +309,49 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(StringUtils.isBlank(symbolId)) {
       Optional<Integer> lineNumberOpt = sar.getLineNumber();
       throw new IllegalStateException(String.format(
-              "The type \'%s\' on line %s does not exist!",
+              "%s : The type \'%s\' does not exist!",
               lineNumberOpt.isPresent() ? lineNumberOpt.get() : "UNKNOWN",
               sar.getText()));
     }
     sar.setSymbolId(symbolId);
     sas.push(sar);
+  }
+
+  /**
+   * #referenceExist
+   * This method will pop off the top SAR from the SAS and then check to make sure the reference 
+   * exists and does not conflict with other references. If the reference is found in the 
+   * SymbolTable then the symbolId is added to the SAR
+   */
+  private void referenceExist() {
+    if(CollectionUtils.isEmpty(sas) || sas.size() < 2) {
+      throw new IllegalStateException("SAS does not have enough SARs when trying to check if a reference exists");
+    }
+    SAR fieldSar = sas.pop();
+    SAR parentSar = sas.pop();
+
+    if(parentSar.getType() == SarType.IDENTIFIER) {
+      // Then the parent must be an instantiated object and the field a non-static 
+      // class member that is visible
+      Optional<String> className = symbols.get(parentSar.getSymbolId()).getData().getType();
+      
+      
+      System.out.println();
+    }
+    else if(parentSar.getType() == SarType.TYPE) {
+      // Then the parent must be a class and the field a static member of that class
+
+      System.out.println();
+    }
+    else {
+      throw new IllegalStateException(String.format("%s : %s.%s, %s is not a object or a class and cannot referenced from",
+              parentSar.getLineNumber().isPresent() ? parentSar.getLineNumber().get() : "--",
+              parentSar.getText(),
+              fieldSar.getText(),
+              parentSar.getText()));
+    }
+    
+    System.out.println();
   }
   
   /**
@@ -564,8 +606,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .filter(node -> node instanceof CclGrammarParser.FnArrMemberContext)
             .map(context -> (CclGrammarParser.FnArrMemberContext)context)
             .forEach(this::visitFnArrMember);
-    // TODO - #referenceExist
-
+    referenceExist();
+    
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.MemberRefzContext)
             .map(context -> (CclGrammarParser.MemberRefzContext)context)
