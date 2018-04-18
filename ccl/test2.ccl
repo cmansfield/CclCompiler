@@ -1,9 +1,5 @@
 
 public void main() {
-    int num = 5;
+    int numbers[] = {3, 5, 1, 7};
 }
 
-private class Employee {
-    public void someMethod(int test) {
-    }
-}

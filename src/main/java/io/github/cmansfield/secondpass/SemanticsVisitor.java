@@ -162,7 +162,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /*
-    ************ Semantic methods ************
+    **************************************
+    *           Semantic methods
+    **************************************
    */
 
   /**
@@ -214,6 +216,20 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     sas.push(sar);
   }
 
+  /**
+   * #BeginningArgumentListPush
+   * 
+   * @param ctx   The context of where int the tree the visitor currently is
+   */
+  void balPush(ParserRuleContext ctx) {
+    // Beginning argument list Push
+    sas.push(new SAR(
+            SarType.BEGINNING_ARG_LIST,
+            "",
+            SarType.BEGINNING_ARG_LIST.toString(),
+            ctx.start.getLine()));
+  }
+  
   /**
    * #identifierExist
    * This method will pop off the top SAR from the SAS and then check to make sure
@@ -392,6 +408,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
 
     scope = scope + "." + symbolId;
+    traverseParameterList(ctx);
     traverseMethodBody(ctx);
     scope = scopeOrig;
 
@@ -566,5 +583,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx) {
     operatorStack.push(getChildText(ctx));
     return super.visitArrayOperator(ctx);
+  }
+
+  @Override
+  public Object visitArgumentList(CclGrammarParser.ArgumentListContext ctx) {
+    balPush(ctx);
+    return super.visitArgumentList(ctx);
   }
 }
