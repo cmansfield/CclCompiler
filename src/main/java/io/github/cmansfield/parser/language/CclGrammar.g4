@@ -74,8 +74,8 @@ newDeclaration
 
 expression 
     : invokeOperator expression ')' expressionz?
-    |  (TRUE | FALSE | NULL) expressionz?
-    |  THIS memberRefz? expressionz?
+    | (TRUE | FALSE | NULL) expressionz?
+    | self memberRefz? expressionz?
     | numericLiteral expressionz?
     | characterLiteral expressionz?
     | stringLiteral expressionz?
@@ -138,6 +138,8 @@ className : IDENTIFIER ;
 methodName : IDENTIFIER ;
 
 name : IDENTIFIER ;
+
+self : THIS ;
 
 stringLiteral : STRING_LITERAL ;
 

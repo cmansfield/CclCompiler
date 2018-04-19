@@ -1,10 +1,16 @@
 
-public void main() {
-    Employee employee = new Employee();
-    // Employee.companyId = 5;
-    // Employee.getName();
-    employee.companyId = 5;
-    // employee.getName();
+public void main() {}
+
+public class Company {
+    private static Employee ceo;
+    
+    public Company(Employee ceo) {
+        this.ceo = ceo;
+    }
+    
+    public string getCeoName() {
+        return ceo.getName();
+    }
 }
 
 public class Employee {

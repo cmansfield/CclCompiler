@@ -354,8 +354,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
         throwExcpetion.accept(String.format("instance \'%s\'s class not found", parentSar.getText()));
       }
     }
-    else if(parentSar.getType() != SarType.TYPE) {
-      throwExcpetion.accept(String.format("%s is not a object or a class and cannot referenced from", parentSar.getText()));
+    else if(parentSar.getType() != SarType.TYPE && parentSar.getType() != SarType.REFERENCE) {
+      throwExcpetion.accept(String.format("\'%s\' is not a object or a class and cannot referenced from", parentSar.getText()));
     }
 
     Symbol classSymbol = symbols.get(classId);
@@ -365,14 +365,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .build();
     List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
     if(foundSymbols.size() != 1) {
-      throwExcpetion.accept(String.format("Too many \'%s\'s in the same scope", fieldSar.getText()));
+      throwExcpetion.accept(String.format("Too many or too few \'%s\'s in the same scope", fieldSar.getText()));
     }
     Symbol fieldSymbol = foundSymbols.get(0);
     fieldSar.setSymbolId(fieldSymbol.getSymbolId());
     Data fieldData = fieldSymbol.getData();
     List<AccessModifier> accessModifiers = fieldData.getAccessModifiers();
 
-    if(accessModifiers.contains(AccessModifier.PRIVATE)) {
+    if(ParserUtils.getLiteralName(CclGrammarParser.THIS).equals(parentSar.getText())) {
+      if(accessModifiers.contains(AccessModifier.STATIC)) {
+        throwExcpetion.accept(String.format(
+                "Cannot access static \'%s\' from an instance of \'%s\'",
+                fieldSar.getText(),
+                ParserUtils.getLiteralName(CclGrammarParser.THIS)));
+      }
+    }
+    else if(accessModifiers.contains(AccessModifier.PRIVATE)) {
       throwExcpetion.accept(String.format("\'%s\' is private and cannot be accessed", fieldSar.getText()));
     }
     if(parentSar.getType() == SarType.TYPE && !accessModifiers.contains(AccessModifier.STATIC)) {
@@ -711,5 +719,42 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Object result = super.visitArgumentList(ctx);
     endOfArgumentList();
     return result;
+  }
+
+  @Override
+  public Object visitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx) {
+    getName(ctx);    
+    return super.visitFieldDeclaration(ctx);
+  }
+
+  @Override
+  public Object visitSelf(CclGrammarParser.SelfContext ctx) {
+    String workingScope = scope;
+    Symbol symbol = null;
+    String classId = "";
+
+    while(StringUtils.isNotBlank(classId = SymbolTableUtils.getParentScope(workingScope))) {
+      symbol = symbols.get(classId);
+      if(symbol.getSymbolKind() == SymbolKind.CLASS) {
+        break;
+      }
+      workingScope = symbol.getScope(); 
+    }
+
+    if(symbol == null || symbol.getSymbolKind() != SymbolKind.CLASS) {
+      throw new IllegalStateException(String.format(
+              "%s : The keyword \'%s\' cannot be used here", 
+              ctx.start.getLine(),
+              ParserUtils.getLiteralName(CclGrammarParser.THIS)));
+    }
+
+    // Push 'this'
+    sas.push(new SAR(
+            SarType.REFERENCE,
+            symbol.getSymbolId(),
+            ParserUtils.getLiteralName(CclGrammarParser.THIS),
+            ctx.start.getLine()));
+
+    return super.visitSelf(ctx);
   }
 }

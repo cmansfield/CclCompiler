@@ -1,4 +1,4 @@
-// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.parser.language;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -226,6 +226,12 @@ public interface CclGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitName(CclGrammarParser.NameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#self}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelf(CclGrammarParser.SelfContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CclGrammarParser#stringLiteral}.
 	 * @param ctx the parse tree
