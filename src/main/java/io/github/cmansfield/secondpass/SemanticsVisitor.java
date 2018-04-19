@@ -324,15 +324,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * exists and does not conflict with other references. If the reference is found in the 
    * SymbolTable then the symbolId is added to the SAR
    */
-  private void referenceExist() {
+  void referenceExist() {
     if(CollectionUtils.isEmpty(sas) || sas.size() < 2) {
       throw new IllegalStateException("SAS does not have enough SARs when trying to check if a reference exists");
     }
     SAR fieldSar = sas.pop();
     SAR parentSar = sas.pop();
 
-    String classId = "";
-
+    String classId = parentSar.getSymbolId();
     Consumer<String> throwExcpetion = message -> {
       throw new IllegalStateException(String.format("%s : %s.%s, %s",
               parentSar.getLineNumber().orElse(0),
@@ -342,24 +341,20 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     };
 
     if(fieldSar.getType() != SarType.IDENTIFIER) {
-      throwExcpetion.accept(fieldSar.getText() + "is not a SarType identifier");
+      throwExcpetion.accept(fieldSar.getText() + "is not something that can be referenced");
     }
 
     if(parentSar.getType() == SarType.IDENTIFIER) {
-      // Then the parent must be an instantiated object and the field a non-static 
-      // class member that is visible
-      String className = symbols.get(parentSar.getSymbolId()).getData().getType().orElse("");
+      // The parent must be an instantiated object and the field a non-static class member that is visible
+      Symbol classSymbol = symbols.get(parentSar.getSymbolId()); 
+      String className = classSymbol == null ? "" : classSymbol.getData().getType().orElse("");
       classId = findSymbolId(className, SymbolKind.CLASS);
       
       if(StringUtils.isBlank(className) || StringUtils.isBlank(classId)) {
         throwExcpetion.accept(String.format("instance \'%s\'s class not found", parentSar.getText()));
       }
     }
-    else if(parentSar.getType() == SarType.TYPE) {
-      // Then the parent must be a class and the field a static member of that class
-      classId = parentSar.getSymbolId();
-    }
-    else {
+    else if(parentSar.getType() != SarType.TYPE) {
       throwExcpetion.accept(String.format("%s is not a object or a class and cannot referenced from", parentSar.getText()));
     }
 
@@ -396,7 +391,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             SymbolKind.REFERENCE, 
             scope, 
             refData);
-    SAR refSar = new SAR(SarType.REFERENCE, referenceSymbol.getSymbolId(), "", parentSar.getLineNumber().orElse(-1));
+    SAR refSar = new SAR(
+            SarType.REFERENCE, 
+            referenceSymbol.getSymbolId(), 
+            referenceSymbol.getText(), 
+            parentSar.getLineNumber().orElse(-1));
     refSar.addSymbolId(classId);
     refSar.addSymbolId(fieldSar.getSymbolId());
     sas.push(refSar);

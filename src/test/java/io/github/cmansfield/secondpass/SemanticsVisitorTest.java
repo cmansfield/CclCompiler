@@ -1,12 +1,14 @@
 package io.github.cmansfield.secondpass;
 
-import org.apache.commons.collections4.CollectionUtils;
+import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
+import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.SymbolFilter;
 import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
+import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.Symbol;
@@ -353,6 +355,302 @@ public class SemanticsVisitorTest {
     catch(IllegalStateException e) {
       assertTrue(e.getMessage().contains("Missing SymbolId for SAR"));
     }
+  }
+  
+  @Test
+  public void test_referenceExist_instanceVariable() {
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    String scope = "g.D00001";
+    String className = "MyClass";
+    String instanceId = "L00001";
+    String instanceText = className.toLowerCase();
+    String instanceVarId = "I00001";
+    String instanceVarText = "number";
+    String classId = "C00001";
+    symbolTable.put(instanceId, new SymbolBuilder()
+            .scope(scope + ".X00001")
+            .symbolKind(SymbolKind.LOCAL_VAR)
+            .symbolId(instanceId)
+            .text(instanceText)
+            .data(new DataBuilder()
+                    .type(className)
+                    .build())
+            .build());
+    symbolTable.put(classId, new SymbolBuilder()
+            .scope(scope)
+            .symbolKind(SymbolKind.CLASS)
+            .symbolId(classId)
+            .text(className)
+            .build());
+    symbolTable.put(instanceVarId, new SymbolBuilder()
+            .scope(scope + "." + classId)
+            .symbolKind(SymbolKind.INSTANCE_VAR)
+            .symbolId(instanceVarId)
+            .text(instanceVarText)
+            .data(new DataBuilder()
+                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .build())
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.IDENTIFIER, instanceId, instanceText, 5));
+    sas.push(new SAR(SarType.IDENTIFIER, instanceVarId, instanceVarText, 5));
+    
+    visitor.referenceExist();
+
+    assertTrue(CollectionUtils.isNotEmpty(sas));
+    assertEquals(sas.size(), 1);
+    SAR sar = sas.pop();
+    assertNotNull(sar);
+    assertEquals(sar.getText(), instanceText + "." + instanceVarText);
+    assertEquals(sar.getLineNumber().orElse(0), Integer.valueOf(5));
+    assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
+    assertEquals(sar.getType(), SarType.REFERENCE);
+    List<String> referenceIds = sar.getSymbolIds();
+    assertTrue(CollectionUtils.isNotEmpty(referenceIds));
+    assertEquals(referenceIds.size(), 2);
+    assertEquals(referenceIds.get(0), classId);
+    assertEquals(referenceIds.get(1), instanceVarId);
+  }
+
+  @Test
+  public void test_referenceExist_instanceMethod() {
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    String scope = "g.D00001";
+    String className = "MyClass";
+    String instanceId = "L00001";
+    String instanceText = className.toLowerCase();
+    String methodId = "M00001";
+    String methodText = "someMethod";
+    String classId = "C00001";
+    symbolTable.put(instanceId, new SymbolBuilder()
+            .scope(scope + ".X00001")
+            .symbolKind(SymbolKind.LOCAL_VAR)
+            .symbolId(instanceId)
+            .text(instanceText)
+            .data(new DataBuilder()
+                    .type(className)
+                    .build())
+            .build());
+    symbolTable.put(classId, new SymbolBuilder()
+            .scope(scope)
+            .symbolKind(SymbolKind.CLASS)
+            .symbolId(classId)
+            .text(className)
+            .build());
+    symbolTable.put(methodId, new SymbolBuilder()
+            .scope(scope + "." + classId)
+            .symbolKind(SymbolKind.METHOD)
+            .symbolId(methodId)
+            .text(methodText)
+            .data(new DataBuilder()
+                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .build())
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.IDENTIFIER, instanceId, instanceText, 5));
+    sas.push(new SAR(SarType.IDENTIFIER, methodId, methodText, 5));
+
+    visitor.referenceExist();
+
+    assertTrue(CollectionUtils.isNotEmpty(sas));
+    assertEquals(sas.size(), 1);
+    SAR sar = sas.pop();
+    assertNotNull(sar);
+    assertEquals(sar.getText(), instanceText + "." + methodText);
+    assertEquals(sar.getLineNumber().orElse(0), Integer.valueOf(5));
+    assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
+    assertEquals(sar.getType(), SarType.REFERENCE);
+    List<String> referenceIds = sar.getSymbolIds();
+    assertTrue(CollectionUtils.isNotEmpty(referenceIds));
+    assertEquals(referenceIds.size(), 2);
+    assertEquals(referenceIds.get(0), classId);
+    assertEquals(referenceIds.get(1), methodId);
+  }
+
+  @Test
+  public void test_referenceExist_staticVariable() {
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    String scope = "g.D00001";
+    String className = "MyClass";
+    String instanceVarId = "I00001";
+    String instanceVarText = "number";
+    String classId = "C00001";
+    symbolTable.put(classId, new SymbolBuilder()
+            .scope(scope)
+            .symbolKind(SymbolKind.CLASS)
+            .symbolId(classId)
+            .text(className)
+            .build());
+    symbolTable.put(instanceVarId, new SymbolBuilder()
+            .scope(scope + "." + classId)
+            .symbolKind(SymbolKind.INSTANCE_VAR)
+            .symbolId(instanceVarId)
+            .text(instanceVarText)
+            .data(new DataBuilder()
+                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .accessModifier(AccessModifier.STATIC)
+                    .build())
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.TYPE, classId, className, 5));
+    sas.push(new SAR(SarType.IDENTIFIER, instanceVarId, instanceVarText, 5));
+
+    visitor.referenceExist();
+
+    assertTrue(CollectionUtils.isNotEmpty(sas));
+    assertEquals(sas.size(), 1);
+    SAR sar = sas.pop();
+    assertNotNull(sar);
+    assertEquals(sar.getText(), className + "." + instanceVarText);
+    assertEquals(sar.getLineNumber().orElse(0), Integer.valueOf(5));
+    assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
+    assertEquals(sar.getType(), SarType.REFERENCE);
+    List<String> referenceIds = sar.getSymbolIds();
+    assertTrue(CollectionUtils.isNotEmpty(referenceIds));
+    assertEquals(referenceIds.size(), 2);
+    assertEquals(referenceIds.get(0), classId);
+    assertEquals(referenceIds.get(1), instanceVarId);
+  }
+
+  @Test
+  public void test_referenceExist_staticMethod() {
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    String scope = "g.D00001";
+    String className = "MyClass";
+    String methodId = "M00001";
+    String methodText = "number";
+    String classId = "C00001";
+    symbolTable.put(classId, new SymbolBuilder()
+            .scope(scope)
+            .symbolKind(SymbolKind.CLASS)
+            .symbolId(classId)
+            .text(className)
+            .build());
+    symbolTable.put(methodId, new SymbolBuilder()
+            .scope(scope + "." + classId)
+            .symbolKind(SymbolKind.METHOD)
+            .symbolId(methodId)
+            .text(methodText)
+            .data(new DataBuilder()
+                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .accessModifier(AccessModifier.STATIC)
+                    .build())
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.TYPE, classId, className, 5));
+    sas.push(new SAR(SarType.IDENTIFIER, methodId, methodText, 5));
+
+    visitor.referenceExist();
+
+    assertTrue(CollectionUtils.isNotEmpty(sas));
+    assertEquals(sas.size(), 1);
+    SAR sar = sas.pop();
+    assertNotNull(sar);
+    assertEquals(sar.getText(), className + "." + methodText);
+    assertEquals(sar.getLineNumber().orElse(0), Integer.valueOf(5));
+    assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
+    assertEquals(sar.getType(), SarType.REFERENCE);
+    List<String> referenceIds = sar.getSymbolIds();
+    assertTrue(CollectionUtils.isNotEmpty(referenceIds));
+    assertEquals(referenceIds.size(), 2);
+    assertEquals(referenceIds.get(0), classId);
+    assertEquals(referenceIds.get(1), methodId);
+  }
+
+  @Test
+  public void test_referenceExist_fail_emptySas() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    
+    try {
+      visitor.referenceExist();
+      fail();
+    }
+    catch(IllegalStateException e) {
+      assertTrue(e.getMessage().contains("SAS does not have enough SARs"));
+    }
+  }
+
+  @Test
+  public void test_referenceExist_fail_tooFewSars() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.TYPE, "C00001", "MyClass", 5));
+    
+    try {
+      visitor.referenceExist();
+      fail();
+    }
+    catch(IllegalStateException e) {
+      assertTrue(e.getMessage().contains("SAS does not have enough SARs"));
+    }
+  }
+
+  @Test
+  public void test_referenceExist_fail_badFieldSarType() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.TYPE, "C00001", "MyClass", 5));
+    sas.push(new SAR(SarType.TYPE, "C00002", "SomeOtherClass", 5));
+
+    try {
+      visitor.referenceExist();
+      fail();
+    }
+    catch(IllegalStateException e) {
+      assertTrue(e.getMessage().contains("is not something that can be referenced"));
+    }
+  }
+
+  @Test
+  public void test_referenceExist_fail_missingType() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.IDENTIFIER, "I00001", "number", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "L00001", "MyClass", 5));
+
+    try {
+      visitor.referenceExist();
+      fail();
+    }
+    catch(IllegalStateException e) {
+      assertTrue(e.getMessage().contains("Could not find the symbol"));
+    }
+  }
+
+  @Test
+  public void test_referenceExist_fail_badParentSarType() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.LITERAL, "I00001", "13", 5));
+    sas.push(new SAR(SarType.IDENTIFIER, "M00001", "someMethod", 5));
+
+    try {
+      visitor.referenceExist();
+      fail();
+    }
+    catch(IllegalStateException e) {
+      assertTrue(e.getMessage().contains("is not a object or a class and cannot referenced from"));
+    }
+  }
+  
+  @Test
+  public void test_referenceExist_fail_privateAccessModifier() {
+    // TODO - Finish this
+    
+  }
+
+  @Test
+  public void test_referenceExist_fail_staticAccessModifier() {
+    // TODO - Finish this
+
   }
   
   /**
