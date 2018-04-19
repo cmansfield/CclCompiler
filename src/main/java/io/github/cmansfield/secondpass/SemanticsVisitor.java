@@ -330,6 +330,17 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     SAR fieldSar = sas.pop();
     SAR parentSar = sas.pop();
 
+    Data fieldData = null;
+    String parentId = "";
+
+    if(fieldSar.getType() != SarType.IDENTIFIER) {
+      throw new IllegalStateException(String.format("%s : %s.%s, %s is not a SarType identifier",
+              parentSar.getLineNumber().orElse(0),
+              parentSar.getText(),
+              fieldSar.getText(),
+              fieldSar.getText()));
+    }
+
     if(parentSar.getType() == SarType.IDENTIFIER) {
       // Then the parent must be an instantiated object and the field a non-static 
       // class member that is visible
@@ -340,17 +351,64 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     else if(parentSar.getType() == SarType.TYPE) {
       // Then the parent must be a class and the field a static member of that class
+      parentId = parentSar.getSymbolId();
+      Symbol parentSymbol = symbols.get(parentId);
+      Symbol filter = new SymbolBuilder()
+              .scope(parentSymbol.getScope() + "." + parentId)
+              .text(fieldSar.getText())
+              .build();
+      List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
+      if(foundSymbols.size() != 1) {
+        throw new IllegalStateException(String.format("%s : %s.%s, Too many \'%s\'s in the same scope",
+                parentSar.getLineNumber().orElse(0),
+                parentSar.getText(),
+                fieldSar.getText(),
+                fieldSar.getText()));
+      }
+      Symbol fieldSymbol = foundSymbols.get(0);
+      fieldSar.setSymbolId(fieldSymbol.getSymbolId());
+      fieldData = fieldSymbol.getData();
+      List<AccessModifier> accessModifiers = fieldData.getAccessModifiers();
 
-      System.out.println();
+      if(accessModifiers.contains(AccessModifier.PRIVATE)) {
+        throw new IllegalStateException(String.format("%s : %s.%s, \'%s\' is private and cannot be accessed",
+                parentSar.getLineNumber().orElse(0),
+                parentSar.getText(),
+                fieldSar.getText(),
+                fieldSar.getText()));
+      }
+      if(!accessModifiers.contains(AccessModifier.STATIC)) {
+        throw new IllegalStateException(String.format("%s : %s.%s, \'%s\' is not static and cannot be accessed in a static context",
+                parentSar.getLineNumber().orElse(0),
+                parentSar.getText(),
+                fieldSar.getText(),
+                fieldSar.getText()));
+      }
     }
     else {
       throw new IllegalStateException(String.format("%s : %s.%s, %s is not a object or a class and cannot referenced from",
-              parentSar.getLineNumber().isPresent() ? parentSar.getLineNumber().get() : "--",
+              parentSar.getLineNumber().orElse(0),
               parentSar.getText(),
               fieldSar.getText(),
               parentSar.getText()));
     }
-    
+
+    if(fieldData == null) {
+      fieldData = new Data();
+    }
+    Data refData = new DataBuilder()
+            .returnType(fieldData.getReturnType().orElse(""))
+            .type(fieldData.getType().orElse(""))
+            .isTypeAnArray(fieldData.isTypeAnArray())
+            .parameter(parentId)
+            .parameter(fieldSar.getSymbolId())
+            .build();
+    Symbol referenceSymbol = addNewSymbol("", SymbolKind.REFERENCE, scope, refData);
+    SAR refSar = new SAR(SarType.REFERENCE, referenceSymbol.getSymbolId(), "", parentSar.getLineNumber().orElse(-1));
+    refSar.addSymbolId(parentId);
+    refSar.addSymbolId(fieldSar.getSymbolId());
+    sas.push(refSar);
+
     System.out.println();
   }
   

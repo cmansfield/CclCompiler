@@ -18,6 +18,7 @@ public enum SymbolKind {
   FOR("F"),
   BLOCK("B"),
   PACKAGE("D"),
+  REFERENCE("R"),
   UNKNOWN("U");
   
   private String prefix;

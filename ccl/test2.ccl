@@ -1,14 +1,15 @@
 
 public void main() {
     Employee employee = new Employee();
+    Employee.getName();
     // employee.getName();
-    Employee.companyId = 5;
+    // Employee.companyId = 5;
 }
 
 public class Employee {
-    static public int companyId;    
+    public static int companyId;
     
-    public string getName() {
+    public static string getName() {
         return "John";
     }
 }
