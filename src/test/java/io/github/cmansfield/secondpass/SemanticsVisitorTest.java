@@ -643,14 +643,79 @@ public class SemanticsVisitorTest {
   
   @Test
   public void test_referenceExist_fail_privateAccessModifier() {
-    // TODO - Finish this
-    
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    String scope = "g.D00001";
+    String className = "MyClass";
+    String instanceVarId = "I00001";
+    String instanceVarText = "number";
+    String classId = "C00001";
+    symbolTable.put(classId, new SymbolBuilder()
+            .scope(scope)
+            .symbolKind(SymbolKind.CLASS)
+            .symbolId(classId)
+            .text(className)
+            .build());
+    symbolTable.put(instanceVarId, new SymbolBuilder()
+            .scope(scope + "." + classId)
+            .symbolKind(SymbolKind.INSTANCE_VAR)
+            .symbolId(instanceVarId)
+            .text(instanceVarText)
+            .data(new DataBuilder()
+                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .accessModifier(AccessModifier.PRIVATE)
+                    .accessModifier(AccessModifier.STATIC)
+                    .build())
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.TYPE, classId, className, 5));
+    sas.push(new SAR(SarType.IDENTIFIER, instanceVarId, instanceVarText, 5));
+
+    try {
+      visitor.referenceExist();
+      fail();
+    }
+    catch(IllegalStateException e) {
+      assertTrue(e.getMessage().contains("is private and cannot be accessed"));
+    }
   }
 
   @Test
   public void test_referenceExist_fail_staticAccessModifier() {
-    // TODO - Finish this
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    String scope = "g.D00001";
+    String className = "MyClass";
+    String instanceVarId = "I00001";
+    String instanceVarText = "number";
+    String classId = "C00001";
+    symbolTable.put(classId, new SymbolBuilder()
+            .scope(scope)
+            .symbolKind(SymbolKind.CLASS)
+            .symbolId(classId)
+            .text(className)
+            .build());
+    symbolTable.put(instanceVarId, new SymbolBuilder()
+            .scope(scope + "." + classId)
+            .symbolKind(SymbolKind.INSTANCE_VAR)
+            .symbolId(instanceVarId)
+            .text(instanceVarText)
+            .data(new DataBuilder()
+                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .build())
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.TYPE, classId, className, 5));
+    sas.push(new SAR(SarType.IDENTIFIER, instanceVarId, instanceVarText, 5));
 
+    try {
+      visitor.referenceExist();
+      fail();
+    }
+    catch(IllegalStateException e) {
+      assertTrue(e.getMessage().contains("is not static and cannot be accessed in a static context"));
+    }
   }
   
   /**
