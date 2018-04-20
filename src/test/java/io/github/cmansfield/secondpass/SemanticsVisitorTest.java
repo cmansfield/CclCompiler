@@ -717,7 +717,7 @@ public class SemanticsVisitorTest {
       assertTrue(e.getMessage().contains("is not static and cannot be accessed in a static context"));
     }
   }
-  
+
   /**
    * This is a template method for testing each of the different type of literals
    * 

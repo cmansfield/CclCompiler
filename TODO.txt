@@ -20,4 +20,3 @@ TODO List
         
     Add Unit Tests
         SemanticsVisitor::methodCall
-        SemanticsVisitor::referenceExistReferenceBase

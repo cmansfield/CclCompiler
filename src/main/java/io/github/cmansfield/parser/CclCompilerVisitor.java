@@ -78,14 +78,14 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
    *                    original symbol object from the symbol table
    */
   protected Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data, String symbolId) {
-    SymbolBuilder symbolBuilder = new SymbolBuilder()
+    Symbol symbol = new SymbolBuilder()
             .scope(scope)
             .text(identifier)
             .symbolKind(symbolKind)
-            .data(data);
-    Symbol symbol = symbolBuilder.build();
+            .data(data)
+            .build();
 
-    if(symbols.containsValue(symbol)) {
+    if(symbolKind != SymbolKind.REFERENCE && symbols.containsValue(symbol)) {
       if(symbol.getSymbolKind().isLiteral()) {
         return symbols.get(symbols.getKey(symbol));
       }

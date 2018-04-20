@@ -502,12 +502,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(accessModifiers.contains(AccessModifier.PRIVATE)) {
       referenceExistException(parentSar, fieldSar, String.format("\'%s\' is private and cannot be accessed", fieldSar.getText()));
     }
-    
-    
-    // TODO - Look into static accessModifiers with references
-//    if(!accessModifiers.contains(AccessModifier.STATIC)) {
-//      referenceExistException(parentSar, fieldSar, String.format("\'%s\' is not static and cannot be accessed in a static context", fieldSar.getText()));
-//    }
 
     createReferenceSar(parentSar, fieldSar, classId, fieldData);
   }
