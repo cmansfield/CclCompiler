@@ -15,7 +15,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.*;
 
@@ -331,33 +330,50 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     SAR fieldSar = sas.pop();
     SAR parentSar = sas.pop();
 
-    String classId = parentSar.getSymbolId();
-    Consumer<String> throwExcpetion = message -> {
-      throw new IllegalStateException(String.format("%s : %s.%s, %s",
-              parentSar.getLineNumber().orElse(0),
-              parentSar.getText(),
-              fieldSar.getText(),
-              message));
-    };
-
-    if(fieldSar.getType() != SarType.IDENTIFIER) {
-      throwExcpetion.accept(fieldSar.getText() + "is not something that can be referenced");
+    if(fieldSar.getType() != SarType.IDENTIFIER && fieldSar.getType() != SarType.METHOD) {
+      referenceExistException(parentSar, fieldSar, fieldSar.getText() + "is not something that can be referenced");
     }
-
+    
     if(parentSar.getType() == SarType.IDENTIFIER) {
-      // The parent must be an instantiated object and the field a non-static class member that is visible
-      Symbol classSymbol = symbols.get(parentSar.getSymbolId()); 
-      String className = classSymbol == null ? "" : classSymbol.getData().getType().orElse("");
-      classId = findSymbolId(className, SymbolKind.CLASS);
-      
-      if(StringUtils.isBlank(className) || StringUtils.isBlank(classId)) {
-        throwExcpetion.accept(String.format("instance \'%s\'s class not found", parentSar.getText()));
-      }
+      referenceExistIdentifierBase(parentSar, fieldSar);
     }
-    else if(parentSar.getType() != SarType.TYPE && parentSar.getType() != SarType.REFERENCE) {
-      throwExcpetion.accept(String.format("\'%s\' is not a object or a class and cannot referenced from", parentSar.getText()));
+    else if(parentSar.getType() == SarType.TYPE) {
+      referenceExistTypeBase(parentSar, fieldSar);
     }
+    else if(parentSar.getType() == SarType.REFERENCE) {
+      referenceExistReferenceBase(parentSar, fieldSar);
+    }
+    else {
+      referenceExistException(parentSar, fieldSar, String.format("\'%s\' is not a object or a class and cannot referenced from", parentSar.getText()));
+    }
+  }
 
+  /**
+   * Supporting method for #referenceExist, will throw a standardized exception for all
+   * referenceExist SarTypes
+   * 
+   * @param parentSar   The base SAR in the reference call
+   * @param fieldSar    The referenced SAR in the reference call
+   * @param message     A unique error message for the reference exception  
+   */
+  private void referenceExistException(SAR parentSar, SAR fieldSar, String message) {
+    throw new IllegalStateException(String.format("%s : %s.%s, %s",
+            parentSar.getLineNumber().orElse(0),
+            parentSar.getText(),
+            fieldSar.getText(),
+            message));
+  }
+
+  /**
+   * Supporting method for #referenceExist, this method will find the Symbol for the class
+   * field being referenced
+   * 
+   * @param parentSar   The base SAR in the reference call
+   * @param fieldSar    The referenced SAR in the reference call
+   * @param classId     The Symbol ID of the class that houses the field we are searching for
+   * @return            The Symbol object of the field being searched
+   */
+  private Symbol getFieldSymbol(SAR parentSar, SAR fieldSar, String classId) {
     Symbol classSymbol = symbols.get(classId);
     Symbol filter = new SymbolBuilder()
             .scope(classSymbol.getScope() + "." + classId)
@@ -365,48 +381,135 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .build();
     List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
     if(foundSymbols.size() != 1) {
-      throwExcpetion.accept(String.format("Too many or too few \'%s\'s in the same scope", fieldSar.getText()));
+      referenceExistException(parentSar, fieldSar, String.format("Too many or too few \'%s\'s in the same scope", fieldSar.getText()));
     }
-    Symbol fieldSymbol = foundSymbols.get(0);
-    fieldSar.setSymbolId(fieldSymbol.getSymbolId());
-    Data fieldData = fieldSymbol.getData();
-    List<AccessModifier> accessModifiers = fieldData.getAccessModifiers();
+    return foundSymbols.get(0);
+  }
 
-    if(ParserUtils.getLiteralName(CclGrammarParser.THIS).equals(parentSar.getText())) {
-      if(accessModifiers.contains(AccessModifier.STATIC)) {
-        throwExcpetion.accept(String.format(
-                "Cannot access static \'%s\' from an instance of \'%s\'",
-                fieldSar.getText(),
-                ParserUtils.getLiteralName(CclGrammarParser.THIS)));
-      }
-    }
-    else if(accessModifiers.contains(AccessModifier.PRIVATE)) {
-      throwExcpetion.accept(String.format("\'%s\' is private and cannot be accessed", fieldSar.getText()));
-    }
-    if(parentSar.getType() == SarType.TYPE && !accessModifiers.contains(AccessModifier.STATIC)) {
-      throwExcpetion.accept(String.format("\'%s\' is not static and cannot be accessed in a static context", fieldSar.getText()));
-    }
-    
+  /**
+   * Supporting method for #referenceExist, this will create a new SAR of SarType.REFERENCE
+   * 
+   * @param parentSar   The base SAR in the reference call
+   * @param fieldSar    The referenced SAR in the reference call
+   * @param classId     The Symbol ID of the class that houses the field
+   * @param fieldData   The Data object from the field Symbol
+   */
+  private void createReferenceSar(SAR parentSar, SAR fieldSar, String classId, Data fieldData) {
     Data refData = new DataBuilder()
             .returnType(fieldData.getReturnType().orElse(""))
             .type(fieldData.getType().orElse(""))
             .isTypeAnArray(fieldData.isTypeAnArray())
             .parameter(classId)
             .parameter(fieldSar.getSymbolId())
+            .parameters(fieldSar.getSymbolIds())
             .build();
     Symbol referenceSymbol = addNewSymbol(
-            String.format("%s.%s", parentSar.getText(), fieldSar.getText()), 
-            SymbolKind.REFERENCE, 
-            scope, 
+            String.format("%s.%s", parentSar.getText(), fieldSar.getText()),
+            SymbolKind.REFERENCE,
+            scope,
             refData);
     SAR refSar = new SAR(
-            SarType.REFERENCE, 
-            referenceSymbol.getSymbolId(), 
-            referenceSymbol.getText(), 
+            SarType.REFERENCE,
+            referenceSymbol.getSymbolId(),
+            referenceSymbol.getText(),
             parentSar.getLineNumber().orElse(-1));
     refSar.addSymbolId(classId);
     refSar.addSymbolId(fieldSar.getSymbolId());
+    fieldSar.getSymbolIds().forEach(refSar::addSymbolId);
     sas.push(refSar);
+  }
+
+  /**
+   * Supporting method for #referenceExist
+   * The method will handle references where the base is an identifier, usually this
+   * is the case when working with instantiated objects. (Ex. employee.getName)
+   * 
+   * @param parentSar   The base SAR in the reference call
+   * @param fieldSar    The referenced SAR in the reference call
+   */
+  private void referenceExistIdentifierBase(SAR parentSar, SAR fieldSar) {
+    // The parent must be an instantiated object and the field a non-static class member that is visible
+    Symbol instanceSymbol = symbols.get(parentSar.getSymbolId());
+    String className = instanceSymbol == null ? "" : instanceSymbol.getData().getType().orElse("");
+    String classId = findSymbolId(className, SymbolKind.CLASS);
+
+    if(StringUtils.isBlank(className) || StringUtils.isBlank(classId)) {
+      referenceExistException(parentSar, fieldSar, String.format("instance \'%s\'s class not found", parentSar.getText()));
+    }
+    
+    Symbol fieldSymbol = getFieldSymbol(parentSar, fieldSar, classId);
+    fieldSar.setSymbolId(fieldSymbol.getSymbolId());
+    Data fieldData = fieldSymbol.getData();
+    List<AccessModifier> accessModifiers = fieldData.getAccessModifiers();
+
+    if(ParserUtils.getLiteralName(CclGrammarParser.THIS).equals(parentSar.getText())) {
+      if(accessModifiers.contains(AccessModifier.STATIC)) {
+        referenceExistException(parentSar, fieldSar, String.format(
+                "Cannot access static \'%s\' from an instance of \'%s\'",
+                fieldSar.getText(),
+                ParserUtils.getLiteralName(CclGrammarParser.THIS)));
+      }
+    }
+    else if(accessModifiers.contains(AccessModifier.PRIVATE)) {
+      referenceExistException(parentSar, fieldSar, String.format("\'%s\' is private and cannot be accessed", fieldSar.getText()));      // NOSONAR
+    }
+
+    createReferenceSar(parentSar, fieldSar, classId, fieldData);
+  }
+
+  /**
+   * Supporting method for #referenceExist
+   * The method will handle references where the base is a type, usually this is the 
+   * case when working with static class member fields. (Ex. Tax.stateTaxPercentage)
+   * 
+   * @param parentSar   The base SAR in the reference call
+   * @param fieldSar    The referenced SAR in the reference call
+   */
+  private void referenceExistTypeBase(SAR parentSar, SAR fieldSar) {
+    String classId = parentSar.getSymbolId();
+    Symbol fieldSymbol = getFieldSymbol(parentSar, fieldSar, classId);
+    fieldSar.setSymbolId(fieldSymbol.getSymbolId());
+    Data fieldData = fieldSymbol.getData();
+    List<AccessModifier> accessModifiers = fieldData.getAccessModifiers();
+    
+    if(accessModifiers.contains(AccessModifier.PRIVATE)) {
+      referenceExistException(parentSar, fieldSar, String.format("\'%s\' is private and cannot be accessed", fieldSar.getText()));
+    }
+    if(!accessModifiers.contains(AccessModifier.STATIC)) {
+      referenceExistException(parentSar, fieldSar, String.format("\'%s\' is not static and cannot be accessed in a static context", fieldSar.getText()));
+    }
+
+    createReferenceSar(parentSar, fieldSar, classId, fieldData);
+  }
+
+  /**
+   * Supporting method for #referenceExist
+   * The method will handle references where the base is a reference, usually this is the 
+   * case when making nested calls, functional programming 
+   * (Ex. company.getCeo.getName()) 
+   * 
+   * @param parentSar   The base SAR in the reference call
+   * @param fieldSar    The referenced SAR in the reference call
+   */
+  private void referenceExistReferenceBase(SAR parentSar, SAR fieldSar) {
+    String className = symbols.get(parentSar.getSymbolId()).getData().getType().orElse("");
+    String classId = findSymbolId(className, SymbolKind.CLASS);
+    Symbol fieldSymbol = getFieldSymbol(parentSar, fieldSar, classId);
+    fieldSar.setSymbolId(fieldSymbol.getSymbolId());
+    Data fieldData = fieldSymbol.getData();
+    List<AccessModifier> accessModifiers = fieldData.getAccessModifiers();
+
+    if(accessModifiers.contains(AccessModifier.PRIVATE)) {
+      referenceExistException(parentSar, fieldSar, String.format("\'%s\' is private and cannot be accessed", fieldSar.getText()));
+    }
+    
+    
+    // TODO - Look into static accessModifiers with references
+//    if(!accessModifiers.contains(AccessModifier.STATIC)) {
+//      referenceExistException(parentSar, fieldSar, String.format("\'%s\' is not static and cannot be accessed in a static context", fieldSar.getText()));
+//    }
+
+    createReferenceSar(parentSar, fieldSar, classId, fieldData);
   }
   
   /**
@@ -435,6 +538,33 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               name,
               scope));
     }
+  }
+
+  /**
+   * #methodCall
+   * This semantic all will pop off a argumentListSar and an identifier sar and create a
+   * methodCallSar
+   */
+  private void methodCall() {
+    if(CollectionUtils.isEmpty(sas)) {
+      throw new IllegalStateException("SAS does not have enough SARs when trying to make a method call");
+    }
+
+    SAR argListSar = null;
+    if(sas.peek().getType() == SarType.ARG_LIST) {
+      argListSar = sas.pop();
+    }
+    SAR methodNameSar = sas.pop();
+    List<String> argList = argListSar == null ? Collections.emptyList() : argListSar.getSymbolIds();
+    SAR methodSar  = new SAR(
+            SarType.METHOD, 
+            "",
+            methodNameSar.getText(), 
+            methodNameSar.getLineNumber().orElse(-1));
+    if(CollectionUtils.isNotEmpty(argList)) {
+      argList.forEach(methodSar::addSymbolId);
+    }
+    sas.push(methodSar);
   }
   
   /**
@@ -661,7 +791,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .filter(node -> node instanceof CclGrammarParser.FnArrMemberContext)
             .map(context -> (CclGrammarParser.FnArrMemberContext)context)
             .forEach(this::visitFnArrMember);
-    referenceExist();
+    boolean isMethodCall = ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.FnArrMemberContext)
+            .map(context -> (CclGrammarParser.FnArrMemberContext)context)
+            .flatMap(context -> context.children.stream())
+            .anyMatch(node -> node instanceof CclGrammarParser.InvokeOperatorContext);
+    if(isMethodCall) {
+      methodCall();       // Semantic method
+    }
+    referenceExist();   // Semantic method
     
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.MemberRefzContext)
@@ -731,7 +869,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitSelf(CclGrammarParser.SelfContext ctx) {
     String workingScope = scope;
     Symbol symbol = null;
-    String classId = "";
+    String classId;
 
     while(StringUtils.isNotBlank(classId = SymbolTableUtils.getParentScope(workingScope))) {
       symbol = symbols.get(classId);

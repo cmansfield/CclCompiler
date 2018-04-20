@@ -1,22 +1,19 @@
 
-public void main() {}
-
-public class Company {
-    private static Employee ceo;
-    
-    public Company(Employee ceo) {
-        this.ceo = ceo;
-    }
-    
-    public string getCeoName() {
-        return ceo.getName();
-    }
+public void main() {
+    Employee employee = new Employee();
+    //employee.getName();
+    employee.employee.calculatePay(40, 10);
 }
 
 public class Employee {
     public int companyId;
+    public Employee employee;
     
     public string getName() {
         return "John";
+    }
+    
+    public int calculatePay(int hours, int hourlyRate) {
+        return hours * hourlyRate;
     }
 }

@@ -14,7 +14,10 @@ TODO List
             This is happening because the SemanticsVisitor::visitMethodDeclaration 
             findSymbolId cannot find methods based on the different parameters
         Fix template classes/methods on the second pass
-        Refactor referenceExist
 
     CompilerTest
         Move the compile methods out of this class into their own TestingUtils class
+        
+    Add Unit Tests
+        SemanticsVisitor::methodCall
+        SemanticsVisitor::referenceExistReferenceBase
