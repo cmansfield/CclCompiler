@@ -1,4 +1,4 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.parser.language;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -49,7 +49,7 @@ public class CclGrammarLexer extends Lexer {
 	};
 
 	private static final String[] _LITERAL_NAMES = {
-		null, "'('", "')'", "'.'", "';'", "'{'", "'}'", "','", "'['", "']'", null, 
+		null, "'('", "')'", "'.'", "';'", "'{'", "'}'", "','", "']'", "'['", null, 
 		null, null, null, "'public'", "'private'", "'static'", "'const'", "'int'", 
 		"'char'", "'bool'", "'string'", "'void'", "'true'", "'false'", "'null'", 
 		"'this'", "'if'", "'else'", "'while'", "'for'", "'new'", "'return'", "'print'", 
@@ -191,7 +191,7 @@ public class CclGrammarLexer extends Lexer {
 		"\4\3\2\2\2\u0091\u0092\7+\2\2\u0092\6\3\2\2\2\u0093\u0094\7\60\2\2\u0094"+
 		"\b\3\2\2\2\u0095\u0096\7=\2\2\u0096\n\3\2\2\2\u0097\u0098\7}\2\2\u0098"+
 		"\f\3\2\2\2\u0099\u009a\7\177\2\2\u009a\16\3\2\2\2\u009b\u009c\7.\2\2\u009c"+
-		"\20\3\2\2\2\u009d\u009e\7]\2\2\u009e\22\3\2\2\2\u009f\u00a0\7_\2\2\u00a0"+
+		"\20\3\2\2\2\u009d\u009e\7_\2\2\u009e\22\3\2\2\2\u009f\u00a0\7]\2\2\u00a0"+
 		"\24\3\2\2\2\u00a1\u00a7\5%\23\2\u00a2\u00a7\5\'\24\2\u00a3\u00a7\5)\25"+
 		"\2\u00a4\u00a7\5+\26\2\u00a5\u00a7\5-\27\2\u00a6\u00a1\3\2\2\2\u00a6\u00a2"+
 		"\3\2\2\2\u00a6\u00a3\3\2\2\2\u00a6\u00a4\3\2\2\2\u00a6\u00a5\3\2\2\2\u00a7"+

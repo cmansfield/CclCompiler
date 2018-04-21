@@ -19,6 +19,7 @@ public enum SymbolKind {
   BLOCK("B"),
   PACKAGE("D"),
   REFERENCE("R"),
+  TEMPORARY("J"),
   UNKNOWN("U");
   
   private String prefix;

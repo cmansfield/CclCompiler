@@ -107,7 +107,7 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
    */
   protected boolean isArray(ParserRuleContext ctx) {
     return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ArrayOperatorContext)
+            .filter(node -> node instanceof CclGrammarParser.ArrayDeclarationContext)
             .count() > 0;
   }
 

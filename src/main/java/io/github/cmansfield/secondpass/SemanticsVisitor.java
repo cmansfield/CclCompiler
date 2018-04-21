@@ -560,7 +560,72 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     sas.push(methodSar);
   }
-  
+
+  /**
+   * #integerCast
+   * This method will check to see if the top SAR on the SAS can be
+   * cast to an integer
+   */
+  void integerCast() {
+    if(CollectionUtils.isEmpty(sas)) {
+      throw new IllegalStateException("SAS does not have enough SARs when trying to make an integer cast");
+    }
+    String integerType = ParserUtils.getLiteralName(CclGrammarParser.INT);
+    SAR sar = sas.pop();
+    Symbol symbol = symbols.get(sar.getSymbolId());
+    Data data = symbol.getData();
+    String type = data.getType().orElse("");
+
+    if(!type.equals(ParserUtils.getLiteralName(CclGrammarParser.CHAR)) || data.isTypeAnArray()) {
+      throw new UnsupportedOperationException(String.format(
+              "Cannot cast type \'%s%s\' to \'%s\' at this time",
+              type,
+              data.isTypeAnArray() ? "[]" : "",
+              integerType));
+    }
+
+    String tempSymbolId = SymbolIdGenerator.generateId(SymbolKind.TEMPORARY);
+    String tempText = String.format("cast %s to %s",
+            type,
+            integerType);
+    Data tempData = new DataBuilder()
+            .type(integerType)
+            .build();
+    addNewSymbol(
+            tempText,
+            SymbolKind.TEMPORARY,
+            scope,
+            tempData,
+            tempSymbolId);
+
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY,
+            tempSymbolId,
+            tempText,
+            sar.getLineNumber().orElse(-1));
+    tempSar.addSymbolId(sar.getSymbolId());
+    sas.push(tempSar);
+  }
+
+  /**
+   * #charCast
+   * This method will check to see if the top SAR on the SAS can be
+   * cast to a character
+   */
+  private void charCast() {
+    if(CollectionUtils.isEmpty(sas)) {
+      throw new IllegalStateException("SAS does not have enough SARs when trying to make an integer cast");
+    }
+
+    throw new UnsupportedOperationException("Not implimented yet");
+  }
+
+  /*
+  **************************************
+  *           Overridden methods
+  **************************************
+ */
+
   /**
    * Move this method from SymbolTableVisitor to this class because we don't want to create
    * local variables until the second pass or else the symbol table could say they exist before
@@ -888,5 +953,38 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             ctx.start.getLine()));
 
     return super.visitSelf(ctx);
+  }
+
+  @Override
+  public Object visitCast(CclGrammarParser.CastContext ctx) {
+    return ctx.children.get(1).getText();
+  }
+
+  @Override
+  public Object visitTypeCast(CclGrammarParser.TypeCastContext ctx) {
+    String type = ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.CastContext)
+            .map(context -> (CclGrammarParser.CastContext)context)
+            .map(this::visitCast)
+            .map(value -> (String)value)
+            .findFirst()
+            .orElse("");
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ExpressionContext)
+            .map(context -> (CclGrammarParser.ExpressionContext)context)
+            .forEach(this::visitExpression);
+
+    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.INT))) {
+      integerCast();
+    }
+    else if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.CHAR))) {
+      charCast();
+    }
+    else {
+      throw new UnsupportedOperationException(String.format(
+              "Casting to type \'%s\' is not supported at this time",
+              type));
+    }
+    return null;
   }
 }

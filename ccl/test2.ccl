@@ -1,29 +1,6 @@
 
 public void main() {
-    Employee employee = new Employee();
-    //employee.getName();
-    //employee.employee.calculatePay(40, 10);
-    employee.employee.companyId = 5;
-    employee.employee.test = 5;
-    employee.testObj.test = 5;
-    MyClass.employee.testObj.companyId;
-}
-
-public class MyClass {
-    public static Employee employee;
-}
-
-public class Employee {
-    public static bool test;
-    public static Employee testObj;
-    public int companyId;
-    public Employee employee;
-
-    public string getName() {
-        return "John";
-    }
-    
-    public int calculatePay(int hours, int hourlyRate) {
-        return hours * hourlyRate;
-    }
+    char str[] = new char[7];
+    //int ascii = (int)str;
+    int ascii = (int)'b';
 }

@@ -13,6 +13,7 @@ public enum SarType {
   END_ARG_LIST,
   ARRAY,
   TEMPLATE,
+  TEMPORARY,
   UNKNOWN;
 
   /**

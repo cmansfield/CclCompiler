@@ -1,4 +1,4 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.parser.language;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -119,6 +119,12 @@ public interface CclGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTypeCast(CclGrammarParser.TypeCastContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#cast}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCast(CclGrammarParser.CastContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CclGrammarParser#braceEnclosedInitializer}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -184,6 +190,12 @@ public interface CclGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#arrayDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayDeclaration(CclGrammarParser.ArrayDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CclGrammarParser#argumentList}.
 	 * @param ctx the parse tree

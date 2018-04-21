@@ -24,17 +24,17 @@ classMemberDeclaration
 methodDeclaration : modifier* templateDeclaration? type methodName '(' parameterList? ')'
         methodBody ;
 
-fieldDeclaration : modifier* type name ('[' ']')? (assignmentOperation)? ';' ;
+fieldDeclaration : modifier* type name (arrayDeclaration)? (assignmentOperation)? ';' ;
 
 parameterList : parameter (',' parameter)* ;
 
-parameter : type name ('[' ']')? ;
+parameter : type name (arrayDeclaration)? ;
 
 constructorDeclaration : modifier? methodName '(' parameterList? ')' methodBody ;
 
 methodBody : '{' (variableDeclaration | statement)* '}' ;
 
-variableDeclaration : type name ('[' ']')? (assignmentOperation)? ';' ;
+variableDeclaration : type name (arrayDeclaration)? (assignmentOperation)? ';' ;
 
 statement 
     : IF invokeOperator expression ')' statement (ELSE statement)?
@@ -58,12 +58,14 @@ statementWithScope
 
 assignmentExpression 
     : NEW type templateDeclaration? newDeclaration
-    | typeCast expression
+    | typeCast
     | braceEnclosedInitializer
     | expression
     ;
 
-typeCast : '(' PRIMITIVE_TYPE ')' ;
+typeCast : cast expression ;
+
+cast : '(' PRIMITIVE_TYPE ')' ;
 
 braceEnclosedInitializer : '{' argumentList? '}' ;
 
@@ -122,6 +124,8 @@ mathOperation
 invokeOperator : '(' ;
 
 arrayOperator : '[' ;
+
+arrayDeclaration : '[' ']' ;
 
 argumentList : expression (',' expression)* ;
 
