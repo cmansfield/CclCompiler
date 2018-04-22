@@ -612,12 +612,45 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * This method will check to see if the top SAR on the SAS can be
    * cast to a character
    */
-  private void charCast() {
+  void charCast() {
     if(CollectionUtils.isEmpty(sas)) {
       throw new IllegalStateException("SAS does not have enough SARs when trying to make an integer cast");
     }
+    String charType = ParserUtils.getLiteralName(CclGrammarParser.CHAR);
+    SAR sar = sas.pop();
+    Symbol symbol = symbols.get(sar.getSymbolId());
+    Data data = symbol.getData();
+    String type = data.getType().orElse("");
 
-    throw new UnsupportedOperationException("Not implimented yet");
+    if(!type.equals(ParserUtils.getLiteralName(CclGrammarParser.INT)) || data.isTypeAnArray()) {
+      throw new UnsupportedOperationException(String.format(
+              "Cannot cast type \'%s%s\' to \'%s\' at this time",
+              type,
+              data.isTypeAnArray() ? "[]" : "",
+              charType));
+    }
+
+    String tempSymbolId = SymbolIdGenerator.generateId(SymbolKind.TEMPORARY);
+    String tempText = String.format("cast %s to %s",
+            type,
+            charType);
+    Data tempData = new DataBuilder()
+            .type(charType)
+            .build();
+    addNewSymbol(
+            tempText,
+            SymbolKind.TEMPORARY,
+            scope,
+            tempData,
+            tempSymbolId);
+
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY,
+            tempSymbolId,
+            tempText,
+            sar.getLineNumber().orElse(-1));
+    tempSar.addSymbolId(sar.getSymbolId());
+    sas.push(tempSar);
   }
 
   /*

@@ -784,6 +784,71 @@ public class SemanticsVisitorTest {
     }
   }
 
+  @Test
+  public void test_charCast() {
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    String scope = "g";
+    String literalVarId = "A00001";
+    String literalVarText = "45";
+    symbolTable.put(literalVarId, new SymbolBuilder()
+            .symbolKind(SymbolKind.INT_LIT)
+            .symbolId(literalVarId)
+            .text(literalVarText)
+            .data(new DataBuilder()
+                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .build())
+            .scope(scope)
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.LITERAL, literalVarId, literalVarText, 5));
+
+    visitor.charCast();
+
+    SAR sar = sas.pop();
+    assertNotNull(sar);
+    assertTrue(StringUtils.isNotBlank(sar.getText()));
+    assertEquals(sar.getLineNumber().orElse(-1), Integer.valueOf(5));
+    assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
+    assertEquals(sar.getType(), SarType.TEMPORARY);
+    List<String> ids = sar.getSymbolIds();
+    assertTrue(CollectionUtils.isNotEmpty(ids));
+    assertEquals(ids.size(), 1);
+    String id = ids.get(0);
+    assertTrue(StringUtils.isNotBlank(id));
+    assertEquals(id, literalVarId);
+  }
+
+  @Test
+  public void test_charCast_fail_badType() {
+    BidiMap<String, Symbol> symbolTable = new DualHashBidiMap<>();
+    String scope = "g";
+    String literalVarId = "S00001";
+    String literalVarText = "Hello";
+    symbolTable.put(literalVarId, new SymbolBuilder()
+            .symbolKind(SymbolKind.STR_LIT)
+            .symbolId(literalVarId)
+            .text(literalVarText)
+            .data(new DataBuilder()
+                    .type(ParserUtils.getLiteralName(CclGrammarParser.STRING))
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .build())
+            .scope(scope)
+            .build());
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    Deque<SAR> sas = visitor.getSemanticActionStack();
+    sas.push(new SAR(SarType.LITERAL, literalVarId, literalVarText, 5));
+
+    try {
+      visitor.charCast();
+      fail();
+    }
+    catch(UnsupportedOperationException e) {
+      assertTrue(e.getMessage().contains("Cannot cast type"));
+    }
+  }
+
   /**
    * This is a template method for testing each of the different type of literals
    * 

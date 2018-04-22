@@ -2,5 +2,6 @@
 public void main() {
     char str[] = new char[7];
     //int ascii = (int)str;
-    int ascii = (int)'b';
+    //int ascii = (int)'b';
+    char b = (char)45;
 }
