@@ -1,5 +1,16 @@
 
 public void main() {
 
-    int number = 3 * (5 + 4);
+    //int number = 1 - 2 * 2 + 1;
+    bool isTest = 3 > 2;
 }
+
+/*
+public class MyClass {
+    private string name = "John";
+
+    public void name() {
+        string name = " Doe";
+    }
+}
+*/

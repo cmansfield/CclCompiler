@@ -2,7 +2,6 @@ package io.github.cmansfield.secondpass;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
-import io.github.cmansfield.parser.Keyword;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,6 +11,7 @@ import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
+import io.github.cmansfield.parser.Keyword;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import java.util.*;
 
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
-  private Deque<String> operatorStack;
+  private Deque<ParserRuleContext> operatorStack;
   private Deque<SAR> sas;
 
   public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
@@ -33,10 +33,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   Deque<SAR> getSemanticActionStack() {
     return sas == null ? new LinkedList<>() : sas;
-  }
-
-  Deque<String> getOperatorStack() {
-    return operatorStack == null ? new LinkedList() : operatorStack;
   }
 
   void setScope(String scope) {
@@ -703,34 +699,149 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     sas.push(tempSar);
   }
 
-  void pushOperatorOntoStack(String operator, int lineNumber) {
-    if(StringUtils.isBlank(operator)) {
-      throw new IllegalArgumentException(lineNumber + " : Operators pushed onto the operator stack cannot be blank");
+  private void operatorException(int lineNumber, String operation, String operator, String op1Type, String op1Text, String op2Type, String op2Text) {
+    throw new IllegalStateException(String.format(
+            "%s : Cannot perform %s operation \'%s %s %s %s %s\'",
+            operation,
+            lineNumber,
+            op2Type,
+            op2Text,
+            operator,
+            op1Type,
+            op1Text));
+  }
+  
+  /**
+   * This will evaluate the given operator and check to make sure it can be used with the top
+   * two SARs on the SAS, after it will create a new temporary Symbol and SAR
+   * 
+   * @param operatorCtx   The context of the operator
+   */
+  private void evaluateOperator(ParserRuleContext operatorCtx) {      // NOSONAR
+    if(CollectionUtils.isEmpty(sas) || sas.size() < 2) {
+      throw new IllegalStateException(String.format(
+              "%s : There are not enough SARs on the SAS while trying to evaluate operand \'%s\'", 
+              operatorCtx.start.getLine(),
+              getChildText(operatorCtx)));
     }
-    if(operator.equals("(") || operator.equals("[")) {
-      operatorStack.push(operator);
-      logger.debug("Operator Stack after adding \'{}\': {}", operator, operatorStack);
+    
+    String operator = getChildText(operatorCtx);
+    String tempType = null;
+    
+    SAR operand1 = sas.pop();
+    SAR operand2 = sas.pop();
+    
+    Symbol op1Symbol = symbols.get(operand1.getSymbolId());
+    Symbol op2Symbol = symbols.get(operand2.getSymbolId());
+    
+    String op1Type = op1Symbol.getData().getType().isPresent() ? op1Symbol.getData().getType().orElse("") : op1Symbol.getData().getReturnType().orElse("");
+    String op2Type = op2Symbol.getData().getType().isPresent() ? op2Symbol.getData().getType().orElse("") : op2Symbol.getData().getReturnType().orElse("");
+    
+    if(operatorCtx instanceof CclGrammarParser.MathOperationContext) {
+      if(!Keyword.INT.toString().equals(op1Type) || !Keyword.INT.toString().equals(op2Type)) {
+        operatorException(operatorCtx.start.getLine(), "math", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+      }
+      
+      tempType = Keyword.INT.toString();
+    }
+    else if(operatorCtx instanceof CclGrammarParser.BooleanOperationContext) {
+      if(Keyword.AND.toString().equals(operator) || Keyword.OR.toString().equals(operator)) {
+        if(!Keyword.BOOL.toString().equals(op1Type) || !Keyword.BOOL.toString().equals(op2Type)) {
+          operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+        }
+      }
+      else if(!Keyword.INT.toString().equals(op1Type) || !Keyword.INT.toString().equals(op2Type)) {
+        operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+      }
+
+      tempType = Keyword.BOOL.toString();
+    }
+    else if(operatorCtx instanceof CclGrammarParser.AssignmentOperationContext) {
+      if(!op1Type.equals(op2Type)) {
+        operatorException(operatorCtx.start.getLine(), "assignment", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+      }
+      
+      tempType = op1Type;
+    }
+    else {
+      logger.warn("Not sure how to evaluate operator {}", getChildText(operatorCtx));
+    }
+
+    String tempText = String.format("%s %s %s",
+            op2Symbol.getText(),
+            operator,
+            op1Symbol.getText());
+    Symbol tempSymbol = addNewSymbol(
+            tempText,
+            SymbolKind.TEMPORARY,
+            scope, new DataBuilder()
+                    .type(tempType)
+                    .build());
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY,
+            tempSymbol.getSymbolId(),
+            tempText,
+            operatorCtx.start.getLine());
+    tempSar.addSymbolId(op2Symbol.getSymbolId());
+    tempSar.addSymbolId(op1Symbol.getSymbolId());
+    sas.push(tempSar);
+  }
+
+  /**
+   * This will push the supplied operator onto the operator stack. It will continue to process
+   * operators on the operator stack until the stack is empty or the top operator has a lower
+   * precedence than the operator being pushed on
+   * 
+   * @param operatorCtx     The context of the operator
+   */
+  private void pushOperatorOntoStack(ParserRuleContext operatorCtx) {
+    if(operatorCtx == null) {
+      throw new IllegalArgumentException(-1 + " : Operators pushed onto the operator stack cannot be null");
+    }
+    String operator = getChildText(operatorCtx);
+    if("(".equals(operator) || "[".equals(operator)) {
+      operatorStack.push(operatorCtx);
+      
+      if(logger.isDebugEnabled()) {
+        logger.debug("Operator Stack after adding \'{}\': [{}]",
+                getChildText(operatorCtx),
+                operatorStack.stream()
+                        .map(this::getChildText)
+                        .collect(Collectors.joining(", ")));
+      }
       return;
     }
 
-    String stackOperator;
+    ParserRuleContext stackOperator;
     while(CollectionUtils.isNotEmpty(operatorStack) 
-            && operatorPrecedence(stackOperator = operatorStack.peek()) >= operatorPrecedence(operator)) {
+            && operatorPrecedence(stackOperator = operatorStack.peek()) >= operatorPrecedence(operatorCtx)) {
+      
       // Eval stackOperator
+      evaluateOperator(stackOperator);
+      
       operatorStack.pop();
     }
 
-    operatorStack.push(operator);     // NOSONAR
-    logger.debug("Operator Stack after adding \'{}\': {}", operator, operatorStack);
+    operatorStack.push(operatorCtx);     // NOSONAR
+    
+    if(logger.isDebugEnabled()) {
+      logger.debug("Operator Stack after adding \'{}\': [{}]",
+              getChildText(operatorCtx),
+              operatorStack.stream()
+                      .map(this::getChildText)
+                      .collect(Collectors.joining(", ")));
+    }
   }
 
   /**
    * This method will return the precedence value for the supplied operator
    * 
-   * @param operator    Operator to evaluate
+   * @param ctx         Operator to evaluate
    * @return            The precedence value for the supplied operator
    */
-  private int operatorPrecedence(String operator) {
+  private int operatorPrecedence(ParserRuleContext ctx) {
+    String operator = getChildText(ctx);
+    
     if(StringUtils.isBlank(operator)) {
       return -1;
     }
@@ -769,21 +880,16 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * #EOE
    * EndOfExpression, this method will pop operators off the operator stack and process the
    * required SARs from the SAS for that operation 
-   *
-   * @param lineNumber  The line number of the line of code being processed
    */
-  private void endOfExpression(int lineNumber) {
-    String operator;
-    
+  private void endOfExpression() {
     while(CollectionUtils.isNotEmpty(operatorStack)) {
-      operator = operatorStack.pop();
-      
-      
+      evaluateOperator(operatorStack.pop());
     }
   }
   
+  // TODO - complete this
   private void closingParenthesis() {
-    String operator;
+    ParserRuleContext operator;
     
     while((operator = operatorStack.pop()) != null && !operator.equals("(")) {
       
@@ -816,7 +922,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     getName(ctx);     // This adds the identifier to the SAS and verifies it
     traverseAssignmentOperation(ctx);
-
+    
+    // Semantic call #EOE
+    endOfExpression();
+    
     return null;
   }
 
@@ -1036,44 +1145,42 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public String toString() {
-    return String.format("SymbolTable:%n\t%s%nSemantic Action Stack%n\t%s%nOperator Stack%n\t%s",
+    return String.format("SymbolTable:%n\t%s%nSemantic Action Stack%n\t%s",
             symbols.entrySet().stream()
                     .map(Object::toString)
                     .collect(Collectors.joining("\n\t")),
             sas.stream()
                     .map(Object::toString)
-                    .collect(Collectors.joining("\n\t")),
-            operatorStack.stream()
                     .collect(Collectors.joining("\n\t")));
   }
 
   @Override
   public Object visitAssignmentOperation(CclGrammarParser.AssignmentOperationContext ctx) {
-    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
+    pushOperatorOntoStack(ctx);
     return super.visitAssignmentOperation(ctx);
   }
 
   @Override
   public Object visitBooleanOperation(CclGrammarParser.BooleanOperationContext ctx) {
-    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
+    pushOperatorOntoStack(ctx);
     return super.visitBooleanOperation(ctx);
   }
 
   @Override
   public Object visitMathOperation(CclGrammarParser.MathOperationContext ctx) {
-    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
+    pushOperatorOntoStack(ctx);
     return super.visitMathOperation(ctx);
   }
 
   @Override
   public Object visitInvokeOperator(CclGrammarParser.InvokeOperatorContext ctx) {
-    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
+    pushOperatorOntoStack(ctx);
     return super.visitInvokeOperator(ctx);
   }
 
   @Override
   public Object visitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx) {
-    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
+    pushOperatorOntoStack(ctx);
     return super.visitArrayOperator(ctx);
   }
 
@@ -1087,8 +1194,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx) {
-    getName(ctx);    
-    return super.visitFieldDeclaration(ctx);
+    getName(ctx);
+
+    super.visitFieldDeclaration(ctx);
+    
+    // Semantic call #EOE
+    endOfExpression();
+    
+    return null;
   }
 
   @Override

@@ -2,7 +2,6 @@ package io.github.cmansfield.secondpass;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
-import io.github.cmansfield.parser.Keyword;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
@@ -17,6 +16,7 @@ import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
+import io.github.cmansfield.parser.Keyword;
 import org.testng.annotations.BeforeClass;
 import org.antlr.v4.runtime.CommonToken;
 import org.testng.annotations.Test;
@@ -848,18 +848,6 @@ public class SemanticsVisitorTest {
       assertTrue(e.getMessage().contains("Cannot cast type"));
     }
   }
-
-  
-  @Test
-  public void test_deleteMe() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
-    
-    visitor.pushOperatorOntoStack("-", 5);
-    visitor.pushOperatorOntoStack("*", 5);
-    visitor.pushOperatorOntoStack("+", 5);
-  }
-  
-  
   
   /**
    * This is a template method for testing each of the different type of literals
