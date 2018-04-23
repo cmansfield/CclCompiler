@@ -10,9 +10,6 @@ TODO List
         Use an interface with tCode manager to allow different types of tCode generation 
 
     SemanticsVisitor
-        Fix overloaded methods not finding the correct Symbol
-            This is happening because the SemanticsVisitor::visitMethodDeclaration 
-            findSymbolId cannot find methods based on the different parameters
         Fix template classes/methods on the second pass
 
     CompilerTest
@@ -20,3 +17,5 @@ TODO List
         
     Add Unit Tests
         SemanticsVisitor::methodCall
+        SemanticsVisitor - methodOverloading
+            

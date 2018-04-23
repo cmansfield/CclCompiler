@@ -16,7 +16,7 @@ public class SymbolTableUtils {
    * @param scope The scope to pull the parentId from
    * @return      The parent symbolId discovered, or empty string if not
    */
-  public static String getParentScope(String scope) {
+  public static String getParentSymbolId(String scope) {
     int index = scope.lastIndexOf('.');
     if(index < 0) {
       return "";
@@ -77,7 +77,7 @@ public class SymbolTableUtils {
     String scope = symbol.getScope();
     String parentId;
 
-    while(StringUtils.isNotBlank(parentId = getParentScope(scope))) {
+    while(StringUtils.isNotBlank(parentId = getParentSymbolId(scope))) {
       if(!symbolTable.containsKey(parentId)) {
         throw new IllegalStateException(
                 String.format("SymbolId %s is not in the symbol table", parentId));

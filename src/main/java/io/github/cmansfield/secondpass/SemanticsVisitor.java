@@ -125,7 +125,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       if(GLOBAL_SCOPE.equals(currentScope)) {
         throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
       }
-      String parentId = SymbolTableUtils.getParentScope(currentScope);
+      String parentId = SymbolTableUtils.getParentSymbolId(currentScope);
       Symbol parentSymbol = symbols.get(parentId);
       if(parentSymbol == null) {
         throw new IllegalStateException(String.format(
@@ -505,6 +505,28 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     createReferenceSar(parentSar, fieldSar, classId, fieldData);
   }
+
+  /**
+   * #paramExist
+   * Check to make sure we don't have any duplicate parameters
+   * 
+   * @param ctx   The context of where int the tree the visitor currently is
+   */
+  private void paramExist(ParserRuleContext ctx) {
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ParameterListContext)
+            .map(context -> (CclGrammarParser.ParameterListContext)context)
+            .flatMap(context -> context.children.stream())
+            .filter(node -> node instanceof CclGrammarParser.ParameterContext)
+            .map(context -> (CclGrammarParser.ParameterContext)context)
+            .forEach(node -> findSymbolId(
+                      new SymbolBuilder()
+                              .text(node.children.get(1).getText())
+                              .symbolKind(SymbolKind.PARAM)
+                              .scope(scope)
+                              .build(),
+                      true));
+  }
   
   /**
    * #duplicate
@@ -545,7 +567,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(StringUtils.isBlank(name)) {
       throw new IllegalArgumentException("Constructor name cannot be blank");
     }
-    String classId = SymbolTableUtils.getParentScope(scope);
+    String classId = SymbolTableUtils.getParentSymbolId(scope);
     Symbol classSymbol = symbols.get(classId);
 
     if(classSymbol == null) {
@@ -778,17 +800,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {   // NOSONAR
     String name = getNameWithoutVisiting(ctx);
     List<String> paramTypes = traverseParameterList(ctx);
+    
     String scopeOrig = scope;
-
     String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
-    if(StringUtils.isBlank(symbolId)) {
-      return null;
-    }
-
     scope = scope + "." + symbolId;
+    
     // Semantic #constructorCheck
     constructorCheck(name);
-
+    // Semantic #paramExist
+    paramExist(ctx);
     traverseMethodBody(ctx);
     scope = scopeOrig;
 
@@ -798,24 +818,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {     // NOSONAR
     getType(ctx);
-    String name = getMethodName(ctx);
-    if(name == null) {
-      throw new IllegalStateException("Method name came back null, should not be null after the first pass");
+    String name = getNameWithoutVisiting(ctx);
+    List<String> paramTypes = traverseParameterList(ctx);
+    if(StringUtils.isBlank(name)) {
+      throw new IllegalStateException("Method name came back blank, should not be blank after the first pass");
     }
+    
     String scopeOrig = scope;
-
-    String symbolId = findSymbolId(
-            new SymbolBuilder()
-              .text(name)
-              .symbolKind(SymbolKind.METHOD)
-              .build(),
-            false);
-    if(StringUtils.isBlank(symbolId)) {
-      return null;
-    }
-
+    String symbolId = findMethodSymbolId(name, SymbolKind.METHOD, paramTypes);
     scope = scope + "." + symbolId;
-    traverseParameterList(ctx);
+
+    // Semantic #paramExist
+    paramExist(ctx);
     traverseMethodBody(ctx);
     scope = scopeOrig;
 
@@ -896,7 +910,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {
     String text = getChildText(ctx);
+    // Semantic call #typePush
     typePush(ctx, text);
+    // Semantic call #typeExist
     typeExist();
     return text;
   }
@@ -993,7 +1009,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Symbol symbol = null;
     String classId;
 
-    while(StringUtils.isNotBlank(classId = SymbolTableUtils.getParentScope(workingScope))) {
+    while(StringUtils.isNotBlank(classId = SymbolTableUtils.getParentSymbolId(workingScope))) {
       symbol = symbols.get(classId);
       if(symbol.getSymbolKind() == SymbolKind.CLASS) {
         break;
@@ -1053,6 +1069,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
-    return getChildText(ctx);
+    return getChildText(ctx); 
   }
 }

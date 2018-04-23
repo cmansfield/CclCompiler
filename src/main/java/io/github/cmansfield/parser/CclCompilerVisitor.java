@@ -284,7 +284,7 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
       throw new IllegalStateException(String.format(
               "Found duplicate %ss in class \'%s\' with method signature \'%s\'",
               symbolKind.toString(),
-              symbols.get(SymbolTableUtils.getParentScope(scope)).getText(),
+              symbols.get(SymbolTableUtils.getParentSymbolId(scope)).getText(),
               String.format(
                       "%s(%s)",
                       name,
@@ -320,10 +320,17 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
    */
   protected String findSymbolId(Symbol filter, boolean errorOnFail) {
     List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
-    if(foundSymbols.size() != 1 && errorOnFail) {
-      String message = String.format("Could not find the symbol for %s", filter.toString());
-      logger.error(message);
-      throw new IllegalStateException(message);
+    if(foundSymbols.isEmpty() && errorOnFail) {
+      throw new IllegalStateException(String.format("Could not find the symbol for %s", filter.toString()));
+    }
+    if(foundSymbols.size() > 1 && errorOnFail) {
+      Symbol parentSymbol = symbols.get(SymbolTableUtils.getParentSymbolId(scope));
+      throw new IllegalStateException(String.format(
+              "Found too many matching %ss with the name \'%s\' in %s \'%s\'",
+              filter.getSymbolKind().toString(),
+              filter.getText(),
+              parentSymbol.getSymbolKind().toString(),
+              parentSymbol.getText()));
     }
 
     return foundSymbols.isEmpty() ? null : foundSymbols.get(0).getSymbolId();

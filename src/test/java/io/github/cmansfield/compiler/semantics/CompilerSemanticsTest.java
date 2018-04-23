@@ -29,4 +29,19 @@ public class CompilerSemanticsTest {
   public void test_duplicateParameters() throws IOException {
     compilerTest.compile("test16.ccl");
   }
+
+  @Test
+  public void test_methodOverloading() throws IOException {
+    compilerTest.compile("test18.ccl");
+  }
+  
+  @Test
+  public void test_methodOverloadingConstructors() throws IOException {
+    compilerTest.compile("test17.ccl");
+  }
+  
+  @Test (expectedExceptions = IllegalStateException.class)
+  public void test_failed_duplicateMethods() throws IOException {
+    compilerTest.compile("test19.ccl");    
+  }
 }

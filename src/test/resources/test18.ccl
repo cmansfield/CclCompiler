@@ -1,0 +1,22 @@
+
+public void main() {}
+
+public class TestClass {
+    public void someMethod(int number, bool isCool, char newLine) {
+        print(number);
+    }
+
+    public void someMethod(char number, int isCool, bool newLine) {
+        print(number);
+    }
+
+    public void someMethod(int number, bool isCool) {
+        print(number);
+    }
+
+    public void someMethod(int number, bool isCool, char newLine, string name) {
+        print(number);
+    }
+
+    public void someMethod() {}
+}

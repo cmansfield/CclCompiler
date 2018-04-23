@@ -14,14 +14,9 @@ public class TestClass {
         print(number);
     }
 
-    public TestClass() {}
-    
-    public void someMethod(int number, bool isCool, char newLine) {
+    public TestClass(int number, bool isCool, char newLine, string name) {
         print(number);
-        print(newLine);
     }
-    
-    public void someMethod(int number, bool number) {
-        print("");
-    }
+
+    public TestClass() {}
 }
