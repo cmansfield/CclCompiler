@@ -1,12 +1,11 @@
 package io.github.cmansfield.compiler.syntax;
 
-import io.github.cmansfield.parser.language.CclGrammarParser;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.*;
-import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.compiler.Compiler;
+import io.github.cmansfield.parser.Keyword;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -71,7 +70,7 @@ public class CompilerTest {
 
     Symbol literalTrue;
     Symbol literalFalse;
-    if(ParserUtils.getLiteralName(CclGrammarParser.TRUE).equals(foundSymbols.get(0).getText())) {
+    if(Keyword.TRUE.toString().equals(foundSymbols.get(0).getText())) {
       literalTrue = foundSymbols.get(0);
       literalFalse = foundSymbols.get(1);
     }
@@ -80,10 +79,10 @@ public class CompilerTest {
       literalTrue = foundSymbols.get(1);
     }
 
-    assertEquals(literalTrue.getText(), ParserUtils.getLiteralName(CclGrammarParser.TRUE));
-    assertEquals(literalTrue.getData().getType().get(), ParserUtils.getLiteralName(CclGrammarParser.BOOL));
-    assertEquals(literalFalse.getText(), ParserUtils.getLiteralName(CclGrammarParser.FALSE));
-    assertEquals(literalFalse.getData().getType().get(), ParserUtils.getLiteralName(CclGrammarParser.BOOL));
+    assertEquals(literalTrue.getText(), Keyword.TRUE.toString());
+    assertEquals(literalTrue.getData().getType().get(), Keyword.BOOL.toString());
+    assertEquals(literalFalse.getText(), Keyword.FALSE.toString());
+    assertEquals(literalFalse.getData().getType().get(), Keyword.BOOL.toString());
   }
 
   @Test
@@ -100,8 +99,8 @@ public class CompilerTest {
     assertTrue(CollectionUtils.isNotEmpty(foundSymbols));
     assertEquals(foundSymbols.size(), 1);
     Symbol literalNull = foundSymbols.get(0);
-    assertEquals(literalNull.getText(), ParserUtils.getLiteralName(CclGrammarParser.NULL));
-    assertEquals(literalNull.getData().getType().get(), ParserUtils.getLiteralName(CclGrammarParser.NULL));
+    assertEquals(literalNull.getText(), Keyword.NULL.toString());
+    assertEquals(literalNull.getData().getType().get(), Keyword.NULL.toString());
   }
 
   @Test

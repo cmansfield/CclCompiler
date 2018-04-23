@@ -36,18 +36,18 @@ public class ParserUtils {
     if(StringUtils.isBlank(type)) {
       return false;
     }
-    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.INT))) {
+    if(type.equals(Keyword.INT.toString())) {
       return true;
     }
-    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.CHAR))) {
+    if(type.equals(Keyword.CHAR.toString())) {
       return true;
     }
-    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.BOOL))) {
+    if(type.equals(Keyword.BOOL.toString())) {
       return true;
     }
-    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.STRING))) {
+    if(type.equals(Keyword.STRING.toString())) {
       return true;
     }
-    return type.equals(ParserUtils.getLiteralName(CclGrammarParser.VOID));
+    return type.equals(Keyword.VOID.toString());
   }
 }

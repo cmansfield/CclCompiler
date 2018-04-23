@@ -2,6 +2,7 @@ package io.github.cmansfield.secondpass;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
+import io.github.cmansfield.parser.Keyword;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
@@ -14,7 +15,6 @@ import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.collections4.BidiMap;
-import io.github.cmansfield.parser.ParserUtils;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
@@ -248,11 +248,11 @@ public class SemanticsVisitorTest {
     ParserRuleContext mockContext = mock(ParserRuleContext.class);
     mockContext.start = new CommonToken(-1);
     List<String> primitiveTypes = Arrays.asList(
-            ParserUtils.getLiteralName(CclGrammarParser.INT),
-            ParserUtils.getLiteralName(CclGrammarParser.CHAR),
-            ParserUtils.getLiteralName(CclGrammarParser.BOOL),
-            ParserUtils.getLiteralName(CclGrammarParser.STRING),
-            ParserUtils.getLiteralName(CclGrammarParser.VOID));
+            Keyword.INT.toString(),
+            Keyword.CHAR.toString(),
+            Keyword.BOOL.toString(),
+            Keyword.STRING.toString(),
+            Keyword.VOID.toString());
 
     for(String type : primitiveTypes) {
       SemanticsVisitor visitor = new SemanticsVisitor(null);
@@ -388,7 +388,7 @@ public class SemanticsVisitorTest {
             .symbolId(instanceVarId)
             .text(instanceVarText)
             .data(new DataBuilder()
-                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .type(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .build());
@@ -445,7 +445,7 @@ public class SemanticsVisitorTest {
             .symbolId(methodId)
             .text(methodText)
             .data(new DataBuilder()
-                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .returnType(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .build());
@@ -491,7 +491,7 @@ public class SemanticsVisitorTest {
             .symbolId(instanceVarId)
             .text(instanceVarText)
             .data(new DataBuilder()
-                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .type(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .accessModifier(AccessModifier.STATIC)
                     .build())
@@ -538,7 +538,7 @@ public class SemanticsVisitorTest {
             .symbolId(methodId)
             .text(methodText)
             .data(new DataBuilder()
-                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .returnType(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .accessModifier(AccessModifier.STATIC)
                     .build())
@@ -661,7 +661,7 @@ public class SemanticsVisitorTest {
             .symbolId(instanceVarId)
             .text(instanceVarText)
             .data(new DataBuilder()
-                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .type(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PRIVATE)
                     .accessModifier(AccessModifier.STATIC)
                     .build())
@@ -700,7 +700,7 @@ public class SemanticsVisitorTest {
             .symbolId(instanceVarId)
             .text(instanceVarText)
             .data(new DataBuilder()
-                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .type(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .build());
@@ -729,7 +729,7 @@ public class SemanticsVisitorTest {
             .symbolId(literalVarId)
             .text(literalVarText)
             .data(new DataBuilder()
-                    .type(ParserUtils.getLiteralName(CclGrammarParser.CHAR))
+                    .type(Keyword.CHAR.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .scope(scope)
@@ -765,7 +765,7 @@ public class SemanticsVisitorTest {
             .symbolId(varId)
             .text(varText)
             .data(new DataBuilder()
-                    .type(ParserUtils.getLiteralName(CclGrammarParser.CHAR))
+                    .type(Keyword.CHAR.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .isTypeAnArray(true)
                     .build())
@@ -795,7 +795,7 @@ public class SemanticsVisitorTest {
             .symbolId(literalVarId)
             .text(literalVarText)
             .data(new DataBuilder()
-                    .type(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .type(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .scope(scope)
@@ -831,7 +831,7 @@ public class SemanticsVisitorTest {
             .symbolId(literalVarId)
             .text(literalVarText)
             .data(new DataBuilder()
-                    .type(ParserUtils.getLiteralName(CclGrammarParser.STRING))
+                    .type(Keyword.STRING.toString())
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .scope(scope)
@@ -849,6 +849,18 @@ public class SemanticsVisitorTest {
     }
   }
 
+  
+  @Test
+  public void test_deleteMe() {
+    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    
+    visitor.pushOperatorOntoStack("-", 5);
+    visitor.pushOperatorOntoStack("*", 5);
+    visitor.pushOperatorOntoStack("+", 5);
+  }
+  
+  
+  
   /**
    * This is a template method for testing each of the different type of literals
    * 

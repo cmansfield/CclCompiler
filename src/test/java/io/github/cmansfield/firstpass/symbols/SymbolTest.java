@@ -2,8 +2,7 @@ package io.github.cmansfield.firstpass.symbols;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
-import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.parser.ParserUtils;
+import io.github.cmansfield.parser.Keyword;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -28,7 +27,7 @@ public class SymbolTest {
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
             .data(new DataBuilder()
-                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .returnType(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PRIVATE)
                     .parameters(parameters)
                     .build())
@@ -47,7 +46,7 @@ public class SymbolTest {
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
             .data(new DataBuilder()
-                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .returnType(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PRIVATE)
                     .parameters(moreParameters)
                     .build())
@@ -86,7 +85,7 @@ public class SymbolTest {
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
             .data(new DataBuilder()
-                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .returnType(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PRIVATE)
                     .parameters(moreParameters)
                     .build())
@@ -143,7 +142,7 @@ public class SymbolTest {
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
             .data(new DataBuilder()
-                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .returnType(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PRIVATE)
                     .parameters(moreParameters)
                     .build())
@@ -164,7 +163,7 @@ public class SymbolTest {
             .text("MyClass")
             .symbolKind(SymbolKind.METHOD)
             .data(new DataBuilder()
-                    .returnType(ParserUtils.getLiteralName(CclGrammarParser.INT))
+                    .returnType(Keyword.INT.toString())
                     .accessModifier(AccessModifier.PRIVATE)
                     .parameters(moreParameters)
                     .build())

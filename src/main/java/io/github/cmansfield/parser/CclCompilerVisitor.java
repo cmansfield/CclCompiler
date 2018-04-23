@@ -10,15 +10,12 @@ import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 
 public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
-  private final Logger logger = LoggerFactory.getLogger(CclCompilerVisitor.class);
   public static final String GLOBAL_SCOPE = "g";
   protected BidiMap<String, Symbol> symbols;
   protected String scope;

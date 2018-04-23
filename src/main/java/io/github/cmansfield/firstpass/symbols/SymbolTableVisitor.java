@@ -2,6 +2,7 @@ package io.github.cmansfield.firstpass.symbols;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
+import io.github.cmansfield.parser.Keyword;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -154,10 +155,10 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     Data data = new DataBuilder()
-            .returnType(ParserUtils.getLiteralName(CclGrammarParser.VOID))
+            .returnType(Keyword.VOID.toString())
             .accessModifiers(accessModifiers)
             .build();
-    addNewSymbol(ParserUtils.getLiteralName(CclGrammarParser.MAIN), SymbolKind.MAIN, scope, data, symbolId);
+    addNewSymbol(Keyword.MAIN.toString(), SymbolKind.MAIN, scope, data, symbolId);
 
     String scopeOrig = scope;
     scope = scope + "." + symbolId;

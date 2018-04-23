@@ -85,7 +85,7 @@ public class SAR {
             "SAR - type:%s SymbolId:\'%s\' lineNumber:%s text:\'%s\' argIds(%s)",
             type.toString(),
             getSymbolId(),
-            getLineNumber().isPresent() ? getLineNumber().get() : "",
+            getLineNumber().orElse(-1),
             getText(),
             getSymbolIds().stream().collect(Collectors.joining(", ")));
   }

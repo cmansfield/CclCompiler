@@ -2,6 +2,7 @@ package io.github.cmansfield.secondpass;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
+import io.github.cmansfield.parser.Keyword;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -442,12 +443,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Data fieldData = fieldSymbol.getData();
     List<AccessModifier> accessModifiers = fieldData.getAccessModifiers();
 
-    if(ParserUtils.getLiteralName(CclGrammarParser.THIS).equals(parentSar.getText())) {
+    if(Keyword.THIS.toString().equals(parentSar.getText())) {
       if(accessModifiers.contains(AccessModifier.STATIC)) {
         referenceExistException(parentSar, fieldSar, String.format(
                 "Cannot access static \'%s\' from an instance of \'%s\'",
                 fieldSar.getText(),
-                ParserUtils.getLiteralName(CclGrammarParser.THIS)));
+                Keyword.THIS.toString()));
       }
     }
     else if(accessModifiers.contains(AccessModifier.PRIVATE)) {
@@ -619,13 +620,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(CollectionUtils.isEmpty(sas)) {
       throw new IllegalStateException("SAS does not have enough SARs when trying to make an integer cast");
     }
-    String integerType = ParserUtils.getLiteralName(CclGrammarParser.INT);
+    String integerType = Keyword.INT.toString();
     SAR sar = sas.pop();
     Symbol symbol = symbols.get(sar.getSymbolId());
     Data data = symbol.getData();
     String type = data.getType().orElse("");
 
-    if(!type.equals(ParserUtils.getLiteralName(CclGrammarParser.CHAR)) || data.isTypeAnArray()) {
+    if(!type.equals(Keyword.CHAR.toString()) || data.isTypeAnArray()) {
       throw new UnsupportedOperationException(String.format(
               "Cannot cast type \'%s%s\' to \'%s\' at this time",
               type,
@@ -665,13 +666,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(CollectionUtils.isEmpty(sas)) {
       throw new IllegalStateException("SAS does not have enough SARs when trying to make an integer cast");
     }
-    String charType = ParserUtils.getLiteralName(CclGrammarParser.CHAR);
+    String charType = Keyword.CHAR.toString();
     SAR sar = sas.pop();
     Symbol symbol = symbols.get(sar.getSymbolId());
     Data data = symbol.getData();
     String type = data.getType().orElse("");
 
-    if(!type.equals(ParserUtils.getLiteralName(CclGrammarParser.INT)) || data.isTypeAnArray()) {
+    if(!type.equals(Keyword.INT.toString()) || data.isTypeAnArray()) {
       throw new UnsupportedOperationException(String.format(
               "Cannot cast type \'%s%s\' to \'%s\' at this time",
               type,
@@ -702,6 +703,93 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     sas.push(tempSar);
   }
 
+  void pushOperatorOntoStack(String operator, int lineNumber) {
+    if(StringUtils.isBlank(operator)) {
+      throw new IllegalArgumentException(lineNumber + " : Operators pushed onto the operator stack cannot be blank");
+    }
+    if(operator.equals("(") || operator.equals("[")) {
+      operatorStack.push(operator);
+      logger.debug("Operator Stack after adding \'{}\': {}", operator, operatorStack);
+      return;
+    }
+
+    String stackOperator;
+    while(CollectionUtils.isNotEmpty(operatorStack) 
+            && operatorPrecedence(stackOperator = operatorStack.peek()) >= operatorPrecedence(operator)) {
+      // Eval stackOperator
+      operatorStack.pop();
+    }
+
+    operatorStack.push(operator);     // NOSONAR
+    logger.debug("Operator Stack after adding \'{}\': {}", operator, operatorStack);
+  }
+
+  /**
+   * This method will return the precedence value for the supplied operator
+   * 
+   * @param operator    Operator to evaluate
+   * @return            The precedence value for the supplied operator
+   */
+  private int operatorPrecedence(String operator) {
+    if(StringUtils.isBlank(operator)) {
+      return -1;
+    }
+    if(operator.equals(Keyword.ASSIGN.toString())) {
+      return 0;
+    }
+    if(operator.equals(Keyword.OR.toString())) {
+      return 1;
+    }
+    if(operator.equals(Keyword.AND.toString())) {
+      return 2;
+    }
+    if(operator.equals(Keyword.EQUALS.toString())
+            ||operator.equals(Keyword.NOT_EQ.toString())) {
+      return 3;
+    }
+    if(operator.equals(Keyword.LESS.toString())
+            || operator.equals(Keyword.GREATER.toString()) 
+            || operator.equals(Keyword.LESS_EQ.toString()) 
+            || operator.equals(Keyword.GREAT_EQ.toString())) {
+      return 4;
+    }
+    if(operator.equals(Keyword.PLUS.toString()) 
+            || operator.equals(Keyword.MINUS.toString())) {
+      return 5;
+    }
+    if(operator.equals(Keyword.MULTI.toString())
+            || operator.equals(Keyword.DIV.toString())) {
+      return 6;
+    }
+    
+    return -1;
+  }
+  
+  /**
+   * #EOE
+   * EndOfExpression, this method will pop operators off the operator stack and process the
+   * required SARs from the SAS for that operation 
+   *
+   * @param lineNumber  The line number of the line of code being processed
+   */
+  private void endOfExpression(int lineNumber) {
+    String operator;
+    
+    while(CollectionUtils.isNotEmpty(operatorStack)) {
+      operator = operatorStack.pop();
+      
+      
+    }
+  }
+  
+  private void closingParenthesis() {
+    String operator;
+    
+    while((operator = operatorStack.pop()) != null && !operator.equals("(")) {
+      
+    }
+  }
+  
   /*
   **************************************
   *           Overridden methods
@@ -750,7 +838,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if("{".equals(child.getText())) {
       symbolKind = SymbolKind.BLOCK;
     }
-    else if(ParserUtils.getLiteralName(CclGrammarParser.FOR).equals(child.getText())) {
+    else if(Keyword.FOR.toString().equals(child.getText())) {
       symbolKind = SymbolKind.FOR;
     }
 
@@ -838,7 +926,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitMainDeclaration(CclGrammarParser.MainDeclarationContext ctx) {
-    String symbolId = findSymbolId(ParserUtils.getLiteralName(CclGrammarParser.MAIN), SymbolKind.MAIN);
+    String symbolId = findSymbolId(Keyword.MAIN.toString(), SymbolKind.MAIN);
     String scopeOrig = scope;
     scope = String.format("%s.%s", scope, symbolId);
     traverseMethodBody(ctx);
@@ -961,31 +1049,31 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitAssignmentOperation(CclGrammarParser.AssignmentOperationContext ctx) {
-    operatorStack.push(getChildText(ctx));
+    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
     return super.visitAssignmentOperation(ctx);
   }
 
   @Override
   public Object visitBooleanOperation(CclGrammarParser.BooleanOperationContext ctx) {
-    operatorStack.push(getChildText(ctx));
+    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
     return super.visitBooleanOperation(ctx);
   }
 
   @Override
   public Object visitMathOperation(CclGrammarParser.MathOperationContext ctx) {
-    operatorStack.push(getChildText(ctx));
+    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
     return super.visitMathOperation(ctx);
   }
 
   @Override
   public Object visitInvokeOperator(CclGrammarParser.InvokeOperatorContext ctx) {
-    operatorStack.push(getChildText(ctx));
+    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
     return super.visitInvokeOperator(ctx);
   }
 
   @Override
   public Object visitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx) {
-    operatorStack.push(getChildText(ctx));
+    pushOperatorOntoStack(getChildText(ctx), ctx.start.getLine());
     return super.visitArrayOperator(ctx);
   }
 
@@ -1021,14 +1109,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       throw new IllegalStateException(String.format(
               "%s : The keyword \'%s\' cannot be used here", 
               ctx.start.getLine(),
-              ParserUtils.getLiteralName(CclGrammarParser.THIS)));
+              Keyword.THIS.toString()));
     }
 
     // Push 'this'
     sas.push(new SAR(
             SarType.REFERENCE,
             symbol.getSymbolId(),
-            ParserUtils.getLiteralName(CclGrammarParser.THIS),
+            Keyword.THIS.toString(),
             ctx.start.getLine()));
 
     return super.visitSelf(ctx);
@@ -1053,10 +1141,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .map(context -> (CclGrammarParser.ExpressionContext)context)
             .forEach(this::visitExpression);
 
-    if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.INT))) {
+    if(type.equals(Keyword.INT.toString())) {
       integerCast();
     }
-    else if(type.equals(ParserUtils.getLiteralName(CclGrammarParser.CHAR))) {
+    else if(type.equals(Keyword.CHAR.toString())) {
       charCast();
     }
     else {

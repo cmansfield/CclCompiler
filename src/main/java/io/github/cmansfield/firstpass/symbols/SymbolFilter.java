@@ -81,7 +81,7 @@ public class SymbolFilter {
       if(!symbolData.getReturnType().isPresent()) {
         return false;
       }
-      if(!filterData.getReturnType().get().equals(symbolData.getReturnType().get())) {
+      if(!filterData.getReturnType().orElse("").equals(symbolData.getReturnType().orElse(""))) {
         return false;
       }
     }
@@ -89,7 +89,7 @@ public class SymbolFilter {
       if(!symbolData.getType().isPresent()) {
         return false;
       }
-      if(!filterData.getType().get().equals(symbolData.getType().get())) {
+      if(!filterData.getType().orElse("").equals(symbolData.getType().orElse(""))) {
         return false;
       }
     }
