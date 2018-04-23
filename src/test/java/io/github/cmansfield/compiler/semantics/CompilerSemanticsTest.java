@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 
 
-public class CompileremanticsTest {
+public class CompilerSemanticsTest {
   private CompilerTest compilerTest;
   
   @BeforeClass

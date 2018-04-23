@@ -13,7 +13,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
@@ -238,6 +239,63 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
   }
 
   /**
+   *
+   *
+   * @param name
+   * @param symbolKind
+   * @param parameterTypes
+   * @return
+   */
+  protected String findMethodSymbolId(String name, SymbolKind symbolKind, List<String> parameterTypes) {
+    if(symbolKind != SymbolKind.METHOD && symbolKind != SymbolKind.CONSTRUCTOR) {
+      throw new IllegalArgumentException("The Symbol type must be either a method or constructor");
+    }
+    if(parameterTypes == null) {
+      throw new IllegalArgumentException("The parameter types list cannot be null");
+    }
+
+    Symbol filter = new SymbolBuilder()
+            .symbolKind(symbolKind)
+            .scope(scope)
+            .text(name)
+            .build();
+    List<Symbol> foundMethods = SymbolFilter.filter(symbols, filter);
+    foundMethods = foundMethods.stream()
+            .filter(Objects::nonNull)
+            .filter(symbol -> symbol.getData().getParameters().size() == parameterTypes.size())
+            .filter(symbol ->
+              symbol.getData().getParameters().stream()
+                      .map(param -> symbols.get(param))
+                      .filter(Objects::nonNull)
+                      .map(Symbol::getData)
+                      .filter(Objects::nonNull)
+                      .map(data -> data.getType().orElse(""))
+                      .filter(StringUtils::isNotBlank)
+                      .collect(Collectors.toList())
+                  .equals(parameterTypes))
+            .collect(Collectors.toList());
+    if(CollectionUtils.isEmpty(foundMethods)) {
+      throw new IllegalStateException(String.format(
+              "Could not find %s \'%s\'",
+              symbolKind.toString(),
+              name));
+    }
+    if(foundMethods.size() > 1) {
+      throw new IllegalStateException(String.format(
+              "Found duplicate %ss in class \'%s\' with method signature \'%s\'",
+              symbolKind.toString(),
+              symbols.get(SymbolTableUtils.getParentScope(scope)).getText(),
+              String.format(
+                      "%s(%s)",
+                      name,
+                      parameterTypes.stream()
+                              .collect(Collectors.joining(", ")))));
+    }
+
+    return foundMethods.get(0).getSymbolId();
+  }
+
+  /**
    * This method is used to find Symbols in the symbol table
    *
    * @param name        The Symbol text to find
@@ -291,13 +349,27 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
    *
    * @param ctx     The current context to search for any parameter list nodes
    */
-  protected void traverseParameterList(ParserRuleContext ctx) {
+  protected List<String> traverseParameterList(ParserRuleContext ctx) {
     if(ctx == null || ctx.children == null) {
-      return;
+      return Collections.emptyList();
     }
-    ctx.children.stream()
+    return ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.ParameterListContext)
             .map(context -> (CclGrammarParser.ParameterListContext)context)
-            .forEach(this::visitParameterList);
+            .map(this::visitParameterList)
+            .map(value -> (List)value)
+            .flatMap(Collection::stream)
+            .map(value -> (String)value)
+            .collect(Collectors.toList());
+  }
+
+  @Override
+  public Object visitParameterList(CclGrammarParser.ParameterListContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.ParameterContext)
+            .map(node -> (CclGrammarParser.ParameterContext)node)
+            .map(this::visitParameter)
+            .map(val -> (String)val)
+            .collect(Collectors.toList());
   }
 }

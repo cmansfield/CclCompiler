@@ -1,7 +1,18 @@
 
-public void main() {
-    char str[] = new char[7];
-    //int ascii = (int)str;
-    //int ascii = (int)'b';
-    char b = (char)45;
+public void main() {}
+
+public class TestClass {
+    public TestClass(int number, bool isCool, char newLine) {
+        print(number);
+    }
+
+    public TestClass(char number, int isCool, bool newLine) {
+        print(number);
+    }
+
+    public TestClass(int number, bool isCool, char newLine) {
+        print(number);
+    }
+
+    public TestClass() {}
 }

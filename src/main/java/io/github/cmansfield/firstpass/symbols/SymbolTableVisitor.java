@@ -61,16 +61,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   }
 
   @Override
-  public Object visitParameterList(CclGrammarParser.ParameterListContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.ParameterContext)
-            .map(node -> (CclGrammarParser.ParameterContext)node)
-            .map(this::visitParameter)
-            .map(val -> (String)val)
-            .collect(Collectors.toList());
-  }
-
-  @Override
   public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
     String type = ctx.children.get(0).getText();
     String name = ctx.children.get(1).getText();

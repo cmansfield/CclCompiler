@@ -535,6 +535,33 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * #checkConstructor
+   * This method will make sure the class' constructor matches the name
+   * of the containing class
+   *
+   * @param name  The name of the constructor
+   */
+  private void constructorCheck(String name) {
+    if(StringUtils.isBlank(name)) {
+      throw new IllegalArgumentException("Constructor name cannot be blank");
+    }
+    String classId = SymbolTableUtils.getParentScope(scope);
+    Symbol classSymbol = symbols.get(classId);
+
+    if(classSymbol == null) {
+      throw new IllegalStateException(String.format(
+              "Could not find the class \'%s\' Symbol matching ID \'%s\'",
+              name,
+              classId));
+    }
+    if(!name.equals(classSymbol.getText())) {
+      throw new IllegalArgumentException(String.format(
+              "Constructors for class \'%s\' must have the same name",
+              classSymbol.getText()));
+    }
+  }
+
+  /**
    * #methodCall
    * This semantic all will pop off a argumentListSar and an identifier sar and create a
    * methodCallSar
@@ -749,16 +776,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {   // NOSONAR
-    String name = getMethodName(ctx);
+    String name = getNameWithoutVisiting(ctx);
+    List<String> paramTypes = traverseParameterList(ctx);
     String scopeOrig = scope;
 
-    String symbolId = findSymbolId(name, SymbolKind.CONSTRUCTOR);
+    String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
     if(StringUtils.isBlank(symbolId)) {
       return null;
     }
 
     scope = scope + "." + symbolId;
-    traverseParameterList(ctx);
+    // Semantic #constructorCheck
+    constructorCheck(name);
+
     traverseMethodBody(ctx);
     scope = scopeOrig;
 
@@ -1019,5 +1049,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               type));
     }
     return null;
+  }
+
+  @Override
+  public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
+    return getChildText(ctx);
   }
 }
