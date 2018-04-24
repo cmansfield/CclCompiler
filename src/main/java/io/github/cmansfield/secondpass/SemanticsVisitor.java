@@ -968,6 +968,58 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
   }
 
+  /**
+   * #return
+   * This method processes everything on the operator stack and checks to
+   * see if the top SAR can be returned by the method
+   */
+  private void semanticReturn() {
+    Symbol symbol = null;
+    SAR sar = null;
+            
+    endOfExpression();
+
+    if(CollectionUtils.isNotEmpty(sas)) {
+      sar = sas.pop();
+      symbol = symbols.get(sar.getSymbolId());
+    }
+    if(symbol == null) {
+      return;
+    }
+
+    String type = symbol.getData().getType().isPresent()
+            ? symbol.getData().getType().orElse("")
+            : symbol.getData().getReturnType().orElse("");
+    
+    Symbol methodSymbol;
+    String workingScope = scope;
+    while((methodSymbol = symbols.get(SymbolTableUtils.getParentSymbolId(workingScope))).getSymbolKind() 
+            != SymbolKind.METHOD) {
+      workingScope = methodSymbol.getScope();
+    }
+    
+    String returnType = methodSymbol
+            .getData()
+            .getReturnType()
+            .orElse("");
+    
+    if(!returnType.equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : Cannot return type \'%s\' from method \'%s %s(%s)\'",
+              sar.getLineNumber().orElse(-1),
+              type,
+              returnType,
+              methodSymbol.getText(),
+              methodSymbol.getData().getParameters().stream()
+                      .map(symbols::get)
+                      .map(Symbol::getData)
+                      .map(Data::getType)
+                      .filter(Optional::isPresent)
+                      .map(Optional::get)
+                      .collect(Collectors.joining(", "))));
+    }
+  }
+  
   /*
   **************************************
   *           Overridden methods
@@ -1357,10 +1409,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String text = getChildText(ctx);
     
     if(Keyword.PRINT.toString().equals(text)) {
-      print();    // Semantic call #print
+      print();              // Semantic call #print
     }
     if(Keyword.READ.toString().equals(text)) {
-      read();     // Semantic call #read
+      read();               // Semantic call #read
+    }
+    if(Keyword.RETURN.toString().equals(text)) {
+      semanticReturn();     // Semantic call #return
     }
     
     return null;

@@ -3,3 +3,14 @@ public void main() {
     int a;
     read(a);
 }
+
+public class MyClass {
+    public MyClass someMethod(int number, bool test, string hello) {
+        {
+            {
+                MyClass myClass;
+                return myClass;
+            }
+        }
+    }
+}
