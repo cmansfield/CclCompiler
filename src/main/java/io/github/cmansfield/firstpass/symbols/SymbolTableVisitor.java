@@ -121,6 +121,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     Data data = new DataBuilder()
             .accessModifiers(accessModifiers)
             .parameters(parameters)
+            .returnType(name)
             .build();
     addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data, symbolId);
 

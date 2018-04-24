@@ -159,6 +159,25 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .orElse(null);
   }
 
+  /**
+   * This method will simplify method text formatting for logging and errors
+   * 
+   * @param methodSymbol    The method Symbol to format
+   * @return                The method in string format
+   */
+  private String formatMethodText(Symbol methodSymbol) {
+    return String.format("%s %s(%s)", 
+            methodSymbol.getData().getReturnType().orElse("void"),
+            methodSymbol.getText(),
+            methodSymbol.getData().getParameters().stream()
+                    .map(symbols::get)
+                    .map(Symbol::getData)
+                    .map(Data::getType)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.joining(", ")));
+  }
+  
   /*
     **************************************
     *           Semantic methods
@@ -594,6 +613,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     SAR methodNameSar = sas.pop();
     List<String> argList = argListSar == null ? Collections.emptyList() : argListSar.getSymbolIds();
+    
+    // TODO - Find the method being called
+    
     SAR methodSar  = new SAR(
             SarType.METHOD, 
             "",
@@ -700,8 +722,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private void operatorException(int lineNumber, String operation, String operator, String op1Type, String op1Text, String op2Type, String op2Text) {
     throw new IllegalStateException(String.format(
             "%s : Cannot perform %s operation \'%s %s %s %s %s\'",
-            operation,
             lineNumber,
+            operation,
             op2Type,
             op2Text,
             operator,
@@ -1005,19 +1027,142 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     if(!returnType.equals(type)) {
       throw new IllegalStateException(String.format(
-              "%s : Cannot return type \'%s\' from method \'%s %s(%s)\'",
+              "%s : Cannot return type \'%s\' from method \'%s\'",
               sar.getLineNumber().orElse(-1),
               type,
-              returnType,
-              methodSymbol.getText(),
-              methodSymbol.getData().getParameters().stream()
-                      .map(symbols::get)
+              formatMethodText(methodSymbol)));
+    }
+  }
+
+  /**
+   * #newObject
+   * This semantic call will pop a TYPE sar off of the sas and a argList sar if one exists
+   * After it will check to make sure the constructor exists and then create a new constructor
+   * sar
+   */
+  private void newObject() {
+    SAR argListSar = null;
+    SAR typeSar;
+    
+    if(sas.peek().getType() == SarType.ARG_LIST) {
+      argListSar = sas.pop();
+    }
+    typeSar = sas.pop();
+    if(typeSar.getType() != SarType.TYPE) {
+      throw new IllegalStateException(String.format(
+              "%s : Expecting a SAR type \'TYPE\', found \'%s\'",
+              typeSar.getLineNumber(),
+              typeSar.getType().toString()));
+    }
+
+    List<String> argList = argListSar == null 
+            ? Collections.emptyList() 
+            : argListSar.getSymbolIds();
+    List<String> argListTypes = argList.stream()
+                .map(id -> {
+                  Data data = symbols.get(id).getData();
+                  return data.getType().isPresent()
+                          ? data.getType().orElse("")
+                          : data.getReturnType().orElse("");})
+                .collect(Collectors.toList());
+    Symbol classSymbol = symbols.get(typeSar.getSymbolId());
+    
+    List<Symbol> foundConstructors = SymbolFilter.filter(
+            symbols, 
+            new SymbolBuilder()
+                    .scope(classSymbol.getScope() + "." + classSymbol.getSymbolId())
+                    .symbolKind(SymbolKind.CONSTRUCTOR)
+                    .text(typeSar.getText())
+                    .build());
+    // Filter out constructors that don't have maching parameters 
+    foundConstructors = foundConstructors.stream()
+            .filter(constructor -> constructor.getData().getParameters().stream()
+                      .map(paramId -> symbols.get(paramId))
                       .map(Symbol::getData)
                       .map(Data::getType)
                       .filter(Optional::isPresent)
                       .map(Optional::get)
-                      .collect(Collectors.joining(", "))));
+                      .collect(Collectors.toList()).equals(argListTypes))
+            .collect(Collectors.toList());
+    if(CollectionUtils.isEmpty(foundConstructors)) {
+      throw new IllegalStateException("");
     }
+    if(foundConstructors.size() > 1) {
+      throw new IllegalStateException("");
+    }
+    Symbol constructorSymbol = foundConstructors.get(0);
+    if(constructorSymbol.getData().getAccessModifiers().contains(AccessModifier.PRIVATE)) {
+      throw new IllegalStateException(String.format(
+              "%s : %s \'%s\' is private and cannot be accessed", 
+              typeSar.getLineNumber().orElse(-1),
+              constructorSymbol.getSymbolKind().toString(),
+              formatMethodText(constructorSymbol)));
+    }
+    
+    SAR methodSar = new SAR(
+            SarType.METHOD,
+            constructorSymbol.getSymbolId(),
+            constructorSymbol.getText(),
+            typeSar.getLineNumber().orElse(-1));
+    if(CollectionUtils.isNotEmpty(argList)) {
+      argList.forEach(methodSar::addSymbolId);
+    }
+    sas.push(methodSar);
+  }
+  
+  private void methodExist(SAR typeSar, SAR argListSar, Symbol classSymbol, SymbolKind symbolKind) {
+    List<String> argList = argListSar == null
+            ? Collections.emptyList()
+            : argListSar.getSymbolIds();
+    List<String> argListTypes = argList.stream()
+            .map(id -> {
+              Data data = symbols.get(id).getData();
+              return data.getType().isPresent()
+                      ? data.getType().orElse("")
+                      : data.getReturnType().orElse("");})
+            .collect(Collectors.toList());
+
+    List<Symbol> found = SymbolFilter.filter(
+            symbols,
+            new SymbolBuilder()
+                    .scope(classSymbol.getScope() + "." + classSymbol.getSymbolId())
+                    .symbolKind(symbolKind)
+                    .text(typeSar.getText())
+                    .build());
+    // Filter out methods that don't have matching parameters 
+    found = found.stream()
+            .filter(symbol -> symbol.getData().getParameters().stream()
+                    .map(paramId -> symbols.get(paramId))
+                    .map(Symbol::getData)
+                    .map(Data::getType)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList()).equals(argListTypes))
+            .collect(Collectors.toList());
+    if(CollectionUtils.isEmpty(found)) {
+      throw new IllegalStateException("");
+    }
+    if(found.size() > 1) {
+      throw new IllegalStateException("");
+    }
+    Symbol symbol = found.get(0);
+    if(symbol.getData().getAccessModifiers().contains(AccessModifier.PRIVATE)) {
+      throw new IllegalStateException(String.format(
+              "%s : %s \'%s\' is private and cannot be accessed",
+              typeSar.getLineNumber().orElse(-1),
+              symbol.getSymbolKind().toString(),
+              formatMethodText(symbol)));
+    }
+
+    SAR methodSar = new SAR(
+            SarType.METHOD,
+            symbol.getSymbolId(),
+            symbol.getText(),
+            typeSar.getLineNumber().orElse(-1));
+    if(CollectionUtils.isNotEmpty(argList)) {
+      argList.forEach(methodSar::addSymbolId);
+    }
+    sas.push(methodSar);
   }
   
   /*
@@ -1416,6 +1561,27 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     if(Keyword.RETURN.toString().equals(text)) {
       semanticReturn();     // Semantic call #return
+    }
+    
+    return null;
+  }
+
+  @Override
+  public Object visitNewDeclaration(CclGrammarParser.NewDeclarationContext ctx) {
+    super.visitNewDeclaration(ctx);
+    ParseTree childNode = ctx.children.get(0);
+    
+    if(childNode instanceof CclGrammarParser.InvokeOperatorContext) {
+      // Creating a new object
+      newObject();      // Semantic call #newObject
+    }
+    else if(childNode instanceof CclGrammarParser.ArrayOperatorContext) {
+      // create a new array
+
+      System.out.println();
+    }
+    else {
+      throw new UnsupportedOperationException("Unknown operation");      
     }
     
     return null;

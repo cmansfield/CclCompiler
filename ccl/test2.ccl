@@ -1,16 +1,24 @@
 
-public void main() {
-    int a;
-    read(a);
-}
-
 public class MyClass {
-    public MyClass someMethod(int number, bool test, string hello) {
-        {
-            {
-                MyClass myClass;
-                return myClass;
-            }
-        }
+    
+    public MyClass() {}
+    
+    public MyClass(int test) {}
+    
+    public MyClass(bool isTest) {}
+    
+    public MyClass(int test, string hello) {}
+    
+    public void someMethod(int test, bool hello, string world) {
+    
     }
 }
+
+public void main() {
+    //MyClass myClass;
+    MyClass myClass = new MyClass(4);
+    //MyClass objs[] = new MyClass[5];
+    
+    //myClass.someMethod("Hello", true);
+}
+
