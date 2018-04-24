@@ -167,7 +167,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private String formatMethodText(Symbol methodSymbol) {
     return String.format("%s %s(%s)", 
-            methodSymbol.getData().getReturnType().orElse("void"),
+            methodSymbol.getData().getReturnType().orElse(Keyword.VOID.toString()),
             methodSymbol.getText(),
             methodSymbol.getData().getParameters().stream()
                     .map(symbols::get)
@@ -612,19 +612,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       argListSar = sas.pop();
     }
     SAR methodNameSar = sas.pop();
-    List<String> argList = argListSar == null ? Collections.emptyList() : argListSar.getSymbolIds();
+    SAR instanceSar = sas.pop();
     
-    // TODO - Find the method being called
-    
-    SAR methodSar  = new SAR(
-            SarType.METHOD, 
-            "",
-            methodNameSar.getText(), 
-            methodNameSar.getLineNumber().orElse(-1));
-    if(CollectionUtils.isNotEmpty(argList)) {
-      argList.forEach(methodSar::addSymbolId);
+    String classType = symbols.get(instanceSar.getSymbolId()).getData().getType().orElse("");
+    Symbol classSymbol = symbols.get(findSymbolId(classType, SymbolKind.CLASS));
+    if(classSymbol == null) {
+      throw new IllegalStateException(String.format(
+              "%s : Could not find the class for method \'%s\'",
+              methodNameSar.getLineNumber().orElse(-1),
+              methodNameSar.getText()));
     }
-    sas.push(methodSar);
+    
+    methodExist(methodNameSar, argListSar, classSymbol, SymbolKind.METHOD);
   }
 
   /**
@@ -1054,62 +1053,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               typeSar.getLineNumber(),
               typeSar.getType().toString()));
     }
-
-    List<String> argList = argListSar == null 
-            ? Collections.emptyList() 
-            : argListSar.getSymbolIds();
-    List<String> argListTypes = argList.stream()
-                .map(id -> {
-                  Data data = symbols.get(id).getData();
-                  return data.getType().isPresent()
-                          ? data.getType().orElse("")
-                          : data.getReturnType().orElse("");})
-                .collect(Collectors.toList());
+    
     Symbol classSymbol = symbols.get(typeSar.getSymbolId());
-    
-    List<Symbol> foundConstructors = SymbolFilter.filter(
-            symbols, 
-            new SymbolBuilder()
-                    .scope(classSymbol.getScope() + "." + classSymbol.getSymbolId())
-                    .symbolKind(SymbolKind.CONSTRUCTOR)
-                    .text(typeSar.getText())
-                    .build());
-    // Filter out constructors that don't have maching parameters 
-    foundConstructors = foundConstructors.stream()
-            .filter(constructor -> constructor.getData().getParameters().stream()
-                      .map(paramId -> symbols.get(paramId))
-                      .map(Symbol::getData)
-                      .map(Data::getType)
-                      .filter(Optional::isPresent)
-                      .map(Optional::get)
-                      .collect(Collectors.toList()).equals(argListTypes))
-            .collect(Collectors.toList());
-    if(CollectionUtils.isEmpty(foundConstructors)) {
-      throw new IllegalStateException("");
-    }
-    if(foundConstructors.size() > 1) {
-      throw new IllegalStateException("");
-    }
-    Symbol constructorSymbol = foundConstructors.get(0);
-    if(constructorSymbol.getData().getAccessModifiers().contains(AccessModifier.PRIVATE)) {
-      throw new IllegalStateException(String.format(
-              "%s : %s \'%s\' is private and cannot be accessed", 
-              typeSar.getLineNumber().orElse(-1),
-              constructorSymbol.getSymbolKind().toString(),
-              formatMethodText(constructorSymbol)));
-    }
-    
-    SAR methodSar = new SAR(
-            SarType.METHOD,
-            constructorSymbol.getSymbolId(),
-            constructorSymbol.getText(),
-            typeSar.getLineNumber().orElse(-1));
-    if(CollectionUtils.isNotEmpty(argList)) {
-      argList.forEach(methodSar::addSymbolId);
-    }
-    sas.push(methodSar);
+    methodExist(typeSar, argListSar, classSymbol, SymbolKind.CONSTRUCTOR);
   }
-  
+
+  /**
+   * 
+   * 
+   * @param typeSar
+   * @param argListSar
+   * @param classSymbol
+   * @param symbolKind
+   */
   private void methodExist(SAR typeSar, SAR argListSar, Symbol classSymbol, SymbolKind symbolKind) {
     List<String> argList = argListSar == null
             ? Collections.emptyList()
@@ -1140,12 +1096,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
                     .collect(Collectors.toList()).equals(argListTypes))
             .collect(Collectors.toList());
     if(CollectionUtils.isEmpty(found)) {
-      throw new IllegalStateException("");
-    }
-    if(found.size() > 1) {
-      throw new IllegalStateException("");
+      throw new IllegalStateException(String.format(
+              "%s : Could not find method that matching \'%s(%s)\'",
+              typeSar.getLineNumber().orElse(-1),
+              typeSar.getText(),
+              argListTypes.stream().collect(Collectors.joining(", "))));
     }
     Symbol symbol = found.get(0);
+    if(found.size() > 1) {
+      throw new IllegalStateException(String.format(
+              "%s : Found too many methods matching \'%s\'",
+              typeSar.getLineNumber().orElse(-1),
+              formatMethodText(symbol)));
+    }
     if(symbol.getData().getAccessModifiers().contains(AccessModifier.PRIVATE)) {
       throw new IllegalStateException(String.format(
               "%s : %s \'%s\' is private and cannot be accessed",

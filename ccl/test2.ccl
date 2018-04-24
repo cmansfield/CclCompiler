@@ -15,10 +15,10 @@ public class MyClass {
 }
 
 public void main() {
-    //MyClass myClass;
-    MyClass myClass = new MyClass(4);
+    MyClass myClass;
+    //MyClass myClass = new MyClass(4);
     //MyClass objs[] = new MyClass[5];
     
-    //myClass.someMethod("Hello", true);
+    myClass.someMethod(4, true, "");
 }
 

@@ -12,7 +12,8 @@ TODO List
     SemanticsVisitor
         Fix template classes/methods on the second pass
         Add #EOE to the end of 'expression ;' statements
-        Check to make sure method exists in methodCall()
+        Refactor this class to reuse less code 
+        Factor out code that should be in it's own class 
 
     CompilerTest
         Move the compile methods out of this class into their own TestingUtils class
