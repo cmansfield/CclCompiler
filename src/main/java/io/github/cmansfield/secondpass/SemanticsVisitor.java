@@ -1059,12 +1059,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * #methodExist
+   * This method will check to make sure the method being called exists in the context it's being used
+   * If it exists and is accessible then a new method SAR will be placed on the SAS
    * 
-   * 
-   * @param typeSar
-   * @param argListSar
-   * @param classSymbol
-   * @param symbolKind
+   * @param typeSar       The type of Sar pulled off the sas
+   * @param argListSar    The argument list sar if one exists
+   * @param classSymbol   The Symbol of the class that houses the method being called
+   * @param symbolKind    The type of method being called (constructor, or method)
    */
   private void methodExist(SAR typeSar, SAR argListSar, Symbol classSymbol, SymbolKind symbolKind) {
     List<String> argList = argListSar == null
