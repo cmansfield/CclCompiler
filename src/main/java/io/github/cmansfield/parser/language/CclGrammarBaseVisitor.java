@@ -220,6 +220,13 @@ public class CclGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitInvokeOperatorEnd(CclGrammarParser.InvokeOperatorEndContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitArrayOperator(CclGrammarParser.ArrayOperatorContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

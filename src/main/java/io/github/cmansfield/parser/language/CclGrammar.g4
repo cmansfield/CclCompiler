@@ -37,13 +37,13 @@ methodBody : '{' (variableDeclaration | statement)* '}' ;
 variableDeclaration : type name (arrayDeclaration)? (assignmentOperation)? ';' ;
 
 statement 
-    : IF invokeOperator expression ')' statement (ELSE statement)?
-    | WHILE invokeOperator expression ')' statement
+    : IF invokeOperator expression invokeOperatorEnd statement (ELSE statement)?
+    | WHILE invokeOperator expression invokeOperatorEnd statement
     | RETURN expression? ';'
-    | PRINT invokeOperator expression ')' ';'
-    | READ invokeOperator ')' ';'
+    | PRINT invokeOperator expression invokeOperatorEnd ';'
+    | READ '(' ')' ';'
     | SPAWN expression SET name ';'
-    | BLOCK invokeOperator ')' ';'
+    | BLOCK '(' ')' ';'
     | LOCK name ';'
     | UNLOCK name ';'
     | statementWithScope
@@ -51,7 +51,7 @@ statement
     ;
     
 statementWithScope 
-    : FOR invokeOperator (variableDeclaration | expression ';' | ';') expression? ';' expression? ')'
+    : FOR invokeOperator (variableDeclaration | expression ';' | ';') expression? ';' expression? invokeOperatorEnd
       statement
     | '{' (statement | variableDeclaration)* '}'
     ;
@@ -70,12 +70,12 @@ cast : '(' PRIMITIVE_TYPE ')' ;
 braceEnclosedInitializer : '{' argumentList? '}' ;
 
 newDeclaration 
-    : invokeOperator argumentList? ')'
+    : invokeOperator argumentList? invokeOperatorEnd
     | arrayOperator expression ']'
     ;
 
 expression 
-    : invokeOperator expression ')' expressionz?
+    : invokeOperator expression invokeOperatorEnd expressionz?
     | (TRUE | FALSE | NULL) expressionz?
     | self memberRefz? expressionz?
     | numericLiteral expressionz?
@@ -89,7 +89,7 @@ expression
     ;
 
 fnArrMember 
-    : invokeOperator argumentList? ')'
+    : invokeOperator argumentList? invokeOperatorEnd
     | arrayOperator expression ']'
     ;
 
@@ -122,6 +122,8 @@ mathOperation
     ;
     
 invokeOperator : '(' ;
+
+invokeOperatorEnd : ')';
 
 arrayOperator : '[' ;
 

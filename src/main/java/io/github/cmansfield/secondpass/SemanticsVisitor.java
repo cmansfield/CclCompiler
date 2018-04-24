@@ -276,10 +276,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       sar.setType(SarType.TYPE);
     }
     if(StringUtils.isBlank(symbolId)) {
-      Optional<Integer> lineNumberOpt = sar.getLineNumber();
       throw new IllegalStateException(String.format(
               "The identifier \'%s\' on line %s does not exist!",
-              lineNumberOpt.orElse(-1),
+              sar.getLineNumber().orElse(-1),
               sar.getText()));
     }
     sar.setSymbolId(symbolId);
@@ -304,10 +303,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     String symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.TYPE, scope);
     if(StringUtils.isBlank(symbolId)) {
-      Optional<Integer> lineNumberOpt = sar.getLineNumber();
       throw new IllegalStateException(String.format(
               "%s : The type \'%s\' does not exist!",
-              lineNumberOpt.orElse(-1),
+              sar.getLineNumber().orElse(-1),
               sar.getText()));
     }
     sar.setSymbolId(symbolId);
@@ -355,7 +353,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void referenceExistException(SAR parentSar, SAR fieldSar, String message) {
     throw new IllegalStateException(String.format("%s : %s.%s, %s",
-            parentSar.getLineNumber().orElse(0),
+            parentSar.getLineNumber().orElse(-1),
             parentSar.getText(),
             fieldSar.getText(),
             message));
@@ -767,7 +765,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       logger.warn("Not sure how to evaluate operator {}", getChildText(operatorCtx));
     }
 
-    String tempText = String.format("%s %s %s",
+    String tempText = String.format("(%s %s %s)",
             op2Symbol.getText(),
             operator,
             op1Symbol.getText());
@@ -886,16 +884,58 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       evaluateOperator(operatorStack.pop());
     }
   }
-  
-  // TODO - complete this
+
+  /**
+   * #closingParenthesis
+   * closingParenthesis, this method will pop operators off the operator stack and process the
+   * required SARs from the SAS for that operation until an opening parenthesis is found
+   */
   private void closingParenthesis() {
-    ParserRuleContext operator;
-    
-    while((operator = operatorStack.pop()) != null && !operator.equals("(")) {
-      
+    while(CollectionUtils.isNotEmpty(operatorStack) && !"(".equals(getChildText(operatorStack.peek()))) {
+      evaluateOperator(operatorStack.pop());
+    }
+    if(CollectionUtils.isEmpty(operatorStack)) {
+      throw new IllegalStateException("Could not find a matching open parenthesis on the operator stack");
+    }
+
+    // Remove the opening paren from the stack
+    operatorStack.pop();
+  }
+
+  /**
+   * #print
+   * This method processes everything on the operator stack and checks to
+   * see if the top SAR can be printed
+   */
+  private void print() {
+
+    endOfExpression();
+
+    if(CollectionUtils.isEmpty(sas)) {
+      throw new IllegalStateException("Print statements cannot be empty");
+    }
+
+    SAR sar = sas.pop();
+    Symbol symbol = symbols.get(sar.getSymbolId());
+
+    if(symbol == null) {
+      throw new IllegalStateException(String.format(
+              "%s : Could not find the Symbol \'%s\' for the print statement",
+              sar.getLineNumber().orElse(-1),
+              sar.getSymbolId()));
+    }
+
+    String type = symbol.getData().getType().isPresent()
+            ? symbol.getData().getType().orElse("")
+            : symbol.getData().getReturnType().orElse("");
+    if(!ParserUtils.isPrimitiveType(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : Cannot print type \'%s\'",
+              sar.getLineNumber().orElse(-1),
+              type));
     }
   }
-  
+
   /*
   **************************************
   *           Overridden methods
@@ -1271,5 +1311,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
     return getChildText(ctx); 
+  }
+
+  @Override
+  public Object visitInvokeOperatorEnd(CclGrammarParser.InvokeOperatorEndContext ctx) {
+    closingParenthesis();
+    return null;
+  }
+
+  @Override
+  public Object visitStatement(CclGrammarParser.StatementContext ctx) {
+    super.visitStatement(ctx);
+
+    if(Keyword.PRINT.toString().equals(getChildText(ctx))) {
+      // Semantic call #print
+      print();
+    }
+    return null;
   }
 }
