@@ -41,7 +41,7 @@ statement
     | WHILE invokeOperator expression invokeOperatorEnd statement
     | RETURN expression? ';'
     | PRINT invokeOperator expression invokeOperatorEnd ';'
-    | READ '(' ')' ';'
+    | READ invokeOperator expression? invokeOperatorEnd ';'
     | SPAWN expression SET name ';'
     | BLOCK '(' ')' ';'
     | LOCK name ';'

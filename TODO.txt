@@ -15,6 +15,3 @@ TODO List
 
     CompilerTest
         Move the compile methods out of this class into their own TestingUtils class
-        
-    Add Unit Tests
-        SemanticsVisitor::methodCall

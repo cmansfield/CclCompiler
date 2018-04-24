@@ -936,6 +936,38 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
   }
 
+  /**
+   * #read
+   * This method processes everything on the operator stack and checks to
+   * see if the top SAR can store a read value
+   */
+  private void read() {
+
+    endOfExpression();
+
+    if(CollectionUtils.isEmpty(sas)) {
+      throw new IllegalStateException("Read statements cannot be empty");
+    }
+
+    SAR sar = sas.pop();
+    Symbol symbol = symbols.get(sar.getSymbolId());
+
+    if(symbol == null) {
+      throw new IllegalStateException(String.format(
+              "%s : Could not find the Symbol \'%s\' for the read statement",
+              sar.getLineNumber().orElse(-1),
+              sar.getSymbolId()));
+    }
+
+    String type = symbol.getData().getType().orElse("");
+    if(!Keyword.INT.toString().equals(type) && !Keyword.CHAR.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : Cannot store read value into type \'%s\'",
+              sar.getLineNumber().orElse(-1),
+              type));
+    }
+  }
+
   /*
   **************************************
   *           Overridden methods
@@ -1322,11 +1354,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitStatement(CclGrammarParser.StatementContext ctx) {
     super.visitStatement(ctx);
-
-    if(Keyword.PRINT.toString().equals(getChildText(ctx))) {
-      // Semantic call #print
-      print();
+    String text = getChildText(ctx);
+    
+    if(Keyword.PRINT.toString().equals(text)) {
+      print();    // Semantic call #print
     }
+    if(Keyword.READ.toString().equals(text)) {
+      read();     // Semantic call #read
+    }
+    
     return null;
   }
 }
