@@ -71,7 +71,7 @@ braceEnclosedInitializer : '{' argumentList? '}' ;
 
 newDeclaration 
     : invokeOperator argumentList? invokeOperatorEnd
-    | arrayOperator expression ']'
+    | arrayOperator expression arrayOperatorEnd
     ;
 
 expression 
@@ -90,7 +90,7 @@ expression
 
 fnArrMember 
     : invokeOperator argumentList? invokeOperatorEnd
-    | arrayOperator expression ']'
+    | arrayOperator expression arrayOperatorEnd
     ;
 
 memberRefz : '.' name fnArrMember? memberRefz? ;
@@ -126,6 +126,8 @@ invokeOperator : '(' ;
 invokeOperatorEnd : ')';
 
 arrayOperator : '[' ;
+
+arrayOperatorEnd : ']' ;
 
 arrayDeclaration : '[' ']' ;
 

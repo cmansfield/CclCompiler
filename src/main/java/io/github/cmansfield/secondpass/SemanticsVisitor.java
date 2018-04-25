@@ -343,9 +343,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     SAR fieldSar = sas.pop();
     SAR parentSar = sas.pop();
-
-    if(fieldSar.getType() != SarType.IDENTIFIER && fieldSar.getType() != SarType.METHOD) {
-      referenceExistException(parentSar, fieldSar, fieldSar.getText() + "is not something that can be referenced");
+    
+    SarType fieldType = fieldSar.getType();
+    
+    if(fieldType != SarType.IDENTIFIER && fieldType != SarType.METHOD && fieldType != SarType.TEMPORARY) {
+      referenceExistException(parentSar, fieldSar, fieldSar.getText() + " is not something that can be referenced");
     }
     
     if(parentSar.getType() == SarType.IDENTIFIER) {
@@ -372,7 +374,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void referenceExistException(SAR parentSar, SAR fieldSar, String message) {
     throw new IllegalStateException(String.format("%s : %s.%s, %s",
-            parentSar.getLineNumber().orElse(-1),
+            fieldSar.getLineNumber().orElse(-1),
             parentSar.getText(),
             fieldSar.getText(),
             message));
@@ -418,7 +420,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .parameters(fieldSar.getSymbolIds())
             .build();
     Symbol referenceSymbol = addNewSymbol(
-            String.format("%s.%s", parentSar.getText(), fieldSar.getText()),
+            fieldSar.getText(),
             SymbolKind.REFERENCE,
             scope,
             refData);
@@ -442,15 +444,63 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param fieldSar    The referenced SAR in the reference call
    */
   private void referenceExistIdentifierBase(SAR parentSar, SAR fieldSar) {
+    if(symbols.get(parentSar.getSymbolId()).getData().isTypeAnArray()) {
+      referenceExistArrayInstanceBase(parentSar, fieldSar);
+    }
+    else {
+      referenceExistObjectInstanceBase(parentSar, fieldSar);
+    }
+  }
+
+  /**
+   * Supporting method for #referenceExist
+   * The method will handle references where the base is an array instance.
+   * (Ex. numbers[4])
+   *
+   * @param parentSar   The base SAR in the reference call
+   * @param fieldSar    The referenced SAR in the reference call
+   */
+  private void referenceExistArrayInstanceBase(SAR parentSar, SAR fieldSar) {
+    String arrayType = getSymbolType(symbols.get(parentSar.getSymbolId()));
+
+    Symbol arraySymbol = addNewSymbol(
+            arrayType,
+            SymbolKind.REFERENCE,
+            scope,
+            new DataBuilder()
+                    .type(arrayType)
+                    .isTypeAnArray(false)
+                    .parameter(parentSar.getSymbolId())
+                    .parameter(fieldSar.getSymbolIds().get(0))
+                    .build());
+    SAR arraySar = new SAR(
+            SarType.ARRAY,
+            arraySymbol.getSymbolId(),
+            arraySymbol.getText(),
+            parentSar.getLineNumber().orElse(-1));
+    arraySar.addSymbolId(parentSar.getSymbolId());
+    arraySar.addSymbolId(fieldSar.getSymbolIds().get(0));
+    sas.push(arraySar);
+  }
+
+  /**
+   * Supporting method for #referenceExist
+   * The method will handle references where the base is an object instance, usually this
+   * is the case when working with instantiated objects. (Ex. employee.getName)
+   *
+   * @param parentSar   The base SAR in the reference call
+   * @param fieldSar    The referenced SAR in the reference call
+   */
+  private void referenceExistObjectInstanceBase(SAR parentSar, SAR fieldSar) {
     // The parent must be an instantiated object and the field a non-static class member that is visible
     Symbol instanceSymbol = symbols.get(parentSar.getSymbolId());
-    String className = instanceSymbol == null ? "" : instanceSymbol.getData().getType().orElse("");
+    String className = instanceSymbol == null ? "" : getSymbolType(instanceSymbol);
     String classId = findSymbolId(className, SymbolKind.CLASS);
 
-    if(StringUtils.isBlank(className) || StringUtils.isBlank(classId)) {
+    if(StringUtils.isBlank(className) || StringUtils.isBlank(classId) || instanceSymbol == null) {
       referenceExistException(parentSar, fieldSar, String.format("instance \'%s\'s class not found", parentSar.getText()));
     }
-    
+
     Symbol fieldSymbol = getFieldSymbol(parentSar, fieldSar, classId);
     fieldSar.setSymbolId(fieldSymbol.getSymbolId());
     Data fieldData = fieldSymbol.getData();
@@ -506,7 +556,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param fieldSar    The referenced SAR in the reference call
    */
   private void referenceExistReferenceBase(SAR parentSar, SAR fieldSar) {
-    String className = symbols.get(parentSar.getSymbolId()).getData().getType().orElse("");
+    String className = getSymbolType(symbols.get(parentSar.getSymbolId()));
     String classId = findSymbolId(className, SymbolKind.CLASS);
     Symbol fieldSymbol = getFieldSymbol(parentSar, fieldSar, classId);
     fieldSar.setSymbolId(fieldSymbol.getSymbolId());
@@ -614,7 +664,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     SAR methodNameSar = sas.pop();
     SAR instanceSar = sas.pop();
     
-    String classType = symbols.get(instanceSar.getSymbolId()).getData().getType().orElse("");
+    String classType = getSymbolType(symbols.get(instanceSar.getSymbolId()));
     Symbol classSymbol = symbols.get(findSymbolId(classType, SymbolKind.CLASS));
     if(classSymbol == null) {
       throw new IllegalStateException(String.format(
@@ -638,14 +688,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String integerType = Keyword.INT.toString();
     SAR sar = sas.pop();
     Symbol symbol = symbols.get(sar.getSymbolId());
-    Data data = symbol.getData();
-    String type = data.getType().orElse("");
+    String type = getSymbolType(symbol);
 
-    if(!type.equals(Keyword.CHAR.toString()) || data.isTypeAnArray()) {
+    if(!type.equals(Keyword.CHAR.toString())) {
       throw new UnsupportedOperationException(String.format(
-              "Cannot cast type \'%s%s\' to \'%s\' at this time",
+              "Cannot cast type \'%s\' to \'%s\' at this time",
               type,
-              data.isTypeAnArray() ? "[]" : "",
               integerType));
     }
 
@@ -684,14 +732,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String charType = Keyword.CHAR.toString();
     SAR sar = sas.pop();
     Symbol symbol = symbols.get(sar.getSymbolId());
-    Data data = symbol.getData();
-    String type = data.getType().orElse("");
+    String type = getSymbolType(symbol);
 
-    if(!type.equals(Keyword.INT.toString()) || data.isTypeAnArray()) {
+    if(!type.equals(Keyword.INT.toString())) {
       throw new UnsupportedOperationException(String.format(
-              "Cannot cast type \'%s%s\' to \'%s\' at this time",
+              "Cannot cast type \'%s\' to \'%s\' at this time",
               type,
-              data.isTypeAnArray() ? "[]" : "",
               charType));
     }
 
@@ -753,8 +799,16 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Symbol op1Symbol = symbols.get(operand1.getSymbolId());
     Symbol op2Symbol = symbols.get(operand2.getSymbolId());
     
-    String op1Type = op1Symbol.getData().getType().isPresent() ? op1Symbol.getData().getType().orElse("") : op1Symbol.getData().getReturnType().orElse("");
-    String op2Type = op2Symbol.getData().getType().isPresent() ? op2Symbol.getData().getType().orElse("") : op2Symbol.getData().getReturnType().orElse("");
+    String op1Type = getSymbolType(op1Symbol);
+    String op2Type = getSymbolType(op2Symbol);
+    
+    if(op1Symbol == null || op2Symbol == null) {
+      throw new IllegalStateException(String.format(
+              "%s : Could not find the Symbol for \'%s\' or \'%s\'",
+              operand1.getLineNumber().orElse(-1),
+              operand1.getText(),
+              operand2.getText()));
+    }
     
     if(operatorCtx instanceof CclGrammarParser.MathOperationContext) {
       if(!Keyword.INT.toString().equals(op1Type) || !Keyword.INT.toString().equals(op2Type)) {
@@ -780,7 +834,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
         operatorException(operatorCtx.start.getLine(), "assignment", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
       }
       
-      tempType = op1Type;
+      sas.push(operand2);
+      return;
     }
     else {
       logger.warn("Not sure how to evaluate operator {}", getChildText(operatorCtx));
@@ -794,6 +849,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             tempText,
             SymbolKind.TEMPORARY,
             scope, new DataBuilder()
+                    .isTypeAnArray(op1Symbol.getData().isTypeAnArray())
                     .type(tempType)
                     .build());
     SAR tempSar = new SAR(
@@ -916,13 +972,101 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       evaluateOperator(operatorStack.pop());
     }
     if(CollectionUtils.isEmpty(operatorStack)) {
-      throw new IllegalStateException("Could not find a matching open parenthesis on the operator stack");
+      throw new IllegalStateException("Could not find a matching opening parenthesis on the operator stack");
     }
 
     // Remove the opening paren from the stack
     operatorStack.pop();
   }
 
+  /**
+   * #arrayClose
+   * This method will pop operators off the operator stack and process the required SARs from 
+   * the SAS for that operation until an opening bracket is found
+   */
+  private void arrayClose() {
+    while(CollectionUtils.isNotEmpty(operatorStack) && !"[".equals(getChildText(operatorStack.peek()))) {
+      evaluateOperator(operatorStack.pop());
+    }
+    if(CollectionUtils.isEmpty(operatorStack)) {
+      throw new IllegalStateException("Could not find a matching opening \'[\' on the operator stack");
+    }
+
+    // Remove the opening bracket from the stack
+    operatorStack.pop();
+  }
+
+  /**
+   * #array
+   * This method will pop off an integer sar and an object sar from the sas and check to 
+   * make sure this is a valid array reference, will create a new temp sar to be pushed 
+   * onto the sas
+   */
+  private void array() {
+    SAR indexSar = sas.pop();
+    SAR objSar = sas.pop();
+
+    Symbol indexSymbol = symbols.get(indexSar.getSymbolId());
+    Symbol objSymbol = symbols.get(objSar.getSymbolId());
+
+    String indexType = getSymbolType(indexSymbol);
+    String objType = getSymbolType(objSymbol);
+    objType = StringUtils.isBlank(objType) ? objSar.getText() : objType;
+    
+    if(indexSymbol == null) {
+      throw new IllegalStateException(String.format(
+              "%s : Could not find the Symbol \'%s\'",
+              indexSar.getLineNumber().orElse(-1),
+              indexSar.getText()));
+    }
+    if(!Keyword.INT.toString().equals(indexType)) {
+      throw new IllegalStateException(String.format(
+              "%s : Expecting array index type \'%s\' found \'%s[%s]\'",
+              indexSar.getLineNumber().orElse(-1),
+              indexType,
+              objType,
+              Keyword.INT.toString()));
+    }
+
+    Symbol tempSymbol = addNewSymbol(
+            objType, 
+            SymbolKind.TEMPORARY, 
+            scope, 
+            new DataBuilder()
+                    .parameter(indexSymbol.getSymbolId())
+                    .isTypeAnArray(true)
+                    .type(objType)
+                    .build());
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY, 
+            tempSymbol.getSymbolId(), 
+            tempSymbol.getText(), 
+            indexSar.getLineNumber().orElse(-1));
+    tempSar.addSymbolId(indexSymbol.getSymbolId());
+    sas.push(tempSar);
+  }
+
+  /**
+   * This method will extract the correct type for the given Symbol
+   * 
+   * @param symbol    Symbol to extract a type from
+   * @return          A string value of the discovered type
+   */
+  private String getSymbolType(Symbol symbol) {
+    if(symbol == null) {
+      return "";
+    }
+    if(symbol.getSymbolKind() == SymbolKind.CLASS) {
+      return symbol.getText();
+    }
+    Data data = symbol.getData();
+    
+    if(data.getType().isPresent()) {
+      return data.getType().orElse("");
+    }
+    return data.getReturnType().orElse("");
+  }
+  
   /**
    * #print
    * This method processes everything on the operator stack and checks to
@@ -946,9 +1090,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               sar.getSymbolId()));
     }
 
-    String type = symbol.getData().getType().isPresent()
-            ? symbol.getData().getType().orElse("")
-            : symbol.getData().getReturnType().orElse("");
+    String type = getSymbolType(symbol);
     if(!ParserUtils.isPrimitiveType(type)) {
       throw new IllegalStateException(String.format(
               "%s : Cannot print type \'%s\'",
@@ -980,7 +1122,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               sar.getSymbolId()));
     }
 
-    String type = symbol.getData().getType().orElse("");
+    String type = getSymbolType(symbol);
     if(!Keyword.INT.toString().equals(type) && !Keyword.CHAR.toString().equals(type)) {
       throw new IllegalStateException(String.format(
               "%s : Cannot store read value into type \'%s\'",
@@ -1008,9 +1150,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       return;
     }
 
-    String type = symbol.getData().getType().isPresent()
-            ? symbol.getData().getType().orElse("")
-            : symbol.getData().getReturnType().orElse("");
+    String type = getSymbolType(symbol);
     
     Symbol methodSymbol;
     String workingScope = scope;
@@ -1073,11 +1213,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             ? Collections.emptyList()
             : argListSar.getSymbolIds();
     List<String> argListTypes = argList.stream()
-            .map(id -> {
-              Data data = symbols.get(id).getData();
-              return data.getType().isPresent()
-                      ? data.getType().orElse("")
-                      : data.getReturnType().orElse("");})
+            .map(id -> getSymbolType(symbols.get(id)))
             .collect(Collectors.toList());
 
     List<Symbol> found = SymbolFilter.filter(
@@ -1128,6 +1264,60 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       argList.forEach(methodSar::addSymbolId);
     }
     sas.push(methodSar);
+  }
+
+  /**
+   * #newArray
+   * This will pop a quantity sar and a type sar off of the SAS and check to make sure a valid
+   * array object can be instantiated
+   */
+  private void newArray() {
+    if(CollectionUtils.isEmpty(sas) || sas.size() < 2) {
+      throw new IllegalStateException("There are not enough SARs on the SAS while trying to create a new array");
+    }
+    SAR arrayRefSar = sas.pop();
+
+    Symbol symbol = symbols.get(arrayRefSar.getSymbolId());
+    String type = getSymbolType(symbol);
+
+    if(StringUtils.isBlank(type) || symbol == null) {
+      throw new IllegalStateException(String.format(
+              "%s : Could not find the type for \'%s\'",
+              arrayRefSar.getLineNumber().orElse(-1),
+              arrayRefSar.getText()));
+    }
+  
+    // Check type
+    String classId;
+    if(!ParserUtils.isPrimitiveType(type)) {
+      classId = findSymbolId(type, SymbolKind.CLASS);
+      if(StringUtils.isBlank(classId)) {
+        throw new IllegalStateException(String.format(
+                "%s : Cannot create array \'%s %s[%s]\', unknown type \'%s\'",
+                arrayRefSar.getLineNumber().orElse(-1),
+                Keyword.NEW.toString(),
+                type,
+                Keyword.INT.toString(),
+                type));
+      }
+    }
+
+    Symbol tempSymbol = addNewSymbol(
+            String.format("%s %s[]", Keyword.NEW.toString(), type), 
+            SymbolKind.TEMPORARY, 
+            scope, 
+            new DataBuilder()
+                    .parameter(symbol.getSymbolId())
+                    .isTypeAnArray(true)
+                    .type(type)
+                    .build());
+    SAR tempSar = new SAR(
+            SarType.ARRAY, 
+            tempSymbol.getSymbolId(), 
+            tempSymbol.getText(), 
+            arrayRefSar.getLineNumber().orElse(-1));
+    tempSar.addSymbolId(symbol.getSymbolId());
+    sas.push(tempSar);
   }
   
   /*
@@ -1368,7 +1558,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(isMethodCall) {
       methodCall();       // Semantic method
     }
-    referenceExist();   // Semantic method
+    else {
+      referenceExist();   // Semantic method
+    }
     
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.MemberRefzContext)
@@ -1509,7 +1701,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitInvokeOperatorEnd(CclGrammarParser.InvokeOperatorEndContext ctx) {
-    closingParenthesis();
+    closingParenthesis();   // Semantic call #closingParenthesis
+    return null;
+  }
+
+  @Override
+  public Object visitArrayOperatorEnd(CclGrammarParser.ArrayOperatorEndContext ctx) {
+    arrayClose();         // Semantic call #arrayClose
+    array();              // Semantic call #array
     return null;
   }
 
@@ -1542,12 +1741,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     else if(childNode instanceof CclGrammarParser.ArrayOperatorContext) {
       // create a new array
-
-      System.out.println();
+      newArray();       // Semantic call #newArray
     }
     else {
       throw new UnsupportedOperationException("Unknown operation");      
     }
+    
+    return null;
+  }
+
+  @Override
+  public Object visitFnArrMember(CclGrammarParser.FnArrMemberContext ctx) {
+    super.visitFnArrMember(ctx);
+    referenceExist();       // Semantic call #referenceExist
     
     return null;
   }

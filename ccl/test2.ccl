@@ -1,24 +1,23 @@
 
 public class MyClass {
-    
     public MyClass() {}
     
-    public MyClass(int test) {}
-    
-    public MyClass(bool isTest) {}
-    
-    public MyClass(int test, string hello) {}
-    
-    public void someMethod(int test, bool hello, string world) {
-    
+    public int getMax() {
+        return 100;
     }
 }
 
 public void main() {
-    MyClass myClass;
-    //MyClass myClass = new MyClass(4);
-    //MyClass objs[] = new MyClass[5];
+    //MyClass objs[] = new MyClass[10];
+    //objs[0] = new MyClass();
     
-    myClass.someMethod(4, true, "");
+    //MyClass obj;
+    //obj.getMax();
+    //int numbers[] = new int[obj.getMax()];
+    int numbers[] = new int[5];
+    numbers[0];
+    //objs[0].getMax();
+    //int numbers[] = new int[objs[0].getMax()];
+    
 }
 

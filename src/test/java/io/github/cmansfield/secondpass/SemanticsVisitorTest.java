@@ -403,7 +403,7 @@ public class SemanticsVisitorTest {
     assertEquals(sas.size(), 1);
     SAR sar = sas.pop();
     assertNotNull(sar);
-    assertEquals(sar.getText(), instanceText + "." + instanceVarText);
+    assertEquals(sar.getText(), instanceVarText);
     assertEquals(sar.getLineNumber().orElse(0), Integer.valueOf(5));
     assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
     assertEquals(sar.getType(), SarType.REFERENCE);
@@ -460,7 +460,7 @@ public class SemanticsVisitorTest {
     assertEquals(sas.size(), 1);
     SAR sar = sas.pop();
     assertNotNull(sar);
-    assertEquals(sar.getText(), instanceText + "." + methodText);
+    assertEquals(sar.getText(), methodText);
     assertEquals(sar.getLineNumber().orElse(0), Integer.valueOf(5));
     assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
     assertEquals(sar.getType(), SarType.REFERENCE);
@@ -507,7 +507,7 @@ public class SemanticsVisitorTest {
     assertEquals(sas.size(), 1);
     SAR sar = sas.pop();
     assertNotNull(sar);
-    assertEquals(sar.getText(), className + "." + instanceVarText);
+    assertEquals(sar.getText(), instanceVarText);
     assertEquals(sar.getLineNumber().orElse(0), Integer.valueOf(5));
     assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
     assertEquals(sar.getType(), SarType.REFERENCE);
@@ -554,7 +554,7 @@ public class SemanticsVisitorTest {
     assertEquals(sas.size(), 1);
     SAR sar = sas.pop();
     assertNotNull(sar);
-    assertEquals(sar.getText(), className + "." + methodText);
+    assertEquals(sar.getText(), methodText);
     assertEquals(sar.getLineNumber().orElse(0), Integer.valueOf(5));
     assertTrue(StringUtils.isNotBlank(sar.getSymbolId()));
     assertEquals(sar.getType(), SarType.REFERENCE);
