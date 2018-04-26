@@ -2,8 +2,8 @@ package io.github.cmansfield.firstpass.symbols;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
-import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.data.Data;
+import io.github.cmansfield.compiler.CompilerTestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.compiler.CompilerOptions;
@@ -27,8 +27,7 @@ public class SymbolFilterTest {
 
   @BeforeClass
   public void setUp() throws IOException {
-    CompilerTest compilerTest = new CompilerTest();
-    symbolTable = compilerTest.compile("test1.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    symbolTable = CompilerTestUtils.compile("test1.ccl", CompilerOptions.FIRST_PASS_ONLY);
   }
 
   @Test
@@ -114,8 +113,7 @@ public class SymbolFilterTest {
   
   @Test
   public void test_filter_findEmptyStringLiteral() throws IOException {
-    CompilerTest compilerTest = new CompilerTest();
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test9.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test9.ccl", CompilerOptions.FIRST_PASS_ONLY);
     Symbol filter = new SymbolBuilder()
             .text("")
             .symbolKind(SymbolKind.STR_LIT)
@@ -138,8 +136,7 @@ public class SymbolFilterTest {
 
   @Test
   public void test_filter_chainedFiltering() throws IOException {
-    CompilerTest compilerTest = new CompilerTest();
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test1.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test1.ccl", CompilerOptions.FIRST_PASS_ONLY);
     List<Symbol> symbols = symbolTable.entrySet().stream()
             .map(Map.Entry::getValue)
             .collect(Collectors.toList());

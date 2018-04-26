@@ -16,9 +16,5 @@ TODO List
     SemanticsVisitor
         Fix template classes/methods on the second pass
         Create a method for checking accessModifiers
-        Refactor this class to reuse less code 
-        Factor out code that should be in it's own class
         Double check AccessModifiers and ensure they are working correctly
-
-    CompilerTest
-        Move the compile methods out of this class into their own TestingUtils class
+        Include the NOT operator '!'

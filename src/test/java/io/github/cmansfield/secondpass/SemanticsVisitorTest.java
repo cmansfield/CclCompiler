@@ -6,9 +6,9 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.SymbolFilter;
-import io.github.cmansfield.compiler.syntax.CompilerTest;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import org.apache.commons.collections4.CollectionUtils;
+import io.github.cmansfield.compiler.CompilerTestUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.Symbol;
@@ -17,7 +17,6 @@ import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.parser.Keyword;
-import org.testng.annotations.BeforeClass;
 import org.antlr.v4.runtime.CommonToken;
 import org.testng.annotations.Test;
 
@@ -30,12 +29,6 @@ import static org.testng.Assert.*;
 
 
 public class SemanticsVisitorTest {
-  private CompilerTest compilerTest;
-
-  @BeforeClass
-  public void setUp() {
-    this.compilerTest = new CompilerTest();
-  }
 
   @Test
   public void test_copyConstructor() {
@@ -120,7 +113,7 @@ public class SemanticsVisitorTest {
     String fileName = "test7.ccl";
     String text = "name";
 
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile(fileName);
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile(fileName);
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
     Symbol filter = new SymbolBuilder()
             .symbolKind(symbolKind)
@@ -139,7 +132,7 @@ public class SemanticsVisitorTest {
 
   @Test
   public void test_traceScopeToFindSymbolId_notFound() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test7.ccl");
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test7.ccl");
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
     String symbolId = visitor.traceScopeToFindSymbolId("something", SarType.IDENTIFIER, "g.D00001.C00001.M00001");
 
@@ -161,7 +154,7 @@ public class SemanticsVisitorTest {
     String fileName = "test8.ccl";
     String text = "name";
 
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile(fileName);
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile(fileName);
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
     Symbol filter = new SymbolBuilder()
             .symbolKind(SymbolKind.LOCAL_VAR)
@@ -179,7 +172,7 @@ public class SemanticsVisitorTest {
 
   @Test
   public void test_duplicate() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test10.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test10.ccl", CompilerOptions.FIRST_PASS_ONLY);
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
 
     symbolTable.entrySet().stream()
@@ -197,7 +190,7 @@ public class SemanticsVisitorTest {
 
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_duplicate_fail_duplicateClasses() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test11.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test11.ccl", CompilerOptions.FIRST_PASS_ONLY);
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
 
     symbolTable.entrySet().stream()
@@ -213,7 +206,7 @@ public class SemanticsVisitorTest {
 
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_duplicate_fail_duplicateMethods() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test12.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test12.ccl", CompilerOptions.FIRST_PASS_ONLY);
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
 
     symbolTable.entrySet().stream()
@@ -229,7 +222,7 @@ public class SemanticsVisitorTest {
 
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_duplicate_fail_duplicateConstructors() throws IOException {
-    BidiMap<String, Symbol> symbolTable = compilerTest.compile("test13.ccl", CompilerOptions.FIRST_PASS_ONLY);
+    BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test13.ccl", CompilerOptions.FIRST_PASS_ONLY);
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
 
     symbolTable.entrySet().stream()

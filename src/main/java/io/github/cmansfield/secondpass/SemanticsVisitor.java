@@ -25,7 +25,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private final Deque<ParserRuleContext> operatorStack;
   private final Deque<SAR> sas;
   
-  private final int DEFAULT_LINE_NUMBER = -1;
+  private static final int DEFAULT_LINE_NUMBER = -1;
 
   public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
     super(symbols);
