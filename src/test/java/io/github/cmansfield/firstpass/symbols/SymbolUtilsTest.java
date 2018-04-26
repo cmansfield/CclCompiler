@@ -8,13 +8,13 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 
-public class SymbolTableUtilsTest {
+public class SymbolUtilsTest {
 
   @Test
   public void test_getParentId() {
     String scope = "g.D00003.X00003.F00001";
 
-    String parentId = SymbolTableUtils.getParentSymbolId(scope);
+    String parentId = SymbolUtils.getParentSymbolId(scope);
 
     assertNotNull(parentId);
     assertTrue(StringUtils.isNotBlank(parentId));
@@ -25,7 +25,7 @@ public class SymbolTableUtilsTest {
   public void test_getParentId_globalScope() {
     String scope = "g";
 
-    String parentId = SymbolTableUtils.getParentSymbolId(scope);
+    String parentId = SymbolUtils.getParentSymbolId(scope);
 
     assertNotNull(parentId);
     assertTrue(StringUtils.isBlank(parentId));

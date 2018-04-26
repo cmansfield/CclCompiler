@@ -24,7 +24,7 @@ public class CompilerTest {
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 47);
-    SymbolTableUtils.checkSymbolTable(symbolTable);
+    SymbolUtils.checkSymbolTable(symbolTable);
   }
 
   @Test
@@ -34,7 +34,7 @@ public class CompilerTest {
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 21);
-    SymbolTableUtils.checkSymbolTable(symbolTable);
+    SymbolUtils.checkSymbolTable(symbolTable);
   }
 
   @Test (expectedExceptions = IllegalStateException.class)
@@ -51,7 +51,7 @@ public class CompilerTest {
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 3);
-    SymbolTableUtils.checkSymbolTable(symbolTable);
+    SymbolUtils.checkSymbolTable(symbolTable);
   }
 
   @Test
@@ -61,7 +61,7 @@ public class CompilerTest {
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 4);
-    SymbolTableUtils.checkSymbolTable(symbolTable);
+    SymbolUtils.checkSymbolTable(symbolTable);
     List<Symbol> foundSymbols = SymbolFilter.filter(symbolTable, new SymbolBuilder()
             .symbolKind(SymbolKind.BOOL_LIT)
             .build());
@@ -92,7 +92,7 @@ public class CompilerTest {
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
     assertEquals(symbolTable.size(), 3);
-    SymbolTableUtils.checkSymbolTable(symbolTable);
+    SymbolUtils.checkSymbolTable(symbolTable);
     List<Symbol> foundSymbols = SymbolFilter.filter(symbolTable, new SymbolBuilder()
             .symbolKind(SymbolKind.SPECIAL_LIT)
             .build());

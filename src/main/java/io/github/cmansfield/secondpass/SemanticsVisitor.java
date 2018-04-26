@@ -122,7 +122,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       if(GLOBAL_SCOPE.equals(currentScope)) {
         throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
       }
-      String parentId = SymbolTableUtils.getParentSymbolId(currentScope);
+      String parentId = SymbolUtils.getParentSymbolId(currentScope);
       Symbol parentSymbol = symbols.get(parentId);
       if(parentSymbol == null) {
         throw new IllegalStateException(String.format(
@@ -461,7 +461,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param fieldSar    The referenced SAR in the reference call
    */
   private void referenceExistArrayInstanceBase(SAR parentSar, SAR fieldSar) {
-    String arrayType = getSymbolType(symbols.get(parentSar.getSymbolId()));
+    String arrayType = SymbolUtils.getSymbolType(symbols.get(parentSar.getSymbolId()));
 
     Symbol arraySymbol = addNewSymbol(
             arrayType,
@@ -494,7 +494,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private void referenceExistObjectInstanceBase(SAR parentSar, SAR fieldSar) {
     // The parent must be an instantiated object and the field a non-static class member that is visible
     Symbol instanceSymbol = symbols.get(parentSar.getSymbolId());
-    String className = instanceSymbol == null ? "" : getSymbolType(instanceSymbol);
+    String className = instanceSymbol == null ? "" : SymbolUtils.getSymbolType(instanceSymbol);
     String classId = findSymbolId(className, SymbolKind.CLASS);
 
     if(StringUtils.isBlank(className) || StringUtils.isBlank(classId) || instanceSymbol == null) {
@@ -556,7 +556,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param fieldSar    The referenced SAR in the reference call
    */
   private void referenceExistReferenceBase(SAR parentSar, SAR fieldSar) {
-    String className = getSymbolType(symbols.get(parentSar.getSymbolId()));
+    String className = SymbolUtils.getSymbolType(symbols.get(parentSar.getSymbolId()));
     String classId = findSymbolId(className, SymbolKind.CLASS);
     Symbol fieldSymbol = getFieldSymbol(parentSar, fieldSar, classId);
     fieldSar.setSymbolId(fieldSymbol.getSymbolId());
@@ -631,7 +631,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(StringUtils.isBlank(name)) {
       throw new IllegalArgumentException("Constructor name cannot be blank");
     }
-    String classId = SymbolTableUtils.getParentSymbolId(scope);
+    String classId = SymbolUtils.getParentSymbolId(scope);
     Symbol classSymbol = symbols.get(classId);
 
     if(classSymbol == null) {
@@ -664,7 +664,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     SAR methodNameSar = sas.pop();
     SAR instanceSar = sas.pop();
     
-    String classType = getSymbolType(symbols.get(instanceSar.getSymbolId()));
+    String classType = SymbolUtils.getSymbolType(symbols.get(instanceSar.getSymbolId()));
     Symbol classSymbol = symbols.get(findSymbolId(classType, SymbolKind.CLASS));
     if(classSymbol == null) {
       throw new IllegalStateException(String.format(
@@ -688,7 +688,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String integerType = Keyword.INT.toString();
     SAR sar = sas.pop();
     Symbol symbol = symbols.get(sar.getSymbolId());
-    String type = getSymbolType(symbol);
+    String type = SymbolUtils.getSymbolType(symbol);
 
     if(!type.equals(Keyword.CHAR.toString())) {
       throw new UnsupportedOperationException(String.format(
@@ -732,7 +732,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String charType = Keyword.CHAR.toString();
     SAR sar = sas.pop();
     Symbol symbol = symbols.get(sar.getSymbolId());
-    String type = getSymbolType(symbol);
+    String type = SymbolUtils.getSymbolType(symbol);
 
     if(!type.equals(Keyword.INT.toString())) {
       throw new UnsupportedOperationException(String.format(
@@ -799,8 +799,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Symbol op1Symbol = symbols.get(operand1.getSymbolId());
     Symbol op2Symbol = symbols.get(operand2.getSymbolId());
     
-    String op1Type = getSymbolType(op1Symbol);
-    String op2Type = getSymbolType(op2Symbol);
+    String op1Type = SymbolUtils.getSymbolType(op1Symbol);
+    String op2Type = SymbolUtils.getSymbolType(op2Symbol);
     
     if(op1Symbol == null || op2Symbol == null) {
       throw new IllegalStateException(String.format(
@@ -1009,8 +1009,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Symbol indexSymbol = symbols.get(indexSar.getSymbolId());
     Symbol objSymbol = symbols.get(objSar.getSymbolId());
 
-    String indexType = getSymbolType(indexSymbol);
-    String objType = getSymbolType(objSymbol);
+    String indexType = SymbolUtils.getSymbolType(indexSymbol);
+    String objType = SymbolUtils.getSymbolType(objSymbol);
     objType = StringUtils.isBlank(objType) ? objSar.getText() : objType;
     
     if(indexSymbol == null) {
@@ -1028,14 +1028,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               Keyword.INT.toString()));
     }
 
+    String tempType = objType.substring(0, objType.length() - 2);     // Need to remove the '[]' from the end of the type
     Symbol tempSymbol = addNewSymbol(
-            objType, 
+            tempType,
             SymbolKind.TEMPORARY, 
             scope, 
             new DataBuilder()
                     .parameter(indexSymbol.getSymbolId())
-                    .isTypeAnArray(true)
-                    .type(objType)
+                    .isTypeAnArray(false)
+                    .type(tempType)
                     .build());
     SAR tempSar = new SAR(
             SarType.TEMPORARY, 
@@ -1044,27 +1045,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             indexSar.getLineNumber().orElse(-1));
     tempSar.addSymbolId(indexSymbol.getSymbolId());
     sas.push(tempSar);
-  }
-
-  /**
-   * This method will extract the correct type for the given Symbol
-   * 
-   * @param symbol    Symbol to extract a type from
-   * @return          A string value of the discovered type
-   */
-  private String getSymbolType(Symbol symbol) {
-    if(symbol == null) {
-      return "";
-    }
-    if(symbol.getSymbolKind() == SymbolKind.CLASS) {
-      return symbol.getText();
-    }
-    Data data = symbol.getData();
-    
-    if(data.getType().isPresent()) {
-      return data.getType().orElse("");
-    }
-    return data.getReturnType().orElse("");
   }
   
   /**
@@ -1090,7 +1070,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               sar.getSymbolId()));
     }
 
-    String type = getSymbolType(symbol);
+    String type = SymbolUtils.getSymbolType(symbol);
     if(!ParserUtils.isPrimitiveType(type)) {
       throw new IllegalStateException(String.format(
               "%s : Cannot print type \'%s\'",
@@ -1122,7 +1102,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               sar.getSymbolId()));
     }
 
-    String type = getSymbolType(symbol);
+    String type = SymbolUtils.getSymbolType(symbol);
     if(!Keyword.INT.toString().equals(type) && !Keyword.CHAR.toString().equals(type)) {
       throw new IllegalStateException(String.format(
               "%s : Cannot store read value into type \'%s\'",
@@ -1150,11 +1130,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       return;
     }
 
-    String type = getSymbolType(symbol);
+    String type = SymbolUtils.getSymbolType(symbol);
     
     Symbol methodSymbol;
     String workingScope = scope;
-    while((methodSymbol = symbols.get(SymbolTableUtils.getParentSymbolId(workingScope))).getSymbolKind() 
+    while((methodSymbol = symbols.get(SymbolUtils.getParentSymbolId(workingScope))).getSymbolKind() 
             != SymbolKind.METHOD) {
       workingScope = methodSymbol.getScope();
     }
@@ -1213,7 +1193,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             ? Collections.emptyList()
             : argListSar.getSymbolIds();
     List<String> argListTypes = argList.stream()
-            .map(id -> getSymbolType(symbols.get(id)))
+            .map(id -> SymbolUtils.getSymbolType(symbols.get(id)))
             .collect(Collectors.toList());
 
     List<Symbol> found = SymbolFilter.filter(
@@ -1275,18 +1255,32 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(CollectionUtils.isEmpty(sas) || sas.size() < 2) {
       throw new IllegalStateException("There are not enough SARs on the SAS while trying to create a new array");
     }
-    SAR arrayRefSar = sas.pop();
+    SAR quantitySar = sas.pop();
+    SAR typeSar = sas.pop();
 
-    Symbol symbol = symbols.get(arrayRefSar.getSymbolId());
-    String type = getSymbolType(symbol);
-
-    if(StringUtils.isBlank(type) || symbol == null) {
+    Symbol quantitySymbol = symbols.get(quantitySar.getSymbolId());
+    Symbol typeSymbol = symbols.get(typeSar.getSymbolId());
+    
+    String quantityType = SymbolUtils.getSymbolType(quantitySymbol);
+    String type = typeSymbol == null ? typeSar.getText() : SymbolUtils.getSymbolType(typeSymbol);
+    
+    if(StringUtils.isBlank(quantityType) || StringUtils.isBlank(type)) {
       throw new IllegalStateException(String.format(
-              "%s : Could not find the type for \'%s\'",
-              arrayRefSar.getLineNumber().orElse(-1),
-              arrayRefSar.getText()));
+              "%s : Could not find the type for \'%s\' or \'%s\'",
+              quantitySar.getLineNumber().orElse(-1),
+              typeSar.getText(),
+              quantitySar.getText()));
     }
-  
+    // Check quantity
+    if(!Keyword.INT.toString().equals(quantityType)) {
+      throw new IllegalStateException(String.format(
+              "%s : Cannot create array \'%s %s[%s]\', size specifier must be of type \'%s\'",
+              quantitySar.getLineNumber().orElse(-1),
+              Keyword.NEW.toString(),
+              type,
+              quantityType,
+              Keyword.INT.toString()));
+    }
     // Check type
     String classId;
     if(!ParserUtils.isPrimitiveType(type)) {
@@ -1294,7 +1288,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       if(StringUtils.isBlank(classId)) {
         throw new IllegalStateException(String.format(
                 "%s : Cannot create array \'%s %s[%s]\', unknown type \'%s\'",
-                arrayRefSar.getLineNumber().orElse(-1),
+                quantitySar.getLineNumber().orElse(-1),
                 Keyword.NEW.toString(),
                 type,
                 Keyword.INT.toString(),
@@ -1304,10 +1298,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     Symbol tempSymbol = addNewSymbol(
             String.format("%s %s[]", Keyword.NEW.toString(), type), 
-            SymbolKind.TEMPORARY, 
+            SymbolKind.TEMPORARY,
             scope, 
             new DataBuilder()
-                    .parameter(symbol.getSymbolId())
+                    .parameter(quantitySymbol.getSymbolId())
                     .isTypeAnArray(true)
                     .type(type)
                     .build());
@@ -1315,8 +1309,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             SarType.ARRAY, 
             tempSymbol.getSymbolId(), 
             tempSymbol.getText(), 
-            arrayRefSar.getLineNumber().orElse(-1));
-    tempSar.addSymbolId(symbol.getSymbolId());
+            quantitySar.getLineNumber().orElse(-1));
+    tempSar.addSymbolId(quantitySymbol.getSymbolId());
     sas.push(tempSar);
   }
   
@@ -1583,7 +1577,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitAssignmentOperation(CclGrammarParser.AssignmentOperationContext ctx) {
     pushOperatorOntoStack(ctx);
-    return super.visitAssignmentOperation(ctx);
+    super.visitAssignmentOperation(ctx);
+    endOfExpression();
+    
+    return null;
   }
 
   @Override
@@ -1636,7 +1633,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Symbol symbol = null;
     String classId;
 
-    while(StringUtils.isNotBlank(classId = SymbolTableUtils.getParentSymbolId(workingScope))) {
+    while(StringUtils.isNotBlank(classId = SymbolUtils.getParentSymbolId(workingScope))) {
       symbol = symbols.get(classId);
       if(symbol.getSymbolKind() == SymbolKind.CLASS) {
         break;
@@ -1708,7 +1705,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitArrayOperatorEnd(CclGrammarParser.ArrayOperatorEndContext ctx) {
     arrayClose();         // Semantic call #arrayClose
-    array();              // Semantic call #array
     return null;
   }
 
@@ -1753,8 +1749,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitFnArrMember(CclGrammarParser.FnArrMemberContext ctx) {
     super.visitFnArrMember(ctx);
-    referenceExist();       // Semantic call #referenceExist
-    
+
+    if(ctx.children.get(0) instanceof CclGrammarParser.ArrayOperatorContext) {
+      array();              // Semantic call #array
+    }
+
     return null;
   }
 }

@@ -8,16 +8,15 @@ public class MyClass {
 }
 
 public void main() {
-    //MyClass objs[] = new MyClass[10];
-    //objs[0] = new MyClass();
+    MyClass obj;
+    obj.getMax();
     
-    //MyClass obj;
-    //obj.getMax();
-    //int numbers[] = new int[obj.getMax()];
-    int numbers[] = new int[5];
-    numbers[0];
-    //objs[0].getMax();
-    //int numbers[] = new int[objs[0].getMax()];
+    int numbers1[] = new int[5];
+    numbers1[0];
     
+    MyClass objs[] = new MyClass[10];
+    objs[0] = new MyClass();
+    objs[0].getMax();
+    int numbers[] = new int[objs[0].getMax()];
 }
 

@@ -84,10 +84,11 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
             .build();
 
     if(symbolKind != SymbolKind.REFERENCE && symbols.containsValue(symbol)) {
-      if(symbol.getSymbolKind().isLiteral()) {
+      // TODO - Revisit this, there is a good chance new Symbols should be created
+      if(symbol.getSymbolKind().isLiteral() || symbol.getSymbolKind() == SymbolKind.TEMPORARY) {
         return symbols.get(symbols.getKey(symbol));
       }
-      throw new IllegalStateException(String.format("There is already a %s with the name %s defined in the scope %s",
+      throw new IllegalStateException(String.format("There is already a %s with the name \'%s\' defined in the scope \'%s\'",
               symbol.getSymbolKind().toString(), symbol.getText(), symbol.getScope()));
     }
     symbol.setSymbolId(symbolId);
@@ -281,7 +282,7 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
       throw new IllegalStateException(String.format(
               "Found duplicate %ss in class \'%s\' with method signature \'%s\'",
               symbolKind.toString(),
-              symbols.get(SymbolTableUtils.getParentSymbolId(scope)).getText(),
+              symbols.get(SymbolUtils.getParentSymbolId(scope)).getText(),
               String.format(
                       "%s(%s)",
                       name,
@@ -321,7 +322,7 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
       throw new IllegalStateException(String.format("Could not find the symbol for %s", filter.toString()));
     }
     if(foundSymbols.size() > 1 && errorOnFail) {
-      Symbol parentSymbol = symbols.get(SymbolTableUtils.getParentSymbolId(scope));
+      Symbol parentSymbol = symbols.get(SymbolUtils.getParentSymbolId(scope));
       throw new IllegalStateException(String.format(
               "Found too many matching %ss with the name \'%s\' in %s \'%s\'",
               filter.getSymbolKind().toString(),

@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 
 
-public class SymbolTableUtils {
-  private SymbolTableUtils() {}
+public class SymbolUtils {
+  private SymbolUtils() {}
 
   /**
    * This will extract and return the parent symbolId from the scope
@@ -86,5 +86,27 @@ public class SymbolTableUtils {
     }
 
     return symbol;
+  }
+
+  /**
+   * This method will extract the correct type for the given Symbol
+   *
+   * @param symbol    Symbol to extract a type from
+   * @return          A string value of the discovered type
+   */
+  public static String getSymbolType(Symbol symbol) {
+    if(symbol == null) {
+      return "";
+    }
+    if(symbol.getSymbolKind() == SymbolKind.CLASS) {
+      return symbol.getText();
+    }
+    Data data = symbol.getData();
+    boolean isArray = data.isTypeAnArray();
+
+    if(data.getType().isPresent()) {
+      return data.getType().orElse("") + (isArray ? "[]" : "");
+    }
+    return data.getReturnType().orElse("") + (isArray ? "[]" : "");
   }
 }

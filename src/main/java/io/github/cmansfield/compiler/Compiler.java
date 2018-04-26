@@ -1,12 +1,12 @@
 package io.github.cmansfield.compiler;
 
 import io.github.cmansfield.firstpass.symbols.SymbolTableVisitor;
-import io.github.cmansfield.firstpass.symbols.SymbolTableUtils;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.include.ImportGrammarLexer;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.language.CclGrammarLexer;
+import io.github.cmansfield.firstpass.symbols.SymbolUtils;
 import io.github.cmansfield.secondpass.SemanticsVisitor;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.firstpass.symbols.Symbol;
@@ -55,7 +55,7 @@ public class Compiler {
       return false;
     }
     if(options.contains(CompilerOptions.FIRST_PASS_ONLY)) {
-      SymbolTableUtils.checkSymbolTable(symbolTable);
+      SymbolUtils.checkSymbolTable(symbolTable);
 
       if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
         SymbolTableWriter.exportSymbolTable(symbolTable);
@@ -71,7 +71,7 @@ public class Compiler {
     }
 
     // TODO - Remove this when ready
-    SymbolTableUtils.checkSymbolTable(symbolTable);
+    SymbolUtils.checkSymbolTable(symbolTable);
 
     return true;
   }
