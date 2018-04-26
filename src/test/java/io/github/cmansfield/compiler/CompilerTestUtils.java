@@ -45,4 +45,39 @@ public class CompilerTestUtils {
     }
     return compiler.getSymbolTable();
   }
+
+  /**
+   * This method is used to reduce the amount of code needed to test the
+   * different code files
+   *
+   * @param fileName  The name of the file to try and produce a symbol table for
+   * @return          The Compiler object created
+   */
+  public static Compiler compileNoThrow(String fileName) throws IOException {
+    return compileNoThrow(fileName, null);
+  }
+
+  /**
+   * This method is used to reduce the amount of code needed to test the
+   * different code files
+   *
+   * @param fileName  The name of the file to try and produce a symbol table for
+   * @param option    The additional compiler option for compiling
+   * @return          The Compiler object created
+   */
+  public static Compiler compileNoThrow(String fileName, CompilerOptions option) throws IOException {
+    File file = new File(CompilerTestUtils.class
+            .getClassLoader()
+            .getResource(fileName).getFile());
+    Compiler compiler;
+    if(option == null) {
+      compiler = new Compiler();
+    }
+    else {
+      compiler = new Compiler(option);
+    }
+    compiler.compile(file.getAbsolutePath());
+    
+    return compiler;
+  }
 }

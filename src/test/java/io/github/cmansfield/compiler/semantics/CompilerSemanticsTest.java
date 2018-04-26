@@ -1,6 +1,7 @@
 package io.github.cmansfield.compiler.semantics;
 
 import io.github.cmansfield.compiler.CompilerTestUtils;
+import io.github.cmansfield.compiler.Compiler;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -35,5 +36,13 @@ public class CompilerSemanticsTest {
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_failed_duplicateMethods() throws IOException {
     CompilerTestUtils.compile("test19.ccl");    
+  }
+  
+  // TODO - complete this
+  @Test (enabled = false)
+  public void test_deleteMe() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("");
+
+    System.out.println();
   }
 }
