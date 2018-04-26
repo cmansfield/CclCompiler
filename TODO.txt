@@ -3,6 +3,15 @@ TODO List
     Symbol
         Add jackson deserialization
 
+    Semantics
+        #if
+        #while
+        #for
+        #spawn
+        #block
+        #lock
+        #release
+
     iCode
         serialize and deserialize iCode objects
     
