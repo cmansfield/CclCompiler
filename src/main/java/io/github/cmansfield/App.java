@@ -1,5 +1,6 @@
 package io.github.cmansfield;
 
+import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.compiler.Compiler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class App {
       return;
     }
     
-    Compiler compiler = new Compiler();
+    Compiler compiler = new Compiler(CompilerOptions.VERBOSE_CHECK);
     if(!compiler.compile(fileName)) {
       return;
     }

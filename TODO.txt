@@ -9,11 +9,16 @@ TODO List
     tCode    
         Use an interface with tCode manager to allow different types of tCode generation 
 
+    Compiler
+        Create a new error listener for the SymbolTableVisitor to store syntax errors into 
+            compiler's exception list
+
     SemanticsVisitor
         Fix template classes/methods on the second pass
         Create a method for checking accessModifiers
         Refactor this class to reuse less code 
-        Factor out code that should be in it's own class 
+        Factor out code that should be in it's own class
+        Double check AccessModifiers and ensure they are working correctly
 
     CompilerTest
         Move the compile methods out of this class into their own TestingUtils class

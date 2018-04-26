@@ -3,8 +3,10 @@ package io.github.cmansfield.firstpass.symbols;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.lang3.StringUtils;
+import io.github.cmansfield.parser.Keyword;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class SymbolUtils {
@@ -108,5 +110,25 @@ public class SymbolUtils {
       return data.getType().orElse("") + (isArray ? "[]" : "");
     }
     return data.getReturnType().orElse("") + (isArray ? "[]" : "");
+  }
+
+  /**
+   * This method will simplify method text formatting for logging and errors
+   *
+   * @param symbolTable Symbol table to look up IDs
+   * @param methodSymbol    The method Symbol to format
+   * @return                The method in string format
+   */
+  public static String formatMethodText(BidiMap<String, Symbol> symbolTable, Symbol methodSymbol) {
+    return String.format("%s %s(%s)",
+            methodSymbol.getData().getReturnType().orElse(Keyword.VOID.toString()),
+            methodSymbol.getText(),
+            methodSymbol.getData().getParameters().stream()
+                    .map(symbolTable::get)
+                    .map(Symbol::getData)
+                    .map(Data::getType)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.joining(", ")));
   }
 }

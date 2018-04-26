@@ -27,6 +27,7 @@ import java.io.*;
 
 public class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
+  private final List<String> exceptions;
   private final Set<CompilerOptions> options;
   private BidiMap<String, Symbol> symbolTable;
 
@@ -37,8 +38,13 @@ public class Compiler {
     else {
       this.options = Collections.emptySet();
     }
+    exceptions = new LinkedList<>();
   }
-
+  
+  public List<String> getExceptions() {
+    return new LinkedList<>(exceptions);
+  }
+  
   public BidiMap<String, Symbol> getSymbolTable() {
     return symbolTable == null ? new DualHashBidiMap<>() : symbolTable;
   }
@@ -51,7 +57,9 @@ public class Compiler {
    */
   public boolean compile(final String fileName) throws IOException {
     if(!runFirstPass(fileName)) {
-      logger.error("Unable to complete the first pass at this time");
+      String message = "Unable to complete the first pass at this time";
+      logger.error(message);
+      exceptions.add(0, message);
       return false;
     }
     if(options.contains(CompilerOptions.FIRST_PASS_ONLY)) {
@@ -63,15 +71,18 @@ public class Compiler {
       return true;
     }
     if(!runSecondPass(fileName)) {
-      logger.error("Unable to complete the second pass at this time");
+      String message = "Unable to complete the second pass at this time";
+      logger.error(message);
+      exceptions.add(0, message);
       return false;
     }
     if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
       SymbolTableWriter.exportSymbolTable(symbolTable);
     }
 
-    // TODO - Remove this when ready
-    SymbolUtils.checkSymbolTable(symbolTable);
+    if(options.contains(CompilerOptions.VERBOSE_CHECK)) {
+      SymbolUtils.checkSymbolTable(symbolTable);
+    }
 
     return true;
   }
@@ -133,11 +144,15 @@ public class Compiler {
       }
     }
     catch (FileNotFoundException e) {
-      logger.error("Unable to load file", e);
+      String message = "Unable to load file";
+      logger.error(message, e);
+      exceptions.add(0, e.getMessage());
+      exceptions.add(0, message);
       return false;
     }
     catch (Exception e) {
       logger.error("There were errors", e);
+      exceptions.add(0, e.getMessage());
       return false;
     }
     finally {
@@ -185,7 +200,9 @@ public class Compiler {
       visitor.visit(tree);
     }
     catch (FileNotFoundException e) {
-      logger.error("Unable to load file {}", fileName);
+      String message = "Unable to load file {}" + fileName;
+      logger.error(message);
+      exceptions.add(0, message);
     }
 
     for(String file : visitor.getImports()) {

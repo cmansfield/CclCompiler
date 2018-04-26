@@ -24,6 +24,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
   private final Deque<ParserRuleContext> operatorStack;
   private final Deque<SAR> sas;
+  
+  private final int DEFAULT_LINE_NUMBER = -1;
 
   public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
     super(symbols);
@@ -84,7 +86,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private String traceScopeToFindSymbolId(String text, List<Symbol> symbolsToFilter, String currentScope) {
     if(CollectionUtils.isEmpty(symbolsToFilter)) {
-      logger.info("Could not find Symbol \'{}\'", text);
+      logger.trace("Could not find Symbol \'{}\'", text);
       return null;
     }
     
@@ -141,25 +143,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .map(context -> context.getChild(0).getText())
             .findFirst()
             .orElse(null);
-  }
-
-  /**
-   * This method will simplify method text formatting for logging and errors
-   * 
-   * @param methodSymbol    The method Symbol to format
-   * @return                The method in string format
-   */
-  private String formatMethodText(Symbol methodSymbol) {
-    return String.format("%s %s(%s)", 
-            methodSymbol.getData().getReturnType().orElse(Keyword.VOID.toString()),
-            methodSymbol.getText(),
-            methodSymbol.getData().getParameters().stream()
-                    .map(symbols::get)
-                    .map(Symbol::getData)
-                    .map(Data::getType)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.joining(", ")));
   }
   
   /*
@@ -248,13 +231,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     while(CollectionUtils.isNotEmpty(sas) && (sar = sas.pop()).getType() != SarType.BEGINNING_ARG_LIST) {
       String symbolId = sar.getSymbolId();
       if(StringUtils.isBlank(symbolId)) {
-        throw new IllegalStateException(String.format("Missing SymbolId for SAR: %s", sar));
+        throw new IllegalStateException(String.format(
+                "%s : Missing SymbolId for SAR: %s", 
+                sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+                sar));
       }
       argIds.add(symbolId);
     }
     
     if(sar == null || sar.getType() != SarType.BEGINNING_ARG_LIST) {
-      throw new IllegalStateException("End of Argument List called but the SAS is either empty or does not contain a BEGINNING_ARG_LIST Semantic Action Record");
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] End of Argument List called but the SAS is either empty or does not contain a BEGINNING_ARG_LIST Semantic Action Record",
+              sar == null ? DEFAULT_LINE_NUMBER : sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER)));
     }
 
     Collections.reverse(argIds);
@@ -271,7 +259,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void identifierExist() {
     if(sas.isEmpty()) {
-      throw new IllegalStateException("SAS is empty when trying to check if an identifier exists");
+      throw new IllegalStateException("[Compiler Bug] SAS is empty when trying to check if an identifier exists");
     }
     SAR sar = sas.pop();
     String symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.IDENTIFIER, scope);
@@ -281,8 +269,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     if(StringUtils.isBlank(symbolId)) {
       throw new IllegalStateException(String.format(
-              "The identifier \'%s\' on line %s does not exist!",
-              sar.getLineNumber().orElse(-1),
+              "%s : The identifier \'%s\' does not exist!",
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               sar.getText()));
     }
     sar.setSymbolId(symbolId);
@@ -297,7 +285,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   void typeExist() {
     if(sas.isEmpty()) {
-      throw new IllegalStateException("SAS is empty when trying to check if a type exists");
+      throw new IllegalStateException("[Compiler Bug] SAS is empty when trying to check if a type exists");
     }
     SAR sar = sas.pop();
     if(ParserUtils.isPrimitiveType(sar.getText())) {
@@ -309,7 +297,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(StringUtils.isBlank(symbolId)) {
       throw new IllegalStateException(String.format(
               "%s : The type \'%s\' does not exist!",
-              sar.getLineNumber().orElse(-1),
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               sar.getText()));
     }
     sar.setSymbolId(symbolId);
@@ -324,7 +312,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   void referenceExist() {
     if(CollectionUtils.isEmpty(sas) || sas.size() < 2) {
-      throw new IllegalStateException("SAS does not have enough SARs when trying to check if a reference exists");
+      throw new IllegalStateException("[Compiler Bug] SAS does not have enough SARs when trying to check if a reference exists");
     }
     SAR fieldSar = sas.pop();
     SAR parentSar = sas.pop();
@@ -359,7 +347,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void referenceExistException(SAR parentSar, SAR fieldSar, String message) {
     throw new IllegalStateException(String.format("%s : %s.%s, %s",
-            fieldSar.getLineNumber().orElse(-1),
+            fieldSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
             parentSar.getText(),
             fieldSar.getText(),
             message));
@@ -413,7 +401,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             SarType.REFERENCE,
             referenceSymbol.getSymbolId(),
             referenceSymbol.getText(),
-            parentSar.getLineNumber().orElse(-1));
+            parentSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     refSar.addSymbolId(classId);
     refSar.addSymbolId(fieldSar.getSymbolId());
     fieldSar.getSymbolIds().forEach(refSar::addSymbolId);
@@ -462,7 +450,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             SarType.ARRAY,
             arraySymbol.getSymbolId(),
             arraySymbol.getText(),
-            parentSar.getLineNumber().orElse(-1));
+            parentSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     arraySar.addSymbolId(parentSar.getSymbolId());
     arraySar.addSymbolId(fieldSar.getSymbolIds().get(0));
     sas.push(arraySar);
@@ -594,7 +582,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     List<Symbol> foundSymbols = SymbolFilter.filter(symbols, filter);
     
     if(CollectionUtils.isEmpty(foundSymbols)) {
-      throw new IllegalStateException(String.format("There should have been at least one Symbol of %s, found none", name));
+      throw new IllegalStateException(String.format("[Compiler Bug] There should have been at least one Symbol of %s, found none", name));
     }
     if(foundSymbols.size() > 1) {
       throw new IllegalStateException(String.format(
@@ -614,7 +602,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void constructorCheck(String name) {
     if(StringUtils.isBlank(name)) {
-      throw new IllegalArgumentException("Constructor name cannot be blank");
+      throw new IllegalArgumentException("[Compiler Bug] Constructor name cannot be blank");
     }
     String classId = SymbolUtils.getParentSymbolId(scope);
     Symbol classSymbol = symbols.get(classId);
@@ -639,7 +627,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void methodCall() {
     if(CollectionUtils.isEmpty(sas)) {
-      throw new IllegalStateException("SAS does not have enough SARs when trying to make a method call");
+      throw new IllegalStateException("[Compiler Bug] SAS does not have enough SARs when trying to make a method call");
     }
 
     SAR argListSar = null;
@@ -654,7 +642,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(classSymbol == null) {
       throw new IllegalStateException(String.format(
               "%s : Could not find the class for method \'%s\'",
-              methodNameSar.getLineNumber().orElse(-1),
+              methodNameSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               methodNameSar.getText()));
     }
     
@@ -668,7 +656,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   void integerCast() {
     if(CollectionUtils.isEmpty(sas)) {
-      throw new IllegalStateException("SAS does not have enough SARs when trying to make an integer cast");
+      throw new IllegalStateException("[Compiler Bug] SAS does not have enough SARs when trying to make an integer cast");
     }
     String integerType = Keyword.INT.toString();
     SAR sar = sas.pop();
@@ -677,7 +665,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     if(!type.equals(Keyword.CHAR.toString())) {
       throw new UnsupportedOperationException(String.format(
-              "Cannot cast type \'%s\' to \'%s\' at this time",
+              "%s : Cannot cast type \'%s\' to \'%s\' at this time",
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               type,
               integerType));
     }
@@ -700,7 +689,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             SarType.TEMPORARY,
             tempSymbolId,
             tempText,
-            sar.getLineNumber().orElse(-1));
+            sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(sar.getSymbolId());
     sas.push(tempSar);
   }
@@ -712,7 +701,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   void charCast() {
     if(CollectionUtils.isEmpty(sas)) {
-      throw new IllegalStateException("SAS does not have enough SARs when trying to make an integer cast");
+      throw new IllegalStateException("[Compiler Bug] SAS does not have enough SARs when trying to make an integer cast");
     }
     String charType = Keyword.CHAR.toString();
     SAR sar = sas.pop();
@@ -721,7 +710,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     if(!type.equals(Keyword.INT.toString())) {
       throw new UnsupportedOperationException(String.format(
-              "Cannot cast type \'%s\' to \'%s\' at this time",
+              "%s : Cannot cast type \'%s\' to \'%s\' at this time",
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               type,
               charType));
     }
@@ -744,7 +734,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             SarType.TEMPORARY,
             tempSymbolId,
             tempText,
-            sar.getLineNumber().orElse(-1));
+            sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(sar.getSymbolId());
     sas.push(tempSar);
   }
@@ -770,7 +760,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private void evaluateOperator(ParserRuleContext operatorCtx) {      // NOSONAR
     if(CollectionUtils.isEmpty(sas) || sas.size() < 2) {
       throw new IllegalStateException(String.format(
-              "%s : There are not enough SARs on the SAS while trying to evaluate operand \'%s\'", 
+              "%s : [Compiler Bug] There are not enough SARs on the SAS while trying to evaluate operand \'%s\'", 
               operatorCtx.start.getLine(),
               getChildText(operatorCtx)));
     }
@@ -790,7 +780,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(op1Symbol == null || op2Symbol == null) {
       throw new IllegalStateException(String.format(
               "%s : Could not find the Symbol for \'%s\' or \'%s\'",
-              operand1.getLineNumber().orElse(-1),
+              operand1.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               operand1.getText(),
               operand2.getText()));
     }
@@ -856,14 +846,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void pushOperatorOntoStack(ParserRuleContext operatorCtx) {
     if(operatorCtx == null) {
-      throw new IllegalArgumentException(-1 + " : Operators pushed onto the operator stack cannot be null");
+      throw new IllegalArgumentException("[Compiler Bug] Operators pushed onto the operator stack cannot be null");
     }
     String operator = getChildText(operatorCtx);
     if("(".equals(operator) || "[".equals(operator)) {
       operatorStack.push(operatorCtx);
       
-      if(logger.isDebugEnabled()) {
-        logger.debug("Operator Stack after adding \'{}\': [{}]",
+      if(logger.isTraceEnabled()) {
+        logger.trace("Operator Stack after adding \'{}\': [{}]",
                 getChildText(operatorCtx),
                 operatorStack.stream()
                         .map(this::getChildText)
@@ -884,8 +874,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     operatorStack.push(operatorCtx);     // NOSONAR
     
-    if(logger.isDebugEnabled()) {
-      logger.debug("Operator Stack after adding \'{}\': [{}]",
+    if(logger.isTraceEnabled()) {
+      logger.trace("Operator Stack after adding \'{}\': [{}]",
               getChildText(operatorCtx),
               operatorStack.stream()
                       .map(this::getChildText)
@@ -957,7 +947,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       evaluateOperator(operatorStack.pop());
     }
     if(CollectionUtils.isEmpty(operatorStack)) {
-      throw new IllegalStateException("Could not find a matching opening parenthesis on the operator stack");
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Could not find a matching opening parenthesis on the operator stack",
+              sas.isEmpty() ? DEFAULT_LINE_NUMBER : sas.peek().getLineNumber().orElse(DEFAULT_LINE_NUMBER)));
     }
 
     // Remove the opening paren from the stack
@@ -974,7 +966,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       evaluateOperator(operatorStack.pop());
     }
     if(CollectionUtils.isEmpty(operatorStack)) {
-      throw new IllegalStateException("Could not find a matching opening \'[\' on the operator stack");
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Could not find a matching opening \'[\' on the operator stack",
+              sas.isEmpty() ? DEFAULT_LINE_NUMBER : sas.peek().getLineNumber().orElse(DEFAULT_LINE_NUMBER)));
     }
 
     // Remove the opening bracket from the stack
@@ -1001,13 +995,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(indexSymbol == null) {
       throw new IllegalStateException(String.format(
               "%s : Could not find the Symbol \'%s\'",
-              indexSar.getLineNumber().orElse(-1),
+              indexSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               indexSar.getText()));
     }
     if(!Keyword.INT.toString().equals(indexType)) {
       throw new IllegalStateException(String.format(
               "%s : Expecting array index type \'%s\' found \'%s[%s]\'",
-              indexSar.getLineNumber().orElse(-1),
+              indexSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               indexType,
               objType,
               Keyword.INT.toString()));
@@ -1027,7 +1021,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             SarType.TEMPORARY, 
             tempSymbol.getSymbolId(), 
             tempSymbol.getText(), 
-            indexSar.getLineNumber().orElse(-1));
+            indexSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(indexSymbol.getSymbolId());
     sas.push(tempSar);
   }
@@ -1038,11 +1032,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * see if the top SAR can be printed
    */
   private void print() {
-
+    int lineNumber = sas.isEmpty() ? DEFAULT_LINE_NUMBER : sas.peek().getLineNumber().orElse(DEFAULT_LINE_NUMBER);
+    
     endOfExpression();
 
     if(CollectionUtils.isEmpty(sas)) {
-      throw new IllegalStateException("Print statements cannot be empty");
+      throw new IllegalStateException(String.format(
+              "%s : Print statements cannot be empty",
+              lineNumber));
     }
 
     SAR sar = sas.pop();
@@ -1051,7 +1048,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(symbol == null) {
       throw new IllegalStateException(String.format(
               "%s : Could not find the Symbol \'%s\' for the print statement",
-              sar.getLineNumber().orElse(-1),
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               sar.getSymbolId()));
     }
 
@@ -1059,7 +1056,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(!ParserUtils.isPrimitiveType(type)) {
       throw new IllegalStateException(String.format(
               "%s : Cannot print type \'%s\'",
-              sar.getLineNumber().orElse(-1),
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               type));
     }
   }
@@ -1070,11 +1067,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * see if the top SAR can store a read value
    */
   private void read() {
-
+    int lineNumber = sas.isEmpty() ? DEFAULT_LINE_NUMBER : sas.peek().getLineNumber().orElse(DEFAULT_LINE_NUMBER);
+    
     endOfExpression();
 
     if(CollectionUtils.isEmpty(sas)) {
-      throw new IllegalStateException("Read statements cannot be empty");
+      throw new IllegalStateException(String.format(
+              "%s : Read statements cannot be empty",
+              lineNumber));
     }
 
     SAR sar = sas.pop();
@@ -1083,7 +1083,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(symbol == null) {
       throw new IllegalStateException(String.format(
               "%s : Could not find the Symbol \'%s\' for the read statement",
-              sar.getLineNumber().orElse(-1),
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               sar.getSymbolId()));
     }
 
@@ -1091,7 +1091,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(!Keyword.INT.toString().equals(type) && !Keyword.CHAR.toString().equals(type)) {
       throw new IllegalStateException(String.format(
               "%s : Cannot store read value into type \'%s\'",
-              sar.getLineNumber().orElse(-1),
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               type));
     }
   }
@@ -1132,9 +1132,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(!returnType.equals(type)) {
       throw new IllegalStateException(String.format(
               "%s : Cannot return type \'%s\' from method \'%s\'",
-              sar.getLineNumber().orElse(-1),
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               type,
-              formatMethodText(methodSymbol)));
+              SymbolUtils.formatMethodText(symbols, methodSymbol)));
     }
   }
 
@@ -1191,7 +1191,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     // Filter out methods that don't have matching parameters 
     found = found.stream()
             .filter(symbol -> symbol.getData().getParameters().stream()
-                    .map(paramId -> symbols.get(paramId))
+                    .map(symbols::get)
                     .map(Symbol::getData)
                     .map(Data::getType)
                     .filter(Optional::isPresent)
@@ -1201,7 +1201,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(CollectionUtils.isEmpty(found)) {
       throw new IllegalStateException(String.format(
               "%s : Could not find method that matching \'%s(%s)\'",
-              typeSar.getLineNumber().orElse(-1),
+              typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               typeSar.getText(),
               argListTypes.stream().collect(Collectors.joining(", "))));
     }
@@ -1209,22 +1209,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(found.size() > 1) {
       throw new IllegalStateException(String.format(
               "%s : Found too many methods matching \'%s\'",
-              typeSar.getLineNumber().orElse(-1),
-              formatMethodText(symbol)));
+              typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              SymbolUtils.formatMethodText(symbols, symbol)));
     }
     if(symbol.getData().getAccessModifiers().contains(AccessModifier.PRIVATE)) {
       throw new IllegalStateException(String.format(
               "%s : %s \'%s\' is private and cannot be accessed",
-              typeSar.getLineNumber().orElse(-1),
+              typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               symbol.getSymbolKind().toString(),
-              formatMethodText(symbol)));
+              SymbolUtils.formatMethodText(symbols, symbol)));
     }
 
     SAR methodSar = new SAR(
             SarType.METHOD,
             symbol.getSymbolId(),
             symbol.getText(),
-            typeSar.getLineNumber().orElse(-1));
+            typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     if(CollectionUtils.isNotEmpty(argList)) {
       argList.forEach(methodSar::addSymbolId);
     }
@@ -1238,7 +1238,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void newArray() {
     if(CollectionUtils.isEmpty(sas) || sas.size() < 2) {
-      throw new IllegalStateException("There are not enough SARs on the SAS while trying to create a new array");
+      throw new IllegalStateException("[Compiler Bug] There are not enough SARs on the SAS while trying to create a new array");
     }
     SAR quantitySar = sas.pop();
     SAR typeSar = sas.pop();
@@ -1252,7 +1252,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(StringUtils.isBlank(quantityType) || StringUtils.isBlank(type)) {
       throw new IllegalStateException(String.format(
               "%s : Could not find the type for \'%s\' or \'%s\'",
-              quantitySar.getLineNumber().orElse(-1),
+              quantitySar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               typeSar.getText(),
               quantitySar.getText()));
     }
@@ -1260,7 +1260,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(!Keyword.INT.toString().equals(quantityType)) {
       throw new IllegalStateException(String.format(
               "%s : Cannot create array \'%s %s[%s]\', size specifier must be of type \'%s\'",
-              quantitySar.getLineNumber().orElse(-1),
+              quantitySar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               Keyword.NEW.toString(),
               type,
               quantityType,
@@ -1273,7 +1273,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       if(StringUtils.isBlank(classId)) {
         throw new IllegalStateException(String.format(
                 "%s : Cannot create array \'%s %s[%s]\', unknown type \'%s\'",
-                quantitySar.getLineNumber().orElse(-1),
+                quantitySar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
                 Keyword.NEW.toString(),
                 type,
                 Keyword.INT.toString(),
@@ -1294,7 +1294,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             SarType.ARRAY, 
             tempSymbol.getSymbolId(), 
             tempSymbol.getText(), 
-            quantitySar.getLineNumber().orElse(-1));
+            quantitySar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(quantitySymbol.getSymbolId());
     sas.push(tempSar);
   }
@@ -1340,7 +1340,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitStatementWithScope(CclGrammarParser.StatementWithScopeContext ctx) {
     if(ctx.children == null || ctx.children.isEmpty()) {
-      throw new IllegalArgumentException("There must be child nodes at this point in the tree");
+      throw new IllegalArgumentException("[Compiler Bug] There must be child nodes at this point in the tree");
     }
     SymbolKind symbolKind = SymbolKind.UNKNOWN;
     String symbolId;
@@ -1356,7 +1356,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     if(symbolKind == SymbolKind.UNKNOWN) {
       throw new IllegalStateException(
-              String.format("Unknown statement \"%s\" found", StringUtils.isBlank(child.getText()) ? "" : child.getText()));
+              String.format("[Compiler Bug] Unknown statement \"%s\" found", StringUtils.isBlank(child.getText()) ? "" : child.getText()));
     }
 
     symbolId = SymbolIdGenerator.generateId(symbolKind);
@@ -1421,7 +1421,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String name = getNameWithoutVisiting(ctx);
     List<String> paramTypes = traverseParameterList(ctx);
     if(StringUtils.isBlank(name)) {
-      throw new IllegalStateException("Method name came back blank, should not be blank after the first pass");
+      throw new IllegalStateException("[Compiler Bug] Method name came back blank, should not be blank after the first pass");
     }
     
     String scopeOrig = scope;
@@ -1498,7 +1498,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitName(CclGrammarParser.NameContext ctx) {
     if(ctx == null) {
-      throw new IllegalStateException("NameContext cannot be null");
+      throw new IllegalStateException("[Compiler Bug] NameContext cannot be null");
     }
     String name = getChildText(ctx);
 
@@ -1521,7 +1521,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitMemberRefz(CclGrammarParser.MemberRefzContext ctx) {
     String name = getNameWithoutVisiting(ctx);
     if(ctx == null) {
-      throw new IllegalStateException("Member reference cannot be null");
+      throw new IllegalStateException("[Compiler Bug] Member reference cannot be null");
     }
     identifierPush(ctx, name);
 
@@ -1727,7 +1727,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       newArray();       // Semantic call #newArray
     }
     else {
-      throw new UnsupportedOperationException("Unknown operation");      
+      throw new UnsupportedOperationException("[Compiler Bug] Unknown operation");      
     }
     
     return null;
