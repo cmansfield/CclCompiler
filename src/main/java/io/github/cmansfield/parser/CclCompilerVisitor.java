@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
   public static final String GLOBAL_SCOPE = "g";
-  protected BidiMap<String, Symbol> symbols;
+  protected final BidiMap<String, Symbol> symbols;
   protected String scope;
 
   protected CclCompilerVisitor() {
@@ -237,12 +237,12 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
   }
 
   /**
+   * This will search for the Symbol ID of a given method name, type, and parameters
    *
-   *
-   * @param name
-   * @param symbolKind
-   * @param parameterTypes
-   * @return
+   * @param name            The name of the method to search for
+   * @param symbolKind      The type of method being searched for (constructor or method)
+   * @param parameterTypes  The List of parameter types in the method signature 
+   * @return                The Symbol ID of the found method
    */
   protected String findMethodSymbolId(String name, SymbolKind symbolKind, List<String> parameterTypes) {
     if(symbolKind != SymbolKind.METHOD && symbolKind != SymbolKind.CONSTRUCTOR) {
@@ -263,7 +263,7 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
             .filter(symbol -> symbol.getData().getParameters().size() == parameterTypes.size())
             .filter(symbol ->
               symbol.getData().getParameters().stream()
-                      .map(param -> symbols.get(param))
+                      .map(symbols::get)
                       .filter(Objects::nonNull)
                       .map(Symbol::getData)
                       .filter(Objects::nonNull)

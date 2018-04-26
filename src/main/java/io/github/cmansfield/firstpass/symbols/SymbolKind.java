@@ -22,7 +22,7 @@ public enum SymbolKind {
   TEMPORARY("J"),
   UNKNOWN("U");
   
-  private String prefix;
+  private final String prefix;
   
   SymbolKind(String prefix) {
     this.prefix = prefix;

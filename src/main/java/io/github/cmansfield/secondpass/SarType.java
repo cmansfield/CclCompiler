@@ -10,7 +10,6 @@ public enum SarType {
   METHOD,
   BEGINNING_ARG_LIST,
   ARG_LIST,
-  END_ARG_LIST,
   ARRAY,
   TEMPLATE,
   TEMPORARY,

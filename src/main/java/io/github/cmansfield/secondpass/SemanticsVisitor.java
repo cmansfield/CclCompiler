@@ -22,8 +22,8 @@ import java.util.*;
 
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
-  private Deque<ParserRuleContext> operatorStack;
-  private Deque<SAR> sas;
+  private final Deque<ParserRuleContext> operatorStack;
+  private final Deque<SAR> sas;
 
   public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
     super(symbols);
@@ -37,22 +37,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   void setScope(String scope) {
     this.scope = scope;
-  }
-  
-  /**
-   * This method will create a simple filter object for searching
-   * 
-   * @param text        Match the Symbol with this text
-   * @param symbolKind  Match Symbols of this kind
-   * @param scope       Match Symbols within this scope
-   * @return            The Symbol filter used to find Symbols in the symbol table
-   */
-  private Symbol generateFilter(String text, SymbolKind symbolKind, String scope) {
-    return new SymbolBuilder()
-            .text(text)
-            .symbolKind(symbolKind)
-            .scope(scope)
-            .build();
   }
 
   /**
@@ -193,10 +177,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void literalPush(ParserRuleContext ctx, SymbolKind symbolKind) {
     String symbolId = findSymbolId(
-            generateFilter(
-                    getChildText(ctx),
-                    symbolKind,
-                    GLOBAL_SCOPE),
+            new SymbolBuilder()
+                    .text(getChildText(ctx))
+                    .symbolKind(symbolKind)
+                    .scope(GLOBAL_SCOPE)
+                    .build(),
             true);
 
     // literalPush
@@ -1722,6 +1707,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(Keyword.RETURN.toString().equals(text)) {
       semanticReturn();     // Semantic call #return
     }
+    
+    endOfExpression();      // Clear the operator stack
     
     return null;
   }

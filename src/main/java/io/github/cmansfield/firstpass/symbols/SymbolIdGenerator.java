@@ -4,7 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class SymbolIdGenerator {
-  private static Map<SymbolKind, Integer> indexes;
+  private static final Map<SymbolKind, Integer> indexes;
 
   static {
     indexes = new EnumMap<>(SymbolKind.class);

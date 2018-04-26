@@ -27,7 +27,7 @@ import java.io.*;
 
 public class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
-  private Set<CompilerOptions> options;
+  private final Set<CompilerOptions> options;
   private BidiMap<String, Symbol> symbolTable;
 
   public Compiler(CompilerOptions... options) {
