@@ -531,12 +531,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private void referenceExistReferenceBase(SAR parentSar, SAR fieldSar) {
     String className = SymbolUtils.getSymbolType(symbols.get(parentSar.getSymbolId()));
     String classId = findSymbolId(className, SymbolKind.CLASS);
+    Symbol classSymbol = symbols.get(classId);
+    String classScope = classSymbol.getScope() + "." + classId;
     Symbol fieldSymbol = getFieldSymbol(parentSar, fieldSar, classId);
     fieldSar.setSymbolId(fieldSymbol.getSymbolId());
     Data fieldData = fieldSymbol.getData();
     List<AccessModifier> accessModifiers = fieldData.getAccessModifiers();
 
-    if(accessModifiers.contains(AccessModifier.PRIVATE)) {
+    if(!fieldSymbol.getScope().contains(classScope)
+            && accessModifiers.contains(AccessModifier.PRIVATE)) {
       referenceExistException(parentSar, fieldSar, String.format("\'%s\' is private and cannot be accessed", fieldSar.getText()));
     }
 
@@ -646,7 +649,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               methodNameSar.getText()));
     }
     
-    methodExist(methodNameSar, argListSar, classSymbol, SymbolKind.METHOD);
+    methodExist(methodNameSar, argListSar, classSymbol, SymbolKind.METHOD, Keyword.THIS.toString().equalsIgnoreCase(instanceSar.getText()));
   }
 
   /**
@@ -799,13 +802,25 @@ public class SemanticsVisitor extends CclCompilerVisitor {
         }
       }
       else if(!Keyword.INT.toString().equals(op1Type) || !Keyword.INT.toString().equals(op2Type)) {
-        operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+        if(Keyword.NULL.toString().equals(op1Type) && !ParserUtils.isPrimitiveType(op2Type)) {      // NOSONAR
+          // Then we are comparing an object to null
+          // employee == null
+        }
+        else {
+          operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+        }
       }
 
       tempType = Keyword.BOOL.toString();
     }
     else if(operatorCtx instanceof CclGrammarParser.AssignmentOperationContext) {
       if(!op1Type.equals(op2Type)) {
+        if(!ParserUtils.isPrimitiveType(op2Type) && Keyword.NULL.toString().equals(op1Type)) {
+          // Object assignment of null
+          // employee = null
+          sas.push(operand2);
+          return;
+        }
         operatorException(operatorCtx.start.getLine(), "assignment", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
       }
       
@@ -1160,7 +1175,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     
     Symbol classSymbol = symbols.get(typeSar.getSymbolId());
-    methodExist(typeSar, argListSar, classSymbol, SymbolKind.CONSTRUCTOR);
+    methodExist(typeSar, argListSar, classSymbol, SymbolKind.CONSTRUCTOR, false);
   }
 
   /**
@@ -1173,7 +1188,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param classSymbol   The Symbol of the class that houses the method being called
    * @param symbolKind    The type of method being called (constructor, or method)
    */
-  private void methodExist(SAR typeSar, SAR argListSar, Symbol classSymbol, SymbolKind symbolKind) {
+  private void methodExist(SAR typeSar, SAR argListSar, Symbol classSymbol, SymbolKind symbolKind, boolean isThis) {
     List<String> argList = argListSar == null
             ? Collections.emptyList()
             : argListSar.getSymbolIds();
@@ -1212,7 +1227,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               SymbolUtils.formatMethodText(symbols, symbol)));
     }
-    if(symbol.getData().getAccessModifiers().contains(AccessModifier.PRIVATE)) {
+    if(!isThis
+            && symbol.getData().getAccessModifiers().contains(AccessModifier.PRIVATE)
+            && !scope.contains(symbol.getScope())) {
       throw new IllegalStateException(String.format(
               "%s : %s \'%s\' is private and cannot be accessed",
               typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),

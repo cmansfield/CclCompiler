@@ -1,0 +1,8 @@
+
+public class MyClass {
+    public MyClass() {}
+}
+
+public void main() {
+    MyClass myClass = null;
+}

@@ -3,20 +3,32 @@ public class MyClass {
     public MyClass() {}
     
     public int getMax() {
+        return MyClass.max();
+    }
+
+    private static int max() {
         return 100;
     }
 }
 
 public void main() {
-    MyClass obj;
-    obj.getMax();
-    
-    int numbers1[] = new int[5];
-    numbers1[0];
-    
-    MyClass objs[] = new MyClass[10];
-    objs[0] = new MyClass();
-    objs[0].getMax();
-    int numbers[] = new int[objs[0].getMax()];
+
 }
 
+
+/*
+public void main() {
+    MyClass obj;
+    obj = null;
+    //obj.getMax();
+    
+    //int numbers1[] = new int[5];
+    //numbers1[0];
+    
+    //MyClass objs[] = new MyClass[10];
+    //objs[0] = new MyClass();
+    //objs[0].getMax();
+    //int numbers[] = new int[objs[0].getMax()];
+}
+
+*/

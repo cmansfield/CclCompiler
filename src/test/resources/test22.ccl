@@ -1,0 +1,104 @@
+
+public class Company {
+    private Employee employees[];
+    private int numberEmployees;
+    private string name;
+    private int size;
+
+    public Company(string name) {
+        this.name = name;
+        this.employees = null;
+        numberEmployees = 0;
+        size = 0;
+    }
+
+    public void addEmployee(Employee employee) {
+        if(employees == null || numberEmployees == size) {
+            this.growArray();
+        }
+
+        employees[numberEmployees] = employee;
+        numberEmployees = numberEmployees + 1;
+    }
+
+    public Employee getEmployee(int index) {
+        if(index >= numberEmployees) {
+            print("Index out of bounds exception");
+        }
+        return employees[index];
+    }
+
+    private void growArray() {
+        Employee tempArr[] = employees;
+        int newSize = size * 2;
+        employees = new Employee[newSize];
+
+/*
+        for(int i = 0; i < size; i = i + 1) {
+            employees[i] = tempArr[1];
+        }
+        */
+        size = newSize;
+    }
+}
+
+public static class EmployeeType {
+    public static const string HOURLY = "Hourly";
+    public static const string SALARY = "Salary";
+    public static const string CONTRACT = "Contract";
+}
+
+public class Employee {
+    private static int UNIQUE_ID = 0;
+    private string department;
+    private string type;
+    private string name;
+    private int id;
+
+    public Employee(string name, string department) {
+        this.name = name;
+        this.department = department;
+        this.type = EmployeeType.HOURLY;
+        this.id = UNIQUE_ID;
+        UNIQUE_ID = UNIQUE_ID + 1;
+    }
+
+    public Employee(string name, string type, string department) {
+        this.name = name;
+        this.department = department;
+        this.type = type;
+        this.id = UNIQUE_ID;
+        UNIQUE_ID = UNIQUE_ID + 1;
+    }
+
+    public string getName() {
+        return name;
+    }
+
+    public string getEmployeeType() {
+        return type;
+    }
+
+    public int getId() {
+        return id;
+    }
+}
+
+public void main() {
+    string department = "Sales";
+    Company company = new Company("RoboCo");
+    company.addEmployee(new Employee(
+        "John Doe",
+        EmployeeType.HOURLY,
+        department));
+    company.addEmployee(new Employee(
+        "Jane Smith",
+        EmployeeType.SALARY,
+        department));
+    company.addEmployee(new Employee(
+        "Dog Meat",
+        EmployeeType.CONTRACT,
+        department));
+
+
+}

@@ -1,0 +1,27 @@
+
+
+public class Company {
+    private string name;
+
+    public Company(string name) {}
+
+    public void addEmployee(Employee employee) {}
+}
+
+public class Employee {
+    private string department;
+    private string name;
+
+    public Employee(string name, string department) {
+        this.name = name;
+        this.department = department;
+    }
+}
+
+
+public void main() {
+    Company company = new Company("RoboCo");
+    company.addEmployee(new Employee(
+        "John Doe",
+        "Sales"));
+}

@@ -1,0 +1,16 @@
+
+
+public class MyClass {
+    public MyClass() {}
+
+    public int getMax() {
+        return 100;
+    }
+}
+
+public void main() {
+    int max = 10;
+    MyClass objs[] = new MyClass[max];
+    objs[0] = new MyClass();
+    int number = objs[0].getMax();
+}

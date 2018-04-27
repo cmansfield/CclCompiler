@@ -1,0 +1,9 @@
+
+
+public class TestClass {
+    public TestClass(int ascii) {}
+}
+
+public void main() {
+    TestClass company = new TestClass(block());
+}

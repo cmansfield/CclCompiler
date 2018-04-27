@@ -1,0 +1,28 @@
+
+
+public class MyClass {
+    private int number;
+
+    public MyClass() {
+        number = 10;
+    }
+
+    public int getNumber() {
+        int value;
+        {
+            {
+                {
+                    {
+                        value = number;
+                    }
+                }
+            }
+        }
+        return value;
+    }
+}
+
+public void main() {
+    MyClass myClass = new MyClass();
+    int number = myClass.getNumber();
+}

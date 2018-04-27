@@ -1,0 +1,17 @@
+
+public class MyClass {
+    public MyClass() {}
+
+    public int getMax() {
+        return MyClass.max();
+    }
+
+    private static int max() {
+        return 100;
+    }
+}
+
+public void main() {
+    MyClass myClass = new MyClass();
+    int max = myClass.getMax();
+}

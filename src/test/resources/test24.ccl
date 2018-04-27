@@ -1,0 +1,11 @@
+
+public class Company {
+    private Employee employees[];
+    private int numberEmployees;
+
+    public Company() {}
+}
+
+public void main() {
+    Company company = new Company();
+}

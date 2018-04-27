@@ -131,7 +131,7 @@ arrayOperatorEnd : ']' ;
 
 arrayDeclaration : '[' ']' ;
 
-argumentList : expression (',' expression)* ;
+argumentList : assignmentExpression (',' assignmentExpression)* ;
 
 modifier : MODIFIER ;
 

@@ -1,10 +1,13 @@
-// Generated from C:/Users/christopherjman/Documents/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
+// Generated from C:/Users/Chris/Documents/MyProjects/CclCompiler/src/main/java/io/github/cmansfield/parser/language\CclGrammar.g4 by ANTLR 4.7
 package io.github.cmansfield.parser.language;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class CclGrammarParser extends Parser {
@@ -1704,7 +1707,7 @@ public class CclGrammarParser extends Parser {
 			setState(357);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << SPECIAL_LITERAL) | (1L << BOOLEAN_LITERAL) | (1L << TRUE) | (1L << FALSE) | (1L << NULL) | (1L << THIS) | (1L << NOT) | (1L << IDENTIFIER) | (1L << STRING_LITERAL) | (1L << CHARACTER_LITERAL) | (1L << NUMERIC_LITERAL))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__4) | (1L << SPECIAL_LITERAL) | (1L << BOOLEAN_LITERAL) | (1L << TRUE) | (1L << FALSE) | (1L << NULL) | (1L << THIS) | (1L << NEW) | (1L << NOT) | (1L << IDENTIFIER) | (1L << STRING_LITERAL) | (1L << CHARACTER_LITERAL) | (1L << NUMERIC_LITERAL))) != 0)) {
 				{
 				setState(356);
 				argumentList();
@@ -1772,7 +1775,7 @@ public class CclGrammarParser extends Parser {
 				setState(363);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << SPECIAL_LITERAL) | (1L << BOOLEAN_LITERAL) | (1L << TRUE) | (1L << FALSE) | (1L << NULL) | (1L << THIS) | (1L << NOT) | (1L << IDENTIFIER) | (1L << STRING_LITERAL) | (1L << CHARACTER_LITERAL) | (1L << NUMERIC_LITERAL))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__4) | (1L << SPECIAL_LITERAL) | (1L << BOOLEAN_LITERAL) | (1L << TRUE) | (1L << FALSE) | (1L << NULL) | (1L << THIS) | (1L << NEW) | (1L << NOT) | (1L << IDENTIFIER) | (1L << STRING_LITERAL) | (1L << CHARACTER_LITERAL) | (1L << NUMERIC_LITERAL))) != 0)) {
 					{
 					setState(362);
 					argumentList();
@@ -2175,7 +2178,7 @@ public class CclGrammarParser extends Parser {
 				setState(438);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << SPECIAL_LITERAL) | (1L << BOOLEAN_LITERAL) | (1L << TRUE) | (1L << FALSE) | (1L << NULL) | (1L << THIS) | (1L << NOT) | (1L << IDENTIFIER) | (1L << STRING_LITERAL) | (1L << CHARACTER_LITERAL) | (1L << NUMERIC_LITERAL))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__4) | (1L << SPECIAL_LITERAL) | (1L << BOOLEAN_LITERAL) | (1L << TRUE) | (1L << FALSE) | (1L << NULL) | (1L << THIS) | (1L << NEW) | (1L << NOT) | (1L << IDENTIFIER) | (1L << STRING_LITERAL) | (1L << CHARACTER_LITERAL) | (1L << NUMERIC_LITERAL))) != 0)) {
 					{
 					setState(437);
 					argumentList();
@@ -2751,11 +2754,11 @@ public class CclGrammarParser extends Parser {
 	}
 
 	public static class ArgumentListContext extends ParserRuleContext {
-		public List<ExpressionContext> expression() {
-			return getRuleContexts(ExpressionContext.class);
+		public List<AssignmentExpressionContext> assignmentExpression() {
+			return getRuleContexts(AssignmentExpressionContext.class);
 		}
-		public ExpressionContext expression(int i) {
-			return getRuleContext(ExpressionContext.class,i);
+		public AssignmentExpressionContext assignmentExpression(int i) {
+			return getRuleContext(AssignmentExpressionContext.class,i);
 		}
 		public ArgumentListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2776,7 +2779,7 @@ public class CclGrammarParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(503);
-			expression(0);
+			assignmentExpression();
 			setState(508);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -2786,7 +2789,7 @@ public class CclGrammarParser extends Parser {
 				setState(504);
 				match(T__6);
 				setState(505);
-				expression(0);
+				assignmentExpression();
 				}
 				}
 				setState(510);
@@ -3435,21 +3438,21 @@ public class CclGrammarParser extends Parser {
 		"\u01ea\3\2\2\2\u01ed9\3\2\2\2\u01ee\u01ef\7\3\2\2\u01ef;\3\2\2\2\u01f0"+
 		"\u01f1\7\4\2\2\u01f1=\3\2\2\2\u01f2\u01f3\7\n\2\2\u01f3?\3\2\2\2\u01f4"+
 		"\u01f5\7\13\2\2\u01f5A\3\2\2\2\u01f6\u01f7\7\n\2\2\u01f7\u01f8\7\13\2"+
-		"\2\u01f8C\3\2\2\2\u01f9\u01fe\5,\27\2\u01fa\u01fb\7\t\2\2\u01fb\u01fd"+
-		"\5,\27\2\u01fc\u01fa\3\2\2\2\u01fd\u0200\3\2\2\2\u01fe\u01fc\3\2\2\2\u01fe"+
-		"\u01ff\3\2\2\2\u01ffE\3\2\2\2\u0200\u01fe\3\2\2\2\u0201\u0202\7\r\2\2"+
-		"\u0202G\3\2\2\2\u0203\u0206\7\f\2\2\u0204\u0206\5L\'\2\u0205\u0203\3\2"+
-		"\2\2\u0205\u0204\3\2\2\2\u0206I\3\2\2\2\u0207\u0208\7=\2\2\u0208K\3\2"+
-		"\2\2\u0209\u020a\7=\2\2\u020aM\3\2\2\2\u020b\u020c\7=\2\2\u020cO\3\2\2"+
-		"\2\u020d\u020e\7=\2\2\u020eQ\3\2\2\2\u020f\u0210\7\34\2\2\u0210S\3\2\2"+
-		"\2\u0211\u0212\7>\2\2\u0212U\3\2\2\2\u0213\u0214\7?\2\2\u0214W\3\2\2\2"+
-		"\u0215\u0216\7@\2\2\u0216Y\3\2\2\2\u0217\u0218\7\17\2\2\u0218[\3\2\2\2"+
-		"\u0219\u021a\7\16\2\2\u021a]\3\2\2\2@agkp\u0082\u008a\u0090\u0096\u00a4"+
-		"\u00aa\u00af\u00b3\u00b9\u00c1\u00c7\u00ca\u00d3\u00d9\u00dc\u00e1\u00e9"+
-		"\u00eb\u00f3\u00f6\u0101\u010b\u0117\u0132\u013b\u013e\u0142\u014a\u014c"+
-		"\u0150\u0155\u015c\u0167\u016d\u0175\u017c\u0180\u0184\u0187\u018b\u018f"+
-		"\u0193\u0197\u019b\u019f\u01a2\u01a5\u01a9\u01b3\u01b8\u01c0\u01c5\u01c8"+
-		"\u01cd\u01e2\u01ec\u01fe\u0205";
+		"\2\u01f8C\3\2\2\2\u01f9\u01fe\5\"\22\2\u01fa\u01fb\7\t\2\2\u01fb\u01fd"+
+		"\5\"\22\2\u01fc\u01fa\3\2\2\2\u01fd\u0200\3\2\2\2\u01fe\u01fc\3\2\2\2"+
+		"\u01fe\u01ff\3\2\2\2\u01ffE\3\2\2\2\u0200\u01fe\3\2\2\2\u0201\u0202\7"+
+		"\r\2\2\u0202G\3\2\2\2\u0203\u0206\7\f\2\2\u0204\u0206\5L\'\2\u0205\u0203"+
+		"\3\2\2\2\u0205\u0204\3\2\2\2\u0206I\3\2\2\2\u0207\u0208\7=\2\2\u0208K"+
+		"\3\2\2\2\u0209\u020a\7=\2\2\u020aM\3\2\2\2\u020b\u020c\7=\2\2\u020cO\3"+
+		"\2\2\2\u020d\u020e\7=\2\2\u020eQ\3\2\2\2\u020f\u0210\7\34\2\2\u0210S\3"+
+		"\2\2\2\u0211\u0212\7>\2\2\u0212U\3\2\2\2\u0213\u0214\7?\2\2\u0214W\3\2"+
+		"\2\2\u0215\u0216\7@\2\2\u0216Y\3\2\2\2\u0217\u0218\7\17\2\2\u0218[\3\2"+
+		"\2\2\u0219\u021a\7\16\2\2\u021a]\3\2\2\2@agkp\u0082\u008a\u0090\u0096"+
+		"\u00a4\u00aa\u00af\u00b3\u00b9\u00c1\u00c7\u00ca\u00d3\u00d9\u00dc\u00e1"+
+		"\u00e9\u00eb\u00f3\u00f6\u0101\u010b\u0117\u0132\u013b\u013e\u0142\u014a"+
+		"\u014c\u0150\u0155\u015c\u0167\u016d\u0175\u017c\u0180\u0184\u0187\u018b"+
+		"\u018f\u0193\u0197\u019b\u019f\u01a2\u01a5\u01a9\u01b3\u01b8\u01c0\u01c5"+
+		"\u01c8\u01cd\u01e2\u01ec\u01fe\u0205";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

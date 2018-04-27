@@ -1,0 +1,10 @@
+
+public class Company {
+    private int numberEmployees;
+
+    public Compaaaany() {}
+}
+
+public void main() {
+    Company company = new Company();
+}

@@ -1,0 +1,12 @@
+
+public class MyClass {
+    private MyClass() {}
+
+    private static int max() {
+        return 100;
+    }
+}
+
+public void main() {
+    int max = MyClass.max();
+}

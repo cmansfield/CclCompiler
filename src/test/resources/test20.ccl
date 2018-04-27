@@ -1,0 +1,12 @@
+
+public class TestClass {
+    private int number;
+
+    private TestClass() {
+        number = 5;
+    }
+}
+
+public void main() {
+    TestClass testClass = new TestClass();
+}
