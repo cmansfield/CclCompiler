@@ -1,0 +1,27 @@
+
+public class TestClass {
+    public TestClass() {}
+
+    public int test() {
+        return 150;
+    }
+}
+
+public class MyClass {
+    private TestClass testClass;
+    public MyClass() {
+        testClass = new TestClass();
+    }
+
+    public TestClass getTest() {
+        return testClass;
+    }
+}
+
+public void main() {
+    int max = 10;
+    MyClass objs[] = new MyClass[max];
+    objs[0] = new MyClass();
+    int number = objs[0].getTest().test();
+    int numbers[] = new int[objs[0].getTest().test()];
+}

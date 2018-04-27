@@ -4,13 +4,14 @@ TODO List
         Add jackson deserialization
 
     Semantics
-        #if
         #while
         #for
         #spawn
         #block
         #lock
         #release
+        #imports
+        #templates
 
     iCode
         serialize and deserialize iCode objects

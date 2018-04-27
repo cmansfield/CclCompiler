@@ -28,12 +28,20 @@ public class Company {
         return employees[index];
     }
 
+    public int getNumberOfEmployees() {
+        return numberEmployees;
+    }
+
+    public string getName() {
+        return name;
+    }
+
     private void growArray() {
         Employee tempArr[] = employees;
         int newSize = size * 2;
         employees = new Employee[newSize];
 
-/*
+        /*
         for(int i = 0; i < size; i = i + 1) {
             employees[i] = tempArr[1];
         }
@@ -100,5 +108,16 @@ public void main() {
         EmployeeType.CONTRACT,
         department));
 
+    print(company.getName());
+    print("\n\n");
+    print("List of Employees:");
+    print('\n');
 
+    int index = 0;
+    int numberEmployees = company.getNumberOfEmployees();
+
+    while(index < numberEmployees) {
+        print(company.getEmployee(index).getName());
+        print('\n');
+    }
 }

@@ -5,8 +5,10 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.parser.Keyword;
 
-import java.util.*;
 import java.util.stream.Collectors;
+import java.util.*;
+
+import static io.github.cmansfield.parser.CclCompilerVisitor.GLOBAL_SCOPE;
 
 
 public class SymbolUtils {
@@ -115,7 +117,7 @@ public class SymbolUtils {
   /**
    * This method will simplify method text formatting for logging and errors
    *
-   * @param symbolTable Symbol table to look up IDs
+   * @param symbolTable     Symbol table to look up IDs
    * @param methodSymbol    The method Symbol to format
    * @return                The method in string format
    */
@@ -130,5 +132,32 @@ public class SymbolUtils {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.joining(", ")));
+  }
+
+  /**
+   *  This method will convert a typical scope format into a user friendly format
+   *  Ex. scope: g.D00001.C000001.M00001  ->  g.D00001.TestClass.someMethod
+   *
+   * @param symbolTable   Symbol table to look up IDs
+   * @param scope         The scope to convert to a ready friendly format
+   * @return              The scope in a user friendly format
+   */
+  public static String formatScopeText(BidiMap<String, Symbol> symbolTable, String scope) {
+    String workingScope = scope;
+    String scopeText = "";
+    String symbolId;
+
+    while(StringUtils.isNotBlank(symbolId = getParentSymbolId(workingScope))) {
+      Symbol symbol = symbolTable.get(symbolId);
+      scopeText = (symbol.getSymbolKind() == SymbolKind.PACKAGE
+                ? symbolId
+                : symbol.getText())
+              + (StringUtils.isBlank(scopeText)
+                ? ""
+                : "." + scopeText);
+      workingScope = symbol.getScope();
+    }
+
+    return GLOBAL_SCOPE + (StringUtils.isBlank(scopeText) ? "" : "." + scopeText);
   }
 }

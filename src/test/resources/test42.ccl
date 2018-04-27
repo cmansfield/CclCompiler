@@ -1,8 +1,7 @@
 
 
 public void main() {
-    if(true == true) {
+    if(true == true && 2 < 4) {
         int number = 5;
     }
 }
-

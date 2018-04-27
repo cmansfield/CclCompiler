@@ -49,7 +49,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param sarType The SarType of the symbol we are searching for
    * @return        The ID of the found Symbol
    */
-  String traceScopeToFindSymbolId(String text, SarType sarType, String currentScope) {
+  String traceScopeToFindSymbolId(String text, SarType sarType, String currentScope, int lineNumber) {
     if(StringUtils.isBlank(text)) {
       logger.warn("Cannot find the symbolId of something with a blank text");
       return "";
@@ -72,7 +72,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .filter(symbol -> sarType == SarType.getSarType(symbol.getSymbolKind()))
             .collect(Collectors.toList());
 
-    return traceScopeToFindSymbolId(text, found, currentScope);
+    return traceScopeToFindSymbolId(text, found, currentScope, lineNumber);
   }
 
   /**
@@ -84,7 +84,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param currentScope    The currentScope to check for the desired Symbol
    * @return                The Symbol ID if found
    */
-  private String traceScopeToFindSymbolId(String text, List<Symbol> symbolsToFilter, String currentScope) {
+  private String traceScopeToFindSymbolId(String text, List<Symbol> symbolsToFilter, String currentScope, int lineNumber) {
     if(CollectionUtils.isEmpty(symbolsToFilter)) {
       logger.trace("Could not find Symbol \'{}\'", text);
       return null;
@@ -106,20 +106,25 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     if(CollectionUtils.isEmpty(found)) {
       if(GLOBAL_SCOPE.equals(currentScope)) {
-        throw new IllegalStateException(String.format("Could not find Symbol \'%s\'", text));
+        throw new IllegalStateException(String.format(
+                "%s : Could not find Symbol \'%s\' in scope \'%s\'",
+                lineNumber,
+                text,
+                SymbolUtils.formatScopeText(symbols, scope)));
       }
       String parentId = SymbolUtils.getParentSymbolId(currentScope);
       Symbol parentSymbol = symbols.get(parentId);
       if(parentSymbol == null) {
         throw new IllegalStateException(String.format(
-                "Bad scope \'%s\' symbolId \'%s\' not found",
+                "[Compiler Bug] Bad scope \'%s\' symbolId \'%s\' not found",
                 currentScope,
                 parentId));
       }
       return traceScopeToFindSymbolId(
               text,
               symbolsToFilter,
-              parentSymbol.getScope());
+              parentSymbol.getScope(),
+              lineNumber);
     }
     
     return found.get(0).getSymbolId();
@@ -262,9 +267,17 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       throw new IllegalStateException("[Compiler Bug] SAS is empty when trying to check if an identifier exists");
     }
     SAR sar = sas.pop();
-    String symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.IDENTIFIER, scope);
+    String symbolId = traceScopeToFindSymbolId(
+            sar.getText(),
+            SarType.IDENTIFIER,
+            scope,
+            sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     if(StringUtils.isBlank(symbolId)) {
-      symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.TYPE, scope);
+      symbolId = traceScopeToFindSymbolId(
+              sar.getText(),
+              SarType.TYPE,
+              scope,
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
       sar.setType(SarType.TYPE);
     }
     if(StringUtils.isBlank(symbolId)) {
@@ -293,7 +306,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       return;
     }
     
-    String symbolId = traceScopeToFindSymbolId(sar.getText(), SarType.TYPE, scope);
+    String symbolId = traceScopeToFindSymbolId(
+            sar.getText(),
+            SarType.TYPE,
+            scope,
+            sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     if(StringUtils.isBlank(symbolId)) {
       throw new IllegalStateException(String.format(
               "%s : The type \'%s\' does not exist!",
@@ -744,14 +761,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   private void operatorException(int lineNumber, String operation, String operator, String op1Type, String op1Text, String op2Type, String op2Text) {
     throw new IllegalStateException(String.format(
-            "%s : Cannot perform %s operation \'%s %s %s %s %s\'",
+            "%s : Cannot perform %s operation \'%s%s %s %s%s\'",
             lineNumber,
             operation,
             op2Type,
-            op2Text,
+            op2Type.equals(op2Text) ? "" : " " + op2Text,
             operator,
             op1Type,
-            op1Text));
+            op1Type.equals(op1Text) ? "" : " " + op1Text));
   }
   
   /**
@@ -801,14 +818,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
           operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
         }
       }
-      else if(!Keyword.INT.toString().equals(op1Type) || !Keyword.INT.toString().equals(op2Type)) {
-        if(Keyword.NULL.toString().equals(op1Type) && !ParserUtils.isPrimitiveType(op2Type)) {      // NOSONAR
-          // Then we are comparing an object to null
-          // employee == null
-        }
-        else {
-          operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
-        }
+      else if(Keyword.NULL.toString().equals(op1Type) && !ParserUtils.isPrimitiveType(op2Type)) {      // NOSONAR
+        // Then we are comparing an object to null
+        // employee == null
+      }
+      else if(!ParserUtils.isPrimitiveType(op1Type) || !ParserUtils.isPrimitiveType(op2Type)) {
+        operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
       }
 
       tempType = Keyword.BOOL.toString();
@@ -1150,6 +1165,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               type,
               SymbolUtils.formatMethodText(symbols, methodSymbol)));
+    }
+  }
+
+  private void semanticIf() {
+    SAR booleanSar = sas.pop();
+    Symbol booleanSymbol = symbols.get(booleanSar.getSymbolId());
+    String type = SymbolUtils.getSymbolType(booleanSymbol);
+
+    if(!Keyword.BOOL.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : \'%s\' statement requires type \'%s\' found \'%s(%s)\'",
+              booleanSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.IF.toString(),
+              Keyword.BOOL.toString(),
+              Keyword.IF.toString(),
+              type));
     }
   }
 
@@ -1712,22 +1743,50 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitStatement(CclGrammarParser.StatementContext ctx) {
-    super.visitStatement(ctx);
     String text = getChildText(ctx);
     
     if(Keyword.PRINT.toString().equals(text)) {
+      super.visitStatement(ctx);
       print();              // Semantic call #print
     }
     if(Keyword.READ.toString().equals(text)) {
+      super.visitStatement(ctx);
       read();               // Semantic call #read
     }
     if(Keyword.RETURN.toString().equals(text)) {
+      super.visitStatement(ctx);
       semanticReturn();     // Semantic call #return
     }
-    
+    if(Keyword.IF.toString().equals(text)) {
+      ifStatement(ctx);
+    }
+    else {
+      super.visitStatement(ctx);
+    }
+
     endOfExpression();      // Clear the operator stack
     
     return null;
+  }
+
+  /**
+   * Moved the logic for the 'if' statement into its own method
+   *
+   * @param ctx   The 'if' statement context
+   */
+  private void ifStatement(CclGrammarParser.StatementContext ctx) {
+    ParseTree child;
+    Iterator<ParseTree> childIter = ctx.children.iterator();
+    while(!((child = childIter.next()) instanceof CclGrammarParser.StatementContext)) {
+      child.accept(this);
+    }
+    semanticIf();         // Semantic call #if
+
+    // Visit 'if' statement and 'else' statement if one exists
+    ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.StatementContext)
+            .map(context -> (CclGrammarParser.StatementContext)context)
+            .forEach(this::visitStatement);
   }
 
   @Override

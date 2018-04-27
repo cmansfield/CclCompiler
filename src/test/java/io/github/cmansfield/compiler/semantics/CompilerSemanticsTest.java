@@ -152,7 +152,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("3 : Cannot perform assignment operation 'int number = null null'".equals(exceptions.get(1)));
+    assertTrue("3 : Cannot perform assignment operation 'int number = null'".equals(exceptions.get(1)));
   }
 
   @Test
@@ -241,6 +241,60 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isEmpty(exceptions));
   }
+
+  @Test
+  public void test_array_objectsInitComplex() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test41.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_if() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test42.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_if_badType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test43.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : 'if' statement requires type 'bool' found 'if(int)'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_if_badSecondType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test44.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : Cannot perform boolean operation 'bool (5 > 3) && null'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_if_accessingVarInScope() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test45.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue(exceptions.get(1).contains("8 : Could not find Symbol 'number' in scope"));
+  }
+
+
+
 
 
 

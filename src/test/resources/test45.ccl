@@ -1,8 +1,9 @@
 
 
 public void main() {
-    if(true == true) {
+    if(true) {
         int number = 5;
     }
-}
 
+    print(number);
+}

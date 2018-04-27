@@ -121,7 +121,7 @@ public class SemanticsVisitorTest {
             .build();
     List<Symbol> found = SymbolFilter.filter(symbolTable, filter);
     String scope = found.get(0).getScope();
-    String symbolId = visitor.traceScopeToFindSymbolId(text, SarType.IDENTIFIER, scope);
+    String symbolId = visitor.traceScopeToFindSymbolId(text, SarType.IDENTIFIER, scope, -1);
     Symbol symbol = symbolTable.get(symbolId);
 
     assertTrue(StringUtils.isNotBlank(symbolId));
@@ -134,7 +134,7 @@ public class SemanticsVisitorTest {
   public void test_traceScopeToFindSymbolId_notFound() throws IOException {
     BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test7.ccl");
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
-    String symbolId = visitor.traceScopeToFindSymbolId("something", SarType.IDENTIFIER, "g.D00001.C00001.M00001");
+    String symbolId = visitor.traceScopeToFindSymbolId("something", SarType.IDENTIFIER, "g.D00001.C00001.M00001", -1);
 
     assertNull(symbolId);
   }
@@ -142,7 +142,7 @@ public class SemanticsVisitorTest {
   @Test
   public void test_traceScopeToFindSymbolId_noText() throws IOException {
     SemanticsVisitor visitor = new SemanticsVisitor(null);
-    String symbolId = visitor.traceScopeToFindSymbolId("", SarType.IDENTIFIER, "g.D00001.C00001.M00001");
+    String symbolId = visitor.traceScopeToFindSymbolId("", SarType.IDENTIFIER, "g.D00001.C00001.M00001", -1);
 
     assertNotNull(symbolId);
     assertTrue(StringUtils.isBlank(symbolId));
@@ -162,7 +162,7 @@ public class SemanticsVisitorTest {
             .build();
     List<Symbol> found = SymbolFilter.filter(symbolTable, filter);
     String scope = found.get(0).getScope();
-    String symbolId = visitor.traceScopeToFindSymbolId(text, SarType.IDENTIFIER, scope);
+    String symbolId = visitor.traceScopeToFindSymbolId(text, SarType.IDENTIFIER, scope, -1);
     Symbol symbol = symbolTable.get(symbolId);
 
     assertNotNull(symbol);

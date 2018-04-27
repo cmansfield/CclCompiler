@@ -1,0 +1,7 @@
+
+
+public void main() {
+    if(5) {
+        print('a');
+    }
+}
