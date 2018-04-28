@@ -1,0 +1,11 @@
+
+
+public void main() {
+    while(true) {
+        {
+            int number = 5;
+        }
+    }
+
+    print(number);
+}

@@ -1,8 +1,8 @@
 
 
 public void main() {
-    if(true == true) {
-        int number = 5;
+    for(int i = 0; i < 10; i = i + 1) {
+        print(i);
     }
 }
 

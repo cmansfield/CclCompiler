@@ -1,0 +1,7 @@
+
+
+public void main() {
+    while(true == true && 2 < 4) {
+        int number = 5;
+    }
+}

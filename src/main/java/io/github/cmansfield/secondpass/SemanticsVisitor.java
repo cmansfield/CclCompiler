@@ -962,7 +962,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * required SARs from the SAS for that operation 
    */
   private void endOfExpression() {
-    while(CollectionUtils.isNotEmpty(operatorStack)) {
+    while(CollectionUtils.isNotEmpty(operatorStack) && !"(".equals(getChildText(operatorStack.peek()))) {
       evaluateOperator(operatorStack.pop());
     }
   }
@@ -1168,6 +1168,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
   }
 
+  /**
+   * #if
+   * This will pop off the top SAR from the SAS and ensure it's a boolean type
+   */
   private void semanticIf() {
     SAR booleanSar = sas.pop();
     Symbol booleanSymbol = symbols.get(booleanSar.getSymbolId());
@@ -1180,6 +1184,26 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               Keyword.IF.toString(),
               Keyword.BOOL.toString(),
               Keyword.IF.toString(),
+              type));
+    }
+  }
+
+  /**
+   * #while
+   * This will pop off the top SAR from the SAS and ensure it's a boolean type
+   */
+  private void semanticWhile() {
+    SAR booleanSar = sas.pop();
+    Symbol booleanSymbol = symbols.get(booleanSar.getSymbolId());
+    String type = SymbolUtils.getSymbolType(booleanSymbol);
+
+    if(!Keyword.BOOL.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : \'%s\' statement requires type \'%s\' found \'%s(%s)\'",
+              booleanSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.WHILE.toString(),
+              Keyword.BOOL.toString(),
+              Keyword.WHILE.toString(),
               type));
     }
   }
@@ -1390,33 +1414,56 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(ctx.children == null || ctx.children.isEmpty()) {
       throw new IllegalArgumentException("[Compiler Bug] There must be child nodes at this point in the tree");
     }
-    SymbolKind symbolKind = SymbolKind.UNKNOWN;
-    String symbolId;
-    String scopeOrig = scope;
     ParseTree child = ctx.getChild(0);
 
     if("{".equals(child.getText())) {
-      symbolKind = SymbolKind.BLOCK;
+      blockStatement(ctx);
     }
     else if(Keyword.FOR.toString().equals(child.getText())) {
-      symbolKind = SymbolKind.FOR;
+      forStatement(ctx);
     }
-
-    if(symbolKind == SymbolKind.UNKNOWN) {
+    else {
       throw new IllegalStateException(
               String.format("[Compiler Bug] Unknown statement \"%s\" found", StringUtils.isBlank(child.getText()) ? "" : child.getText()));
     }
 
-    symbolId = SymbolIdGenerator.generateId(symbolKind);
+    return null;
+  }
+
+  /**
+   *
+   *
+   * @param ctx
+   */
+  private void forStatement(CclGrammarParser.StatementWithScopeContext ctx) {
+    String scopeOrig = scope;
+    String symbolId = SymbolIdGenerator.generateId(SymbolKind.FOR);
     scope = scope + "." + symbolId;
 
     Data data = new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
-    addNewSymbol(symbolId, symbolKind, scopeOrig, data, symbolId);
+    addNewSymbol(symbolId, SymbolKind.FOR, scopeOrig, data, symbolId);
+
+    // TODO - Change this
+    super.visitStatementWithScope(ctx);
+
+    scope = scopeOrig;
+  }
+
+  /**
+   *
+   *
+   * @param ctx
+   */
+  private void blockStatement(CclGrammarParser.StatementWithScopeContext ctx) {
+    String scopeOrig = scope;
+    String symbolId = SymbolIdGenerator.generateId(SymbolKind.BLOCK);
+    scope = scope + "." + symbolId;
+
+    Data data = new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
+    addNewSymbol(symbolId, SymbolKind.BLOCK, scopeOrig, data, symbolId);
 
     super.visitStatementWithScope(ctx);
     scope = scopeOrig;
-
-    return null;
   }
 
   @Override
@@ -1760,6 +1807,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(Keyword.IF.toString().equals(text)) {
       ifStatement(ctx);
     }
+    if(Keyword.WHILE.toString().equals(text)) {
+      whileStatement(ctx);
+    }
     else {
       super.visitStatement(ctx);
     }
@@ -1767,6 +1817,23 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     endOfExpression();      // Clear the operator stack
     
     return null;
+  }
+
+  /**
+   * Moved the logic for the 'while' statement into its own method
+   *
+   * @param ctx   The 'while' statement context
+   */
+  private void whileStatement(CclGrammarParser.StatementContext ctx) {
+    ParseTree child;
+    Iterator<ParseTree> childIter = ctx.children.iterator();
+    while(!((child = childIter.next()) instanceof CclGrammarParser.StatementContext)) {
+      child.accept(this);
+    }
+    semanticWhile();         // Semantic call #while
+
+    // Visit 'while' statement
+    child.accept(this);
   }
 
   /**

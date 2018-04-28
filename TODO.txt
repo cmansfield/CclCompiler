@@ -4,8 +4,8 @@ TODO List
         Add jackson deserialization
 
     Semantics
-        #while
         #for
+        #ternary
         #spawn
         #block
         #lock

@@ -293,8 +293,47 @@ public class CompilerSemanticsTest {
     assertTrue(exceptions.get(1).contains("8 : Could not find Symbol 'number' in scope"));
   }
 
+  @Test
+  public void test_while() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test46.ccl");
 
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
 
+  @Test
+  public void test_fail_while_badType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test47.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : 'while' statement requires type 'bool' found 'while(int)'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_while_badSecondType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test48.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : Cannot perform boolean operation 'bool (5 > 3) && string Hello'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_while_accessingVarInScope() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test49.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue(exceptions.get(1).contains("10 : Could not find Symbol 'number' in scope"));
+  }
 
 
 

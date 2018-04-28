@@ -1,0 +1,7 @@
+
+
+public void main() {
+    while(5) {
+        print('a');
+    }
+}
