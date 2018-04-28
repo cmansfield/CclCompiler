@@ -1,0 +1,7 @@
+
+
+public void main() {
+    for(true; 10; true) {
+        print(i);
+    }
+}

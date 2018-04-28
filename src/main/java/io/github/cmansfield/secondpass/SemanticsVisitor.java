@@ -1209,6 +1209,29 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * #for
+   * Semantic 'for' will check to make sure the second expression of a for-loop
+   * is a boolean expression
+   */
+  private void semanticFor() {
+    SAR booleanSar = sas.pop();
+    Symbol booleanSymbol = symbols.get(booleanSar.getSymbolId());
+    String type = SymbolUtils.getSymbolType(booleanSymbol);
+
+    if(!Keyword.BOOL.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : The second expression of a \'%s-loop\' must be of type \'%s\', found \'%s( ; %s; )\'",
+              booleanSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.FOR.toString(),
+              Keyword.BOOL.toString(),
+              Keyword.FOR.toString(),
+              type));
+    }
+
+    sas.push(booleanSar);
+  }
+
+  /**
    * #newObject
    * This semantic call will pop a TYPE sar off of the sas and a argList sar if one exists
    * After it will check to make sure the constructor exists and then create a new constructor
@@ -1431,9 +1454,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * Moved the logic for the 'for' statement into its own method
    *
-   *
-   * @param ctx
+   * @param ctx   The 'for' statement context
    */
   private void forStatement(CclGrammarParser.StatementWithScopeContext ctx) {
     String scopeOrig = scope;
@@ -1443,16 +1466,29 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Data data = new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
     addNewSymbol(symbolId, SymbolKind.FOR, scopeOrig, data, symbolId);
 
-    // TODO - Change this
-    super.visitStatementWithScope(ctx);
+    boolean isSecondSemicolon = false;
+    for(ParseTree child : ctx.children) {
+      child.accept(this);
+      endOfExpression();
 
+      if(";".equals(child.getText())) {
+        if(!isSecondSemicolon) {
+          isSecondSemicolon = true;
+        }
+        else {
+          // Check to make sure the second for-loop expression is a
+          // boolean type
+          semanticFor();         // Semantic call #for
+        }
+      }
+    }
     scope = scopeOrig;
   }
 
   /**
+   * Moved the logic for a block statement into its own method
    *
-   *
-   * @param ctx
+   * @param ctx   A block statement context
    */
   private void blockStatement(CclGrammarParser.StatementWithScopeContext ctx) {
     String scopeOrig = scope;
@@ -1796,18 +1832,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       super.visitStatement(ctx);
       print();              // Semantic call #print
     }
-    if(Keyword.READ.toString().equals(text)) {
+    else if(Keyword.READ.toString().equals(text)) {
       super.visitStatement(ctx);
       read();               // Semantic call #read
     }
-    if(Keyword.RETURN.toString().equals(text)) {
+    else if(Keyword.RETURN.toString().equals(text)) {
       super.visitStatement(ctx);
       semanticReturn();     // Semantic call #return
     }
-    if(Keyword.IF.toString().equals(text)) {
+    else if(Keyword.IF.toString().equals(text)) {
       ifStatement(ctx);
     }
-    if(Keyword.WHILE.toString().equals(text)) {
+    else if(Keyword.WHILE.toString().equals(text)) {
       whileStatement(ctx);
     }
     else {

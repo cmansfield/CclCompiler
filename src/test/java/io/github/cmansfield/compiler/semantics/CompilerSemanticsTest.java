@@ -335,6 +335,77 @@ public class CompilerSemanticsTest {
     assertTrue(exceptions.get(1).contains("10 : Could not find Symbol 'number' in scope"));
   }
 
+  @Test
+  public void test_for() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test50.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_for_nonAssignmentFirstExpression() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test56.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_for_missingFirstExpression() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test51.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_for_missingLastExpression() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test52.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_for_missingSecondExpression() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test53.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("Unable to complete the first pass at this time".equals(exceptions.get(0)));
+  }
+
+  @Test
+  public void test_fail_for_wrongSecondExpressionType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test54.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : The second expression of a 'for-loop' must be of type 'bool', found 'for( ; int; )'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_for_wrongSecondExpressionTypeMasked() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test55.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : The second expression of a 'for-loop' must be of type 'bool', found 'for( ; int; )'".equals(exceptions.get(1)));
+  }
+
+
+
 
 
   // TODO - Complete this mega compile file

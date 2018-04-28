@@ -32,9 +32,9 @@ parameter : type name (arrayDeclaration)? ;
 
 constructorDeclaration : modifier? methodName '(' parameterList? ')' methodBody ;
 
-methodBody : '{' (variableDeclaration | statement)* '}' ;
+methodBody : '{' (variableDeclaration ';' | statement)* '}' ;
 
-variableDeclaration : type name (arrayDeclaration)? (assignmentOperation)? ';' ;
+variableDeclaration : type name (arrayDeclaration)? (assignmentOperation)? ;
 
 statement 
     : IF invokeOperator expression invokeOperatorEnd statement (ELSE statement)?
@@ -51,9 +51,9 @@ statement
     ;
     
 statementWithScope 
-    : FOR invokeOperator (variableDeclaration | expression ';' | ';') expression? ';' expression? invokeOperatorEnd
+    : FOR invokeOperator (variableDeclaration | expression)? ';' expression ';' expression? invokeOperatorEnd
       statement
-    | '{' (statement | variableDeclaration)* '}'
+    | '{' (statement | variableDeclaration ';')* '}'
     ;
 
 assignmentExpression 
