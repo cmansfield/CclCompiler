@@ -404,7 +404,56 @@ public class CompilerSemanticsTest {
     assertTrue("4 : The second expression of a 'for-loop' must be of type 'bool', found 'for( ; int; )'".equals(exceptions.get(1)));
   }
 
+  @Test
+  public void test_ternary() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test57.ccl");
 
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_ternary_complex() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test58.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_ternary_misMatchingTypes() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test59.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("5 : Ternary expressions must return the same type, found 'bool ? string : int'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_ternary_nonBoolFirstExpression() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test60.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : The first ternary expression must be type 'bool', found 'int ? string : string'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_ternary_badAssign() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test61.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("5 : Cannot perform assignment operation 'int number = string bool ? string : string'".equals(exceptions.get(1)));
+  }
 
 
 

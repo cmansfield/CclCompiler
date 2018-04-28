@@ -6,6 +6,7 @@ import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
@@ -13,6 +14,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.parser.Keyword;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.CommonToken;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -1189,6 +1191,67 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * #ternary
+   * The method will pop off a boolean, if, and else SARs from the SAS and check
+   * to make sure they are of the expected types
+   */
+  private void ternary() {
+    SAR elseSar = sas.pop();
+    SAR ifSar = sas.pop();
+    SAR booleanSar = sas.pop();
+
+    Symbol booleanSymbol = symbols.get(booleanSar.getSymbolId());
+    Symbol ifSymbol = symbols.get(ifSar.getSymbolId());
+    Symbol elseSymbol = symbols.get(elseSar.getSymbolId());
+
+    String type = SymbolUtils.getSymbolType(booleanSymbol);
+    String ifType = SymbolUtils.getSymbolType(ifSymbol);
+    String elseType = SymbolUtils.getSymbolType(elseSymbol);
+
+    if(StringUtils.isBlank(ifType) || StringUtils.isBlank(elseType)) {
+      throw new IllegalStateException("[Compiler Bug] Ternary types should not be blank");
+    }
+    if(!Keyword.BOOL.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : The first ternary expression must be type \'%s\', found \'%s ? %s : %s\'",
+              elseSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.BOOL.toString(),
+              type,
+              ifType,
+              elseType));
+    }
+    if(!ifType.equals(elseType)) {
+      throw new IllegalStateException(String.format(
+              "%s : Ternary expressions must return the same type, found \'%s ? %s : %s\'",
+              elseSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.BOOL.toString(),
+              ifType,
+              elseType));
+    }
+
+    Symbol tempSymbol = addNewSymbol(
+            String.format("%s ? %s : %s", type, ifType, elseType),
+            SymbolKind.TEMPORARY,
+            scope,
+            new DataBuilder()
+                    .parameter(booleanSymbol.getSymbolId())
+                    .parameter(ifSymbol.getSymbolId())
+                    .parameter(elseSymbol.getSymbolId())
+                    .isTypeAnArray(false)
+                    .type(ifType)
+                    .build());
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY,
+            tempSymbol.getSymbolId(),
+            tempSymbol.getText(),
+            booleanSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
+    tempSar.addSymbolId(booleanSymbol.getSymbolId());
+    tempSar.addSymbolId(ifSymbol.getSymbolId());
+    tempSar.addSymbolId(elseSymbol.getSymbolId());
+    sas.push(tempSar);
+  }
+
+  /**
    * #while
    * This will pop off the top SAR from the SAS and ensure it's a boolean type
    */
@@ -1490,7 +1553,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    *
    * @param ctx   A block statement context
    */
-  private void blockStatement(CclGrammarParser.StatementWithScopeContext ctx) {
+  private void blockStatement(ParserRuleContext ctx) {
     String scopeOrig = scope;
     String symbolId = SymbolIdGenerator.generateId(SymbolKind.BLOCK);
     scope = scope + "." + symbolId;
@@ -1498,7 +1561,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Data data = new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
     addNewSymbol(symbolId, SymbolKind.BLOCK, scopeOrig, data, symbolId);
 
-    super.visitStatementWithScope(ctx);
+    for(ParseTree child : ctx.children) {
+      child.accept(this);
+    }
+
     scope = scopeOrig;
   }
 
@@ -1918,6 +1984,36 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     if(ctx.children.get(0) instanceof CclGrammarParser.ArrayOperatorContext) {
       array();              // Semantic call #array
+    }
+
+    return null;
+  }
+
+  @Override
+  public Object visitExpression(CclGrammarParser.ExpressionContext ctx) {
+
+    // Then this is a ternary expression
+    if(ctx.getChild(0) instanceof CclGrammarParser.ExpressionContext) {
+      // TODO - Refactor this to avoid creating a new context
+      CommonToken commonToken = new CommonToken(CclGrammarParser.BLOCK);
+      commonToken.setText("(");
+      CclGrammarParser.AssignmentOperationContext assignContext = new CclGrammarParser.AssignmentOperationContext(null, 0);
+      assignContext.children = new ArrayList<>();
+      assignContext.children.add(new TerminalNodeImpl(commonToken));
+      pushOperatorOntoStack(assignContext);
+
+      for(ParseTree child : ctx.children) {
+        child.accept(this);
+        endOfExpression();
+      }
+
+      visitInvokeOperatorEnd(null);
+      ternary();       // Semantic #ternary
+
+      endOfExpression();
+    }
+    else {
+      super.visitExpression(ctx);
     }
 
     return null;

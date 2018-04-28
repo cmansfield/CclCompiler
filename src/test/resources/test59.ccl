@@ -1,0 +1,6 @@
+
+
+public void main() {
+    bool isDefault = true;
+    string str = isDefault ? "Hello" : 10;
+}
