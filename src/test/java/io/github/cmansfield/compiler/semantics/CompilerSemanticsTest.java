@@ -455,6 +455,38 @@ public class CompilerSemanticsTest {
     assertTrue("5 : Cannot perform assignment operation 'int number = string bool ? string : string'".equals(exceptions.get(1)));
   }
 
+  @Test
+  public void test_spawn() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test62.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_spawn_badSetType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test63.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("12 : The set type of a spawned thread must be of type 'int', found 'spawn METHOD set bool'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_spawn_badSpawnType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test64.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("6 : Newly spawned threads must be supplied a 'METHOD', found 'INT_LIT'".equals(exceptions.get(1)));
+  }
+
+
 
 
   // TODO - Complete this mega compile file

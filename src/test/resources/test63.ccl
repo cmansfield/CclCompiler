@@ -7,7 +7,7 @@ public class MyClass {
 
 public void main() {
     MyClass d = new MyClass();
-    int i = 20;
+    bool i = true;
 
-    spawn d.go(i) set i;
+    spawn d.go(5) set i;
 }

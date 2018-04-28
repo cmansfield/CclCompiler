@@ -1295,6 +1295,39 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * #spawn
+   * Semantic spawn to make sure the correct types are being used to spawn a
+   * new thread
+   */
+  private void spawn() {
+    SAR threadStatusSar = sas.pop();
+    SAR methodSar = sas.pop();
+
+    Symbol threadSymbol = symbols.get(threadStatusSar.getSymbolId());
+    Symbol methodSymbol = symbols.get(methodSar.getSymbolId());
+
+    String type = SymbolUtils.getSymbolType(threadSymbol);
+
+    if(methodSymbol == null || methodSymbol.getSymbolKind() != SymbolKind.METHOD) {
+      throw new IllegalStateException(String.format(
+              "%s : Newly spawned threads must be supplied a \'%s\', found \'%s\'",
+              methodSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              SymbolKind.METHOD.toString(),
+              methodSymbol == null ? methodSar.getType() : methodSymbol.getSymbolKind()));
+    }
+    if(!Keyword.INT.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : The set type of a spawned thread must be of type \'%s\', found \'%s %s %s %s\'",
+              methodSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.INT.toString(),
+              Keyword.SPAWN.toString(),
+              methodSymbol.getSymbolKind(),
+              Keyword.SET.toString(),
+              type));
+    }
+  }
+
+  /**
    * #newObject
    * This semantic call will pop a TYPE sar off of the sas and a argList sar if one exists
    * After it will check to make sure the constructor exists and then create a new constructor
@@ -1911,6 +1944,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     else if(Keyword.WHILE.toString().equals(text)) {
       whileStatement(ctx);
+    }
+    else if(Keyword.SPAWN.toString().equals(text)) {
+      super.visitStatement(ctx);
+      spawn();     // Semantic call #spawn
     }
     else {
       super.visitStatement(ctx);

@@ -1,0 +1,7 @@
+
+
+public void main() {
+    int i = 20;
+
+    spawn 2 + 3 set i;
+}

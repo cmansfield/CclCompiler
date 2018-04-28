@@ -4,10 +4,9 @@ TODO List
         Add jackson deserialization
 
     Semantics
-        #spawn
-        #block
         #lock
-        #release
+        #unlock
+        #block
         #imports
         #templates
 
