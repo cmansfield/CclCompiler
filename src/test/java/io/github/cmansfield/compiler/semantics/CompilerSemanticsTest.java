@@ -486,7 +486,25 @@ public class CompilerSemanticsTest {
     assertTrue("6 : Newly spawned threads must be supplied a 'METHOD', found 'INT_LIT'".equals(exceptions.get(1)));
   }
 
+  @Test
+  public void test_lock() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test65.ccl");
 
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_lock_badMutexType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test66.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("5 : Mutex locks must be of type 'int', found 'bool'".equals(exceptions.get(1)));
+  }
 
 
   // TODO - Complete this mega compile file

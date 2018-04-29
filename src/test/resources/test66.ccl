@@ -1,6 +1,6 @@
 
 
 public void main() {
-    int mutex;
+    bool mutex;
     lock mutex;
 }

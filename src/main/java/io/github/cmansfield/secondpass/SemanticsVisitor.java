@@ -1328,6 +1328,32 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * #lock
+   * This will check to make sure the mutex lock is an integer
+   */
+  private void lock() {
+    SAR mutexSar = sas.pop();
+    Symbol symbol = symbols.get(mutexSar.getSymbolId());
+    String type = SymbolUtils.getSymbolType(symbol);
+
+    if(!Keyword.INT.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : Mutex locks must be of type \'%s\', found \'%s\'",
+              mutexSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.INT.toString(),
+              type));
+    }
+  }
+
+  /**
+   * #unlock
+   * This will check to make sure the mutex unlock is an integer
+   */
+  private void unlock() {
+    lock();     // Semantic check for #unlock is the same as #lock
+  }
+
+  /**
    * #newObject
    * This semantic call will pop a TYPE sar off of the sas and a argList sar if one exists
    * After it will check to make sure the constructor exists and then create a new constructor
@@ -1948,6 +1974,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     else if(Keyword.SPAWN.toString().equals(text)) {
       super.visitStatement(ctx);
       spawn();     // Semantic call #spawn
+    }
+    else if(Keyword.LOCK.toString().equals(text)) {
+      super.visitStatement(ctx);
+      lock();     // Semantic call #lock
+    }
+    else if(Keyword.UNLOCK.toString().equals(text)) {
+      super.visitStatement(ctx);
+      unlock();     // Semantic call #unlock
     }
     else {
       super.visitStatement(ctx);
