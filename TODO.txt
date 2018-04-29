@@ -4,7 +4,6 @@ TODO List
         Add jackson deserialization
 
     Semantics
-        #block
         #imports
         #templates
 

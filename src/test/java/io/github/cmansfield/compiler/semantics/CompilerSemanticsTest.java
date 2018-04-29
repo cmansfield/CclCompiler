@@ -506,6 +506,34 @@ public class CompilerSemanticsTest {
     assertTrue("5 : Mutex locks must be of type 'int', found 'bool'".equals(exceptions.get(1)));
   }
 
+  @Test
+  public void test_block() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test67.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_block_nestedScope() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test68.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_block_notInMain() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test69.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("5 : The 'block' statement can only be used method 'main'".equals(exceptions.get(1)));
+  }
 
   // TODO - Complete this mega compile file
   @Test (enabled = false)

@@ -1,0 +1,13 @@
+
+
+public void main() {
+    {
+        if(true) {
+            while(true) {
+                {
+                    block();
+                }
+            }
+        }
+    }
+}

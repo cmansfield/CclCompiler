@@ -13,7 +13,7 @@ public void main() {
 	string employeeNames[] = new string[NUMBER_OF_EMPLOYEES];
 	Employee employees[] = EmployeeManager.getEmployees();
 	
-	for(int i = 0; i < NUMBER_OF_EMPLOYEES; i + 1) {
+	for(int i = 0; i < NUMBER_OF_EMPLOYEES; i = i + 1) {
 		employeeNames[i] = employees[i].getName();
 	}
 
@@ -44,7 +44,7 @@ public class Runner {
 	}
 	
 	public void run() {
-		for(int i = 0; i < 10; i + 1) {
+		for(int i = 0; i < 10; i = i + 1) {
 			lock mutex;
 			print("Hello from thread ");
 			print(theadNum);
@@ -69,8 +69,9 @@ public void main() {
 ```
 ****
 **TODO**
-- Add jackson deserialization for the Symbol class
-- Add more unit tests for syntax
+- Add jackson deserialization 
+    - Symbol class
+    - iCode class
 - Begin working on the compiler second pass
 	- generate template classes
 	- iCode
@@ -159,7 +160,7 @@ statement::
 	| ‘print’ ‘(‘ expression ‘)’ ‘;’
 	| ‘read’ ‘(‘ expression ‘)’ ‘;’
 	| ‘spawn’ expression ‘set’ IDENTIFIER ‘;’
-	| ‘block’ ‘;’
+	| ‘block’ ‘(‘ ‘)’ ‘;’
 	| ‘lock’ IDENTIFIER ‘;’
 	| ‘unlock’ IDENTIFIER ‘;’
 	;

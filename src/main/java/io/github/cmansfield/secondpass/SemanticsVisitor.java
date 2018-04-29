@@ -1354,6 +1354,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * #block
+   * Will block the main thread until all other threads have completed
+   */
+  private void threadBlock(int lineNumber) {
+    String mainSymbolId = findSymbolId(Keyword.MAIN.toString(), SymbolKind.MAIN);
+
+    if(!scope.contains(mainSymbolId)) {
+      throw new IllegalStateException(String.format(
+              "%s : The \'%s\' statement can only be used method \'%s\'",
+              lineNumber,
+              Keyword.BLOCK.toString(),
+              Keyword.MAIN.toString()));
+    }
+  }
+
+  /**
    * #newObject
    * This semantic call will pop a TYPE sar off of the sas and a argList sar if one exists
    * After it will check to make sure the constructor exists and then create a new constructor
@@ -1973,15 +1989,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     else if(Keyword.SPAWN.toString().equals(text)) {
       super.visitStatement(ctx);
-      spawn();     // Semantic call #spawn
+      spawn();              // Semantic call #spawn
     }
     else if(Keyword.LOCK.toString().equals(text)) {
       super.visitStatement(ctx);
-      lock();     // Semantic call #lock
+      lock();               // Semantic call #lock
     }
     else if(Keyword.UNLOCK.toString().equals(text)) {
       super.visitStatement(ctx);
-      unlock();     // Semantic call #unlock
+      unlock();             // Semantic call #unlock
+    }
+    else if(Keyword.BLOCK.toString().equals(text)) {
+      super.visitStatement(ctx);
+      threadBlock(ctx.start.getLine());        // Semantic call #block
     }
     else {
       super.visitStatement(ctx);
