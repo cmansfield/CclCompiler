@@ -1,5 +1,6 @@
 
 
 public static void main() {
-
+    bool isTrue = true;
+    bool isTest = !isTrue;
 }

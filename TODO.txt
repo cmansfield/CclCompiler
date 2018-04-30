@@ -17,6 +17,4 @@ TODO List
             compiler's exception list
 
     SemanticsVisitor
-        Fix template classes/methods on the second pass
         Make sure brace initializer work
-        Include the NOT operator '!'

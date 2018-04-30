@@ -689,6 +689,26 @@ public class CompilerSemanticsTest {
     assertEquals(exceptions.size(), 2);
     assertTrue(exceptions.get(1).contains("5 : CLASS 'Test' is private and cannot be accessed from scope"));
   }
+
+  @Test
+  public void test_not() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test88.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_not_badType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test89.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : Boolean 'not (!)' operator must preceed a boolean value, found type 'int'".equals(exceptions.get(1)));
+  }
   
   // TODO - Complete this mega compile file
   @Test (enabled = false)

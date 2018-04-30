@@ -1443,6 +1443,42 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * #not
+   * Semantic 'not', this will pop off the top SAR and ensure it's a boolean and then
+   * create a new temporary boolean SAR to be placed on the SAS
+   */
+  private void not() {
+    SAR booleanSar = sas.pop();
+    Symbol symbol = symbols.get(booleanSar.getSymbolId());
+    String type = SymbolUtils.getSymbolType(symbol);
+
+    if(!Keyword.BOOL.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : Boolean \'not (%s)\' operator must preceed a boolean value, found type \'%s\'",
+              booleanSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.NOT,
+              type));
+    }
+
+    Symbol tempSymbol = addNewSymbol(
+            Keyword.BOOL.toString(),
+            SymbolKind.TEMPORARY,
+            scope,
+            new DataBuilder()
+                    .parameter(symbol.getSymbolId())
+                    .type(Keyword.BOOL.toString())
+                    .isTypeAnArray(false)
+                    .build());
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY,
+            tempSymbol.getSymbolId(),
+            tempSymbol.getText(),
+            booleanSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
+    tempSar.addSymbolId(symbol.getSymbolId());
+    sas.push(tempSar);
+  }
+  
+  /**
    * #spawn
    * Semantic spawn to make sure the correct types are being used to spawn a
    * new thread
@@ -2240,9 +2276,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitExpression(CclGrammarParser.ExpressionContext ctx) {
-
-    // Then this is a ternary expression
+    
+    if(Keyword.NOT.toString().equals(getChildText(ctx))) {
+      super.visitExpression(ctx);
+      not();            // Semantic #not
+    }
     if(ctx.getChild(0) instanceof CclGrammarParser.ExpressionContext) {
+      // Then this is a ternary expression
       // TODO - Refactor this to avoid creating a new context
       CommonToken commonToken = new CommonToken(CclGrammarParser.BLOCK);
       commonToken.setText("(");
