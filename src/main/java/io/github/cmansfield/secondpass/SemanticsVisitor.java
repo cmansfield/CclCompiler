@@ -900,16 +900,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     sas.push(tempSar);
   }
 
-  private void operatorException(int lineNumber, String operation, String operator, String op1Type, String op1Text, String op2Type, String op2Text) {
+  private void operatorException(int lineNumber, String operation, String operator, String op1Type, String op2Type) {
     throw new IllegalStateException(String.format(
-            "%s : Cannot perform %s operation \'%s%s %s %s%s\'",
+            "%s : Cannot perform %s operation \'%s %s %s\'",
             lineNumber,
             operation,
             op2Type,
-            op2Type.equals(op2Text) ? "" : " " + op2Text,
             operator,
-            op1Type,
-            op1Type.equals(op1Text) ? "" : " " + op1Text));
+            op1Type));
   }
   
   /**
@@ -948,7 +946,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     if(operatorCtx instanceof CclGrammarParser.MathOperationContext) {
       if(!Keyword.INT.toString().equals(op1Type) || !Keyword.INT.toString().equals(op2Type)) {
-        operatorException(operatorCtx.start.getLine(), "math", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+        operatorException(operatorCtx.start.getLine(), "math", operator, op1Type, op2Type);
       }
       
       tempType = Keyword.INT.toString();
@@ -956,7 +954,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     else if(operatorCtx instanceof CclGrammarParser.BooleanOperationContext) {
       if(Keyword.AND.toString().equals(operator) || Keyword.OR.toString().equals(operator)) {
         if(!Keyword.BOOL.toString().equals(op1Type) || !Keyword.BOOL.toString().equals(op2Type)) {
-          operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+          operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op2Type);
         }
       }
       else if(Keyword.NULL.toString().equals(op1Type) && !ParserUtils.isPrimitiveType(op2Type)) {      // NOSONAR
@@ -964,7 +962,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
         // employee == null
       }
       else if(!ParserUtils.isPrimitiveType(op1Type) || !ParserUtils.isPrimitiveType(op2Type)) {
-        operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+        operatorException(operatorCtx.start.getLine(), "boolean", operator, op1Type, op2Type);
       }
 
       tempType = Keyword.BOOL.toString();
@@ -977,7 +975,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
           sas.push(operand2);
           return;
         }
-        operatorException(operatorCtx.start.getLine(), "assignment", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+        operatorException(operatorCtx.start.getLine(), "assignment", operator, op1Type, op2Type);
       }
       if(op2Symbol.getData().getAccessModifiers().contains(AccessModifier.CONST)
               && !(operatorCtx.getParent() instanceof CclGrammarParser.FieldDeclarationContext)) {
@@ -1034,7 +1032,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       
       if(logger.isTraceEnabled()) {
         logger.trace("Operator Stack after adding \'{}\': [{}]",
-                getChildText(operatorCtx),
+                operator,
                 operatorStack.stream()
                         .map(this::getChildText)
                         .collect(Collectors.joining(", ")));
@@ -1709,6 +1707,84 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     tempSar.addSymbolId(quantitySymbol.getSymbolId());
     sas.push(tempSar);
   }
+
+  /**
+   * #braceInitializer
+   * This will make sure each value in the brace initializer is of the same type and create a
+   * new array containing the supplied values
+   */
+  private void braceInitializer() {
+    // If the initializer is empty then it's the same as assigning a 'null' value
+    if(sas.peek().getType() != SarType.ARG_LIST) {
+      List<Symbol> found = SymbolFilter.filter(
+              symbols, 
+              new SymbolBuilder()
+                      .symbolKind(SymbolKind.SPECIAL_LIT)
+                      .text(Keyword.NULL.toString())
+                      .build());
+      Symbol nullSymbol;
+      if(CollectionUtils.isNotEmpty(found)) {
+        nullSymbol = found.get(0);
+      }
+      else {
+        nullSymbol = addNewSymbol(
+                Keyword.NULL.toString(),
+                SymbolKind.SPECIAL_LIT,
+                GLOBAL_SCOPE,
+                new DataBuilder()
+                        .accessModifier(AccessModifier.PUBLIC)
+                        .type(Keyword.NULL.toString())
+                        .build());
+      }
+      sas.push(new SAR(
+              SarType.LITERAL,
+              nullSymbol.getSymbolId(),
+              Keyword.NULL.toString(),
+              sas.peek().getLineNumber().orElse(DEFAULT_LINE_NUMBER)));
+      return;
+    }
+
+    SAR argListSar = sas.pop();
+    List<String> ids = argListSar.getSymbolIds();
+
+    List<String> valueTypes = ids.stream()
+            .map(symbols::get)
+            .map(SymbolUtils::getSymbolType)
+            .collect(Collectors.toList());
+    if(valueTypes.stream().distinct().count() > 1) {
+      throw new IllegalStateException(String.format(
+              "%s : Not all of the values in the brace initializer are the same type, found \'{%s}\'",
+              argListSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              valueTypes.stream().collect(Collectors.joining(", "))));
+    }
+    
+    // Create new type and quantity sars
+    sas.push(new SAR(
+            SarType.TYPE,
+            "",
+            valueTypes.get(0),
+            argListSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER)));
+    Symbol quantitySymbol = addNewSymbol(
+            Integer.toString(ids.size()), 
+            SymbolKind.INT_LIT, 
+            GLOBAL_SCOPE, 
+            new DataBuilder()
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .type(Keyword.INT.toString())
+                    .build());
+    sas.push(new SAR(
+            SarType.LITERAL,
+            quantitySymbol.getSymbolId(),
+            quantitySymbol.getText(),
+            argListSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER)));
+    newArray();
+    SAR tempArrSar = sas.peek();
+
+    // TODO - Assign each brace value into the temp array 
+
+    // Ensure the temp array is at the top of the sas at the end of this method
+    sas.push(tempArrSar);
+  }
   
   /*
   **************************************
@@ -1727,12 +1803,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String name = getNameWithoutVisiting(ctx);
     boolean isArray = isArray(ctx);
 
-    Data data = new DataBuilder()
-            .accessModifier(AccessModifier.PRIVATE)
-            .isTypeAnArray(isArray)
-            .type(type)
-            .build();
-    addNewSymbol(name, SymbolKind.LOCAL_VAR, scope, data);
+    addNewSymbol(
+            name, 
+            SymbolKind.LOCAL_VAR, 
+            scope, 
+            new DataBuilder()
+                    .accessModifier(AccessModifier.PRIVATE)
+                    .isTypeAnArray(isArray)
+                    .type(type)
+                    .build());
 
     getName(ctx);     // This adds the identifier to the SAS and verifies it
     traverseAssignmentOperation(ctx);
@@ -2283,7 +2362,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     if(ctx.getChild(0) instanceof CclGrammarParser.ExpressionContext) {
       // Then this is a ternary expression
-      // TODO - Refactor this to avoid creating a new context
       CommonToken commonToken = new CommonToken(CclGrammarParser.BLOCK);
       commonToken.setText("(");
       CclGrammarParser.AssignmentOperationContext assignContext = new CclGrammarParser.AssignmentOperationContext(null, 0);
@@ -2305,6 +2383,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       super.visitExpression(ctx);
     }
 
+    return null;
+  }
+
+  @Override
+  public Object visitBraceEnclosedInitializer(CclGrammarParser.BraceEnclosedInitializerContext ctx) {
+    super.visitBraceEnclosedInitializer(ctx);
+
+    braceInitializer();      // Semantic #braceInitializer
+    
     return null;
   }
 }

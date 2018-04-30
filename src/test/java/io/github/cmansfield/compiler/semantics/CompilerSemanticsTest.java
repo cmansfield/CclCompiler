@@ -174,7 +174,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("3 : Cannot perform assignment operation 'int number = null'".equals(exceptions.get(1)));
+    assertTrue("3 : Cannot perform assignment operation 'int = null'".equals(exceptions.get(1)));
   }
 
   @Test
@@ -241,7 +241,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("4 : Cannot perform assignment operation 'int[] numbers = bool[] new bool[]'".equals(exceptions.get(1)));
+    assertTrue(exceptions.get(1).contains("4 : Cannot perform assignment operation 'int[] = bool[]"));
   }
 
   @Test
@@ -252,7 +252,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("5 : Cannot perform assignment operation 'int[] numbers = bool true'".equals(exceptions.get(1)));
+    assertTrue("5 : Cannot perform assignment operation 'int[] = bool'".equals(exceptions.get(1)));
   }
 
   @Test
@@ -301,7 +301,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("4 : Cannot perform boolean operation 'bool (5 > 3) && null'".equals(exceptions.get(1)));
+    assertTrue("4 : Cannot perform boolean operation 'bool && null'".equals(exceptions.get(1)));
   }
 
   @Test
@@ -343,7 +343,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("4 : Cannot perform boolean operation 'bool (5 > 3) && string Hello'".equals(exceptions.get(1)));
+    assertTrue("4 : Cannot perform boolean operation 'bool && string'".equals(exceptions.get(1)));
   }
 
   @Test
@@ -474,7 +474,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("5 : Cannot perform assignment operation 'int number = string bool ? string : string'".equals(exceptions.get(1)));
+    assertTrue("5 : Cannot perform assignment operation 'int = string'".equals(exceptions.get(1)));
   }
 
   @Test
@@ -708,6 +708,35 @@ public class CompilerSemanticsTest {
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
     assertTrue("4 : Boolean 'not (!)' operator must preceed a boolean value, found type 'int'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_braceInitializer() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test90.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_braceInitializer_empty() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test91.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_braceInitializer_badType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test92.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : Not all of the values in the brace initializer are the same type, found '{int, int, bool, int}'".equals(exceptions.get(1)));
   }
   
   // TODO - Complete this mega compile file

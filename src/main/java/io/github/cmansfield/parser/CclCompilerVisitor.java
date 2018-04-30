@@ -77,15 +77,14 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
    */
   protected Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data, String symbolId) {
     Symbol symbol = new SymbolBuilder()
-            .scope(scope)
-            .text(identifier)
             .symbolKind(symbolKind)
+            .text(symbolKind == SymbolKind.TEMPORARY ? symbolId : identifier)
+            .scope(scope)
             .data(data)
             .build();
 
     if(symbolKind != SymbolKind.REFERENCE && symbols.containsValue(symbol)) {
-      // TODO - Revisit this, there is a good chance new Symbols should be created
-      if(symbol.getSymbolKind().isLiteral() || symbol.getSymbolKind() == SymbolKind.TEMPORARY) {
+      if(symbol.getSymbolKind().isLiteral()) {
         return symbols.get(symbols.getKey(symbol));
       }
       throw new IllegalStateException(String.format("There is already a %s with the name \'%s\' defined in the scope \'%s\'",

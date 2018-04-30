@@ -2,7 +2,6 @@ package io.github.cmansfield.firstpass.symbols;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
-import io.github.cmansfield.parser.Keyword;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -10,6 +9,7 @@ import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.parser.ParserUtils;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
+import io.github.cmansfield.parser.Keyword;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.stream.Collectors;
