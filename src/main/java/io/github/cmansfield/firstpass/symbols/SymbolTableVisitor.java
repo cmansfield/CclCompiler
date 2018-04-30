@@ -272,21 +272,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
   }
-
-  /**
-   * This will get the children from the context and then check for any template nodes 
-   * and return true if any are found
-   *
-   * @param ctx     The current context to search for any template nodes
-   * @return        Boolean, if template nodes were found
-   */
-  private boolean isTemplate(ParserRuleContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
-            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
-            .count() > 0;
-  }
-
+  
   /**
    * This will get the children from the context and then traverse any template nodes and
    * return a String List with all of the found template placeholders

@@ -137,9 +137,11 @@ modifier : MODIFIER ;
 
 type 
     : PRIMITIVE_TYPE
-    | className ;
+    | className declaredTemplateType? ;
 
 templatePlaceHolder : IDENTIFIER ;
+
+declaredTemplateType : '<' type '>' ;
 
 className : IDENTIFIER ;
 

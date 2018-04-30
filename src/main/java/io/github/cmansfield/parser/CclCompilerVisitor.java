@@ -11,8 +11,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.util.*;
 import java.util.stream.Collectors;
+import java.util.*;
 
 
 public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
@@ -29,11 +29,11 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
     this.symbols = symbols == null ? new DualHashBidiMap<>() : new DualHashBidiMap<>(symbols);
     this.scope = GLOBAL_SCOPE;
   }
-
+  
   public BidiMap<String, Symbol> getSymbols() {
     return symbols;
   }
-
+  
   /**
    * This will reset the scope to the new package and create a
    * new Symbol for the package if one does not already exist
@@ -367,6 +367,20 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
             .collect(Collectors.toList());
   }
 
+  /**
+   * This will get the children from the context and then check for any template nodes 
+   * and return true if any are found
+   *
+   * @param ctx     The current context to search for any template nodes
+   * @return        Boolean, if template nodes were found
+   */
+  protected boolean isTemplate(ParserRuleContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
+            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
+            .count() > 0;
+  }
+  
   @Override
   public Object visitParameterList(CclGrammarParser.ParameterListContext ctx) {
     return ctx.children.stream()

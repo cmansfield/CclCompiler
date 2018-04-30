@@ -272,6 +272,21 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   }
 
+  /**
+   * 
+   * 
+   * @param ctx
+   * @return
+   */
+  private List<String> getTemplateTypes(CclGrammarParser.DeclaredTemplateTypeContext ctx) {
+    if(ctx == null) {
+      return Collections.emptyList();
+    }
+    
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TypeContext)
+  }
+  
   /*
     **************************************
     *           Semantic methods
@@ -2052,6 +2067,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {
     String text = getChildText(ctx);
+    List<String> templateTypes = getTemplateTypes(
+            (CclGrammarParser.DeclaredTemplateTypeContext)ctx.children.stream()
+                    .filter(node -> node instanceof CclGrammarParser.DeclaredTemplateTypeContext)
+                    .findFirst()
+                    .orElse(null));
+    
     // Semantic call #typePush
     typePush(ctx, text);
     // Semantic call #typeExist

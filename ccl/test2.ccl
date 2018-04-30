@@ -1,5 +1,11 @@
 
 
+
+public class TemplateClass (T) {
+    public TemplateClass() {}
+}
+
 public static void main() {
-    int numbers[] = {3, 6, 9, 5};
+    //TemplateClass templateclass = new TemplateClass();          // Don't allow
+    TemplateClass<int> templateclass = new TemplateClass<int>();
 }

@@ -15,6 +15,3 @@ TODO List
     Compiler
         Create a new error listener for the SymbolTableVisitor to store syntax errors into 
             compiler's exception list
-
-    SemanticsVisitor
-        Make sure brace initializer work
