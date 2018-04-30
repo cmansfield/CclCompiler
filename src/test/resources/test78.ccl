@@ -1,0 +1,9 @@
+
+
+private static class TestClass {
+	public static int number = 5;
+}
+
+public static void main() {
+    int number = TestClass.number;
+}

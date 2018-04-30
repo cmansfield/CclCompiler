@@ -19,6 +19,6 @@ TODO List
 
     SemanticsVisitor
         Fix template classes/methods on the second pass
-        Create a method for checking accessModifiers
-        Double check AccessModifiers and ensure they are working correctly
+        Double check AccessModifiers for packages is working
+        Make sure brace initializer work
         Include the NOT operator '!'

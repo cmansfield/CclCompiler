@@ -1,0 +1,14 @@
+
+
+private class TestClass {
+	public int number = 5;
+
+	public TestClass() {}
+
+	public static void someMethod() {}
+}
+
+public static void main() {
+    TestClass testClass;
+    testClass.someMethod();
+}

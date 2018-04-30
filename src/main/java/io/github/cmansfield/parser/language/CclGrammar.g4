@@ -4,7 +4,7 @@ grammar CclGrammar;
 
 compilationUnit : importDeclaration* classDeclaration* mainDeclaration? classDeclaration* EOF ;
 
-mainDeclaration : modifier PRIMITIVE_TYPE MAIN '(' ')' methodBody ;
+mainDeclaration : modifier+ PRIMITIVE_TYPE MAIN '(' ')' methodBody ;
 
 importDeclaration : IMPORT IDENTIFIER ('.' IDENTIFIER)* ';' ;
 

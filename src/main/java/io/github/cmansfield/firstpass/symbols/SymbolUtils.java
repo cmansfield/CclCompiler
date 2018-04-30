@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.parser.Keyword;
 
 import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.*;
 
 import static io.github.cmansfield.parser.CclCompilerVisitor.GLOBAL_SCOPE;
@@ -26,6 +28,30 @@ public class SymbolUtils {
       return "";
     }
     return scope.substring(index + 1, scope.length());
+  }
+
+  /**
+   * This method will extract the package ID from a scope if one exists
+   *
+   * @param scope   The scope to search for a packageId
+   * @return        The package ID if found, empty String if not
+   */
+  public static String getPackageId(String scope) {
+    if(StringUtils.isBlank(scope) || GLOBAL_SCOPE.equals(scope)) {
+      return "";
+    }
+
+    final String regex = String.format(
+            "^%s\\.(%s[0-9]*+)",
+            GLOBAL_SCOPE,
+            SymbolKind.PACKAGE.getPrefix());
+    final Pattern pattern = Pattern.compile(regex);
+    final Matcher matcher = pattern.matcher(scope);
+
+    if(matcher.find() && matcher.groupCount() > 0) {
+      return matcher.group(1);
+    }
+    return "";
   }
 
   /**

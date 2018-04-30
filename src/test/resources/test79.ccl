@@ -1,0 +1,7 @@
+
+
+private static class TestClass {
+	public int number = 5;
+}
+
+public static void main() {}

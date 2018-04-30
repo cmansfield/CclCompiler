@@ -52,7 +52,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("11 : CONSTRUCTOR 'TestClass TestClass()' is private and cannot be accessed".equals(exceptions.get(1)));
+    assertTrue(exceptions.get(1).contains("11 : CONSTRUCTOR 'TestClass' is private and cannot be accessed from scope"));
   }
 
   @Test
@@ -123,7 +123,7 @@ public class CompilerSemanticsTest {
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
-    assertTrue("11 : METHOD 'int max()' is private and cannot be accessed".equals(exceptions.get(1)));
+    assertTrue(exceptions.get(1).contains("11 : METHOD 'max' is private and cannot be accessed from scope"));
   }
 
   @Test
@@ -133,6 +133,28 @@ public class CompilerSemanticsTest {
     assertNotNull(compiler);
     List<String> exceptions = compiler.getExceptions();
     assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_callInstanceMethodFromStaticContext() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test76.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("12 : Cannot access instance method 'someOtherMethod' from a static context".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_callStaticMethodFromInstance() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test77.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("13 : Cannot access static method 'someMethod' from instance 'testClass'".equals(exceptions.get(1)));
   }
 
   @Test
@@ -533,6 +555,110 @@ public class CompilerSemanticsTest {
     assertTrue(CollectionUtils.isNotEmpty(exceptions));
     assertEquals(exceptions.size(), 2);
     assertTrue("5 : The 'block' statement can only be used method 'main'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_class_constAccessModifier() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test70.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("3 : 'public const class TestClass' classes cannot have the access modifier 'const'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_method_constAccessModifier() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test71.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("6 : 'public const void someMethod' METHODs cannot have the access modifier 'const'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_constructor_constAccessModifier() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test72.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("6 : 'const TestClass TestClass' CONSTRUCTORs cannot have the access modifier 'const'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_main_validAccessModifiers() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test73.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_main_constAccessModifier() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test74.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("3 : 'public static const void main' main cannot have the access modifiers 'const' or 'private'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_main_privateAccessModifier() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test75.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("3 : 'private static void main' main cannot have the access modifiers 'const' or 'private'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_staticVariable() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test78.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_instanceVariableInStaticClass() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test79.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("4 : INSTANCE_VAR 'number' must be 'static' when in a static class".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_const() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test80.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_assignToConst() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test81.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("7 : REFERENCE 'MAX' is a constant and cannot be assigned to".equals(exceptions.get(1)));
   }
 
   // TODO - Complete this mega compile file

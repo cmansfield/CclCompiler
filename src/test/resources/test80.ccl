@@ -4,5 +4,5 @@ public static class TestClass {
 }
 
 public static void main() {
-    TestClass.MAX = 5;
+    int number = TestClass.MAX;
 }

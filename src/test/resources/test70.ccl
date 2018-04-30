@@ -1,0 +1,11 @@
+
+
+public const class TestClass {
+    private int number;
+
+    public void someMethod() {
+
+    }
+}
+
+public void main() {}

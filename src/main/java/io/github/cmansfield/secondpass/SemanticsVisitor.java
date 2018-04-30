@@ -151,7 +151,120 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .findFirst()
             .orElse(null);
   }
-  
+
+  /**
+   * This method will ensure the Symbol only contains valid access modifiers
+   * for the symbol type being supplied
+   *
+   * @param symbol      The Symbol object to check against
+   * @param lineNumber  The line number this symbol was discovered
+   */
+  private void checkForInvalidAccessModifiers(Symbol symbol, int lineNumber) {
+    if(symbol == null) {
+      return;
+    }
+    SymbolKind symbolKind = symbol.getSymbolKind();
+    Data data = symbol.getData();
+    List<AccessModifier> accessModifiers = data.getAccessModifiers();
+    if(CollectionUtils.isEmpty(accessModifiers)) {
+      return;
+    }
+
+    if(symbolKind == SymbolKind.CLASS && accessModifiers.contains(AccessModifier.CONST)) {
+      throw new IllegalStateException(String.format(
+              "%s : \'%s %s %s\' classes cannot have the access modifier \'%s\'",
+              lineNumber,
+              accessModifiers.stream()
+                      .map(Object::toString)
+                      .collect(Collectors.joining(" ")),
+              Keyword.CLASS,
+              symbol.getText(),
+              Keyword.CONST));
+    }
+    if((symbolKind == SymbolKind.METHOD || symbolKind == SymbolKind.CONSTRUCTOR)
+            && accessModifiers.contains(AccessModifier.CONST)) {
+      throw new IllegalStateException(String.format(
+              "%s : \'%s %s%s\' %ss cannot have the access modifier \'%s\'",
+              lineNumber,
+              accessModifiers.stream()
+                      .map(Object::toString)
+                      .collect(Collectors.joining(" ")),
+              data.getReturnType().orElse("") + " ",
+              symbol.getText(),
+              symbolKind,
+              Keyword.CONST));
+    }
+    if(symbolKind == SymbolKind.MAIN
+            && (accessModifiers.contains(AccessModifier.CONST)
+            || accessModifiers.contains(AccessModifier.PRIVATE))) {
+      throw new IllegalStateException(String.format(
+              "%s : \'%s %s %s\' %s cannot have the access modifiers \'%s\' or \'%s\'",
+              lineNumber,
+              accessModifiers.stream()
+                      .map(Object::toString)
+                      .collect(Collectors.joining(" ")),
+              data.getReturnType().orElse(Keyword.VOID.toString()),
+              Keyword.MAIN,
+              Keyword.MAIN,
+              Keyword.CONST,
+              Keyword.PRIVATE));
+    }
+  }
+
+  /**
+   * This will check to make sure the supplied Symbol can be accessed from the
+   * current scope, if not it will throw an exception
+   *
+   * @param symbol      Symbol to validate
+   * @param lineNumber  The line number this symbol was discovered
+   */
+  private void checkCanBeAccessedFromCurrentScope(Symbol symbol, int lineNumber) {
+    if(symbol == null) {
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Supplied a null Symbol",
+              lineNumber));
+    }
+    List<AccessModifier> accessModifiers = symbol.getData().getAccessModifiers();
+    SymbolKind symbolKind = symbol.getSymbolKind();
+
+    String packageId = SymbolUtils.getPackageId(scope);
+    if(CollectionUtils.isEmpty(accessModifiers) && !symbol.getScope().contains(packageId)) {
+      throw new IllegalStateException(String.format(
+              "%s : \'%s %s\' is package private and cannot be accessed from this context",
+              lineNumber,
+              symbol.getSymbolKind(),
+              symbol.getText()));
+    }
+    if(accessModifiers.contains(AccessModifier.PRIVATE) && !scope.contains(symbol.getScope())) {
+      throw new IllegalStateException(String.format(
+              "%s : %s \'%s\' is private and cannot be accessed from scope \'%s\'",
+              lineNumber,
+              symbolKind,
+              symbol.getText(),
+              SymbolUtils.formatScopeText(symbols, scope)));
+    }
+
+    if(symbolKind == SymbolKind.METHOD
+            || symbolKind == SymbolKind.CONSTRUCTOR
+            || symbolKind == SymbolKind.INSTANCE_VAR) {
+      String classId = SymbolUtils.getParentSymbolId(symbol.getScope());
+      Symbol classSymbol = symbols.get(classId);
+      List<AccessModifier> classAccessModifiers = classSymbol.getData().getAccessModifiers();
+
+      if(classAccessModifiers.contains(AccessModifier.STATIC) && !accessModifiers.contains(AccessModifier.STATIC)) {
+        throw new IllegalStateException(String.format(
+                "%s : %s \'%s\' must be \'%s\' when in a %s %s",
+                lineNumber,
+                symbolKind,
+                symbol.getText(),
+                Keyword.STATIC,
+                Keyword.STATIC,
+                Keyword.CLASS));
+      }
+    }
+
+  }
+
   /*
     **************************************
     *           Semantic methods
@@ -405,6 +518,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private void createReferenceSar(SAR parentSar, SAR fieldSar, String classId, Data fieldData) {
     Data refData = new DataBuilder()
             .returnType(fieldData.getReturnType().orElse(""))
+            .accessModifiers(fieldData.getAccessModifiers())
             .type(fieldData.getType().orElse(""))
             .isTypeAnArray(fieldData.isTypeAnArray())
             .parameter(classId)
@@ -667,8 +781,26 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               methodNameSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               methodNameSar.getText()));
     }
-    
+
     methodExist(methodNameSar, argListSar, classSymbol, SymbolKind.METHOD, Keyword.THIS.toString().equalsIgnoreCase(instanceSar.getText()));
+
+    Symbol methodSymbol = symbols.get(sas.peek().getSymbolId());
+    List<AccessModifier> accessModifiers = methodSymbol.getData().getAccessModifiers();
+    if(instanceSar.getType() == SarType.TYPE && !accessModifiers.contains(AccessModifier.STATIC)) {
+      throw new IllegalStateException(String.format(
+              "%s : Cannot access instance method \'%s\' from a %s context",
+              instanceSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              methodNameSar.getText(),
+              Keyword.STATIC));
+    }
+    if(instanceSar.getType() != SarType.TYPE && accessModifiers.contains(AccessModifier.STATIC)) {
+      throw new IllegalStateException(String.format(
+              "%s : Cannot access %s method \'%s\' from instance \'%s\'",
+              instanceSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.STATIC,
+              methodNameSar.getText(),
+              instanceSar.getText()));
+    }
   }
 
   /**
@@ -839,6 +971,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
           return;
         }
         operatorException(operatorCtx.start.getLine(), "assignment", operator, op1Type, op1Symbol.getText(), op2Type, op2Symbol.getText());
+      }
+      if(op2Symbol.getData().getAccessModifiers().contains(AccessModifier.CONST)
+              && !(operatorCtx.getParent() instanceof CclGrammarParser.FieldDeclarationContext)) {
+        // Anything with a 'const' access modifier should not be assigned to
+        throw new IllegalStateException(String.format(
+                "%s : %s \'%s\' is a constant and cannot be assigned to",
+                operatorCtx.start.getLine(),
+                op2Symbol.getSymbolKind(),
+                op2Symbol.getText()));
       }
       
       sas.push(operand2);
@@ -1443,14 +1584,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               SymbolUtils.formatMethodText(symbols, symbol)));
     }
-    if(!isThis
-            && symbol.getData().getAccessModifiers().contains(AccessModifier.PRIVATE)
-            && !scope.contains(symbol.getScope())) {
-      throw new IllegalStateException(String.format(
-              "%s : %s \'%s\' is private and cannot be accessed",
-              typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
-              symbol.getSymbolKind().toString(),
-              SymbolUtils.formatMethodText(symbols, symbol)));
+    if(!isThis) {
+      checkCanBeAccessedFromCurrentScope(symbol, typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     }
 
     SAR methodSar = new SAR(
@@ -1588,6 +1723,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               String.format("[Compiler Bug] Unknown statement \"%s\" found", StringUtils.isBlank(child.getText()) ? "" : child.getText()));
     }
 
+    endOfExpression();
     return null;
   }
 
@@ -1654,10 +1790,16 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               .symbolKind(SymbolKind.CLASS)
               .build(),
             false);
+    Symbol symbol = symbols.get(symbolId);
     if(StringUtils.isBlank(symbolId)) {
-      return null;
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Could not find the Symbol for %s \'%s\'",
+              ctx.start.getLine(),
+              Keyword.CLASS,
+              symbol.getText()));
     }
-    
+    checkForInvalidAccessModifiers(symbol, ctx.start.getLine());
+
     scope = scope + "." + symbolId;
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.ClassMemberDeclarationContext)
@@ -1672,9 +1814,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {   // NOSONAR
     String name = getNameWithoutVisiting(ctx);
     List<String> paramTypes = traverseParameterList(ctx);
-    
-    String scopeOrig = scope;
+
     String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
+    checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
+
+    String scopeOrig = scope;
     scope = scope + "." + symbolId;
     
     // Semantic #constructorCheck
@@ -1696,8 +1840,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       throw new IllegalStateException("[Compiler Bug] Method name came back blank, should not be blank after the first pass");
     }
     
-    String scopeOrig = scope;
     String symbolId = findMethodSymbolId(name, SymbolKind.METHOD, paramTypes);
+    checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
+
+    String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
     // Semantic #paramExist
@@ -1711,6 +1857,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitMainDeclaration(CclGrammarParser.MainDeclarationContext ctx) {
     String symbolId = findSymbolId(Keyword.MAIN.toString(), SymbolKind.MAIN);
+    checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
+
     String scopeOrig = scope;
     scope = String.format("%s.%s", scope, symbolId);
     traverseMethodBody(ctx);
@@ -1874,10 +2022,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx) {
-    getName(ctx);
-
     super.visitFieldDeclaration(ctx);
-    
+
+    checkCanBeAccessedFromCurrentScope(symbols.get(sas.peek().getSymbolId()), ctx.start.getLine());
     // Semantic call #EOE
     endOfExpression();
     

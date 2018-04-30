@@ -66,9 +66,9 @@ public void main() {
     lock mutex;
     unlock mutex;
     
-    for(i = 0; i < 10; i + 1) {}
-    for(;;) {}
-    for(int i = 0; i < 10; i + 1) {
+    for(i = 0; i < 10; i = i + 1) {}
+    for(;true;) {}
+    for(int i = 0; i < 10; i = i + 1) {
         print(i);
         if(i == num) {
             return;

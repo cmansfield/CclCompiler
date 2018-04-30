@@ -30,4 +30,14 @@ public class SymbolUtilsTest {
     assertNotNull(parentId);
     assertTrue(StringUtils.isBlank(parentId));
   }
+
+  @Test
+  public void test_getPackageId() {
+    String scope = "g.D00003.C00003.M000002.F00001";
+
+    String packageId = SymbolUtils.getPackageId(scope);
+
+    assertTrue(StringUtils.isNotBlank(packageId));
+    assertEquals(packageId, "D00003");
+  }
 }
