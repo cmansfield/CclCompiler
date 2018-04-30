@@ -1,0 +1,6 @@
+
+import src.test.resources.test83;
+
+public static void main() {
+    int number = Numbers.getNumber();
+}

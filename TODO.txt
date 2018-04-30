@@ -4,7 +4,6 @@ TODO List
         Add jackson deserialization
 
     Semantics
-        #imports
         #templates
 
     iCode
@@ -19,6 +18,5 @@ TODO List
 
     SemanticsVisitor
         Fix template classes/methods on the second pass
-        Double check AccessModifiers for packages is working
         Make sure brace initializer work
         Include the NOT operator '!'

@@ -1,0 +1,12 @@
+
+private class Test {
+    private int value;
+    
+    public Test(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+}

@@ -1,8 +1,5 @@
 
-public static class TestClass {
-    public static const int MAX = 10;
-}
 
 public static void main() {
-    TestClass.MAX = 5;
+
 }

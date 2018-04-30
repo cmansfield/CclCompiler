@@ -2,7 +2,6 @@ package io.github.cmansfield.firstpass.symbols.data;
 
 public enum AccessModifier {
   PUBLIC("public"),
-  PROJECT(""),
   PRIVATE("private"),
   STATIC("static"),
   CONST("const");

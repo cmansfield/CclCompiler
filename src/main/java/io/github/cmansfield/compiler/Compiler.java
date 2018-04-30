@@ -200,7 +200,7 @@ public class Compiler {
       visitor.visit(tree);
     }
     catch (FileNotFoundException e) {
-      String message = "Unable to load file {}" + fileName;
+      String message = "Unable to load file " + fileName;
       logger.error(message);
       exceptions.add(0, message);
     }

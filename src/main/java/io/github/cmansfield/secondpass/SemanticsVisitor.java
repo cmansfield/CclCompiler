@@ -73,7 +73,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     found = found.stream()
             .filter(symbol -> sarType == SarType.getSarType(symbol.getSymbolKind()))
             .collect(Collectors.toList());
-
+    // This will allow us to access classes from other imported files
+    if(found.size() == 1) {
+      Symbol symbol = found.get(0);
+      if(symbol.getSymbolKind() == SymbolKind.CLASS) {
+        return symbol.getSymbolId();
+      }
+    }
+    
     return traceScopeToFindSymbolId(text, found, currentScope, lineNumber);
   }
 
@@ -228,9 +235,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     SymbolKind symbolKind = symbol.getSymbolKind();
 
     String packageId = SymbolUtils.getPackageId(scope);
-    if(CollectionUtils.isEmpty(accessModifiers) && !symbol.getScope().contains(packageId)) {
+    if(accessModifiers.isEmpty() && !symbol.getScope().contains(packageId)) {
       throw new IllegalStateException(String.format(
-              "%s : \'%s %s\' is package private and cannot be accessed from this context",
+              "%s : %s \'%s\' is file private and cannot be accessed from this context",
               lineNumber,
               symbol.getSymbolKind(),
               symbol.getText()));
@@ -1816,7 +1823,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     List<String> paramTypes = traverseParameterList(ctx);
 
     String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
-    checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
+    checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());     // NOSONAR
 
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
@@ -1934,6 +1941,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     typePush(ctx, text);
     // Semantic call #typeExist
     typeExist();
+    
+    if(!ParserUtils.isPrimitiveType(text)) {
+      checkCanBeAccessedFromCurrentScope(symbols.get(sas.peek().getSymbolId()), ctx.start.getLine());  
+    }
     return text;
   }
 

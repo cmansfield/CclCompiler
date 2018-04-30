@@ -1,0 +1,13 @@
+
+public static class Numbers {
+    public static const int MAX = 10;
+    private static int index = 0;
+    
+    public static int getNumber() {
+        if(index == MAX) {
+            index = 0;    
+        }
+        index = index + 1;
+        return index;
+    }
+}

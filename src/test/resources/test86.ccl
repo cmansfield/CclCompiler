@@ -1,0 +1,7 @@
+
+import src.test.resources.test87;
+
+public static void main() {
+    Test test = new Test(10);
+    int number = test.getValue();
+}

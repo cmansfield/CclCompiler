@@ -661,6 +661,35 @@ public class CompilerSemanticsTest {
     assertTrue("7 : REFERENCE 'MAX' is a constant and cannot be assigned to".equals(exceptions.get(1)));
   }
 
+  @Test
+  public void test_import_staticClass() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test82.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_import_instanceClass() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test84.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_import_privateClass() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test86.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue(exceptions.get(1).contains("5 : CLASS 'Test' is private and cannot be accessed from scope"));
+  }
+  
   // TODO - Complete this mega compile file
   @Test (enabled = false)
   public void test_fail_() throws IOException {
