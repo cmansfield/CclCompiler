@@ -274,10 +274,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * This method will generate a list of types from the supplied template type context
    * 
-   * 
-   * @param ctx
-   * @return
+   * @param ctx   Template type context to extract types from
+   * @return      A list of found template types
    */
   private List<String> getTemplateTypes(CclGrammarParser.DeclaredTemplateTypeContext ctx) {
     if(ctx == null) {
@@ -290,6 +290,89 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .map(this::visitType)
             .map(text -> (String)text)
             .collect(Collectors.toList());
+  }
+
+  /**
+   * This method will either find or create a class Symbol that matches the template name, 
+   * number of template place holders, and the list of define template types
+   * 
+   * @param sar   The template SAR of the object to be created
+   * @return      The Symbol of the matching class
+   */
+  private Symbol findOrCreateTemplateClassSymbol(SAR sar) {
+    int lineNumber = sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER);
+    Symbol templateSymbol = symbols.get(sar.getSymbolId());
+    List<String> templateTypes = sar.getTemplateTypes();
+    
+    if(templateSymbol == null) {
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] The template class Symbol cannot be null",
+              lineNumber));
+    }
+    if(CollectionUtils.isEmpty(templateTypes)) {
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] The list of template types cannot be empty",
+              lineNumber));
+    }
+    List<String> templatePlaceHolders = templateSymbol.getData().getTemplatePlaceHolders();
+    if(CollectionUtils.isEmpty(templatePlaceHolders)) {
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Template class \'%s\' must have template place holders",
+              lineNumber,
+              templateSymbol.getText()));
+    }
+    if(templateTypes.size() != templatePlaceHolders.size()) {
+      throw new IllegalStateException(String.format(
+              "%s : Type \'%s%s\' does not match template \'%s%s\'",
+              lineNumber,
+              sar.getText(),
+              ParserUtils.templateTextFormat(templateTypes),
+              templateSymbol.getText(),
+              ParserUtils.templateTextFormat(templateSymbol.getData().getTemplatePlaceHolders())));
+    }
+    
+    // Find all classes that match the template name and the list of defined 
+    // template types
+    List<Symbol> classSymbols = symbols.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .filter(symbol -> symbol.getSymbolKind() == SymbolKind.CLASS)
+            .filter(symbol -> sar.getText().equals(symbol.getText()))
+            .filter(symbol -> symbol.getData().getTemplatePlaceHolders().equals(templateTypes))
+            .collect(Collectors.toList());
+    
+    if(classSymbols.isEmpty()) {
+      return createNewClassFromTemplate(
+              templateSymbol, 
+              templateTypes, 
+              lineNumber);
+    }
+    if(classSymbols.size() > 1) {
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Found too many classes that match template type \'%s%s\'",
+              lineNumber, 
+              sar.getText(),
+              ParserUtils.templateTextFormat(templateTypes)));
+    }
+    
+    // Return the class Symbol that matches the template name and the list of defined
+    // template types
+    return classSymbols.get(0);
+  }
+
+  /**
+   * 
+   * 
+   * @param templateSymbol
+   * @param templateTypes
+   * @param lineNumber
+   * @return
+   */
+  private Symbol createNewClassFromTemplate(Symbol templateSymbol, List<String> templateTypes, int lineNumber) {
+    // TODO - complete this
+    
+    
+    
+    return null;
   }
   
   /*
@@ -1597,10 +1680,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     typeSar = sas.pop();
     if(typeSar.getType() == SarType.TEMPLATE) {
-      // TODO - Search for an existing class that matches the supplied template types
-      // TODO - If one does not exist then create a new class based on the supplied types
-
-
+      // Search for an existing class that matches the supplied template types
+      // If one does not exist then create a new class based on the supplied types
+      Symbol classSymbol = findOrCreateTemplateClassSymbol(typeSar);
+      
+      // TODO - Create a new constructor SAR with the supplied class Symbol
 
       System.out.println();
     }

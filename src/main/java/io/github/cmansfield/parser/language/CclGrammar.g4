@@ -141,7 +141,7 @@ type
 
 templatePlaceHolder : IDENTIFIER ;
 
-declaredTemplateType : '<' type '>' ;
+declaredTemplateType : '<' type (',' type)* '>' ;
 
 className : IDENTIFIER ;
 

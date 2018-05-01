@@ -22,7 +22,7 @@ public class CompilerTest {
 
     assertNotNull(symbolTable);
     assertFalse(symbolTable.isEmpty());
-    assertEquals(symbolTable.size(), 47);
+    assertEquals(symbolTable.size(), 50);
     SymbolUtils.checkSymbolTable(symbolTable);
   }
 
