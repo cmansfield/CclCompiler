@@ -362,12 +362,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   /**
    * 
    * 
-   * @param templateSymbol
+   * @param templateClass
    * @param templateTypes
    * @param lineNumber
    * @return
    */
-  private Symbol createNewClassFromTemplate(Symbol templateSymbol, List<String> templateTypes, int lineNumber) {
+  private Symbol createNewClassFromTemplate(Symbol templateClass, List<String> templateTypes, int lineNumber) {
     // TODO - complete this
     
     
@@ -2446,7 +2446,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     while(!((child = childIter.next()) instanceof CclGrammarParser.StatementContext)) {
       child.accept(this);
     }
-    semanticIf();         // Semantic call #if
+    semanticIf();             // Semantic call #if
 
     // Visit 'if' statement and 'else' statement if one exists
     ctx.children.stream()
@@ -2462,11 +2462,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     if(childNode instanceof CclGrammarParser.InvokeOperatorContext) {
       // Creating a new object
-      newObject();      // Semantic call #newObject
+      newObject();            // Semantic call #newObject
     }
     else if(childNode instanceof CclGrammarParser.ArrayOperatorContext) {
       // create a new array
-      newArray();       // Semantic call #newArray
+      newArray();             // Semantic call #newArray
     }
     else {
       throw new UnsupportedOperationException("[Compiler Bug] Unknown operation");      
@@ -2480,7 +2480,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     super.visitFnArrMember(ctx);
 
     if(ctx.children.get(0) instanceof CclGrammarParser.ArrayOperatorContext) {
-      array();              // Semantic call #array
+      array();                // Semantic call #array
     }
 
     return null;
@@ -2491,7 +2491,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     if(Keyword.NOT.toString().equals(getChildText(ctx))) {
       super.visitExpression(ctx);
-      not();            // Semantic #not
+      not();                  // Semantic #not
     }
     if(ctx.getChild(0) instanceof CclGrammarParser.ExpressionContext) {
       // Then this is a ternary expression
@@ -2508,7 +2508,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       }
 
       visitInvokeOperatorEnd(null);
-      ternary();       // Semantic #ternary
+      ternary();              // Semantic #ternary
 
       endOfExpression();
     }
