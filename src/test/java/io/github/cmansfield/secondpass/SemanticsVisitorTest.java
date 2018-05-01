@@ -249,7 +249,7 @@ public class SemanticsVisitorTest {
 
     for(String type : primitiveTypes) {
       SemanticsVisitor visitor = new SemanticsVisitor(null);
-      visitor.typePush(mockContext, type);
+      visitor.typePush(mockContext, type, null);
       visitor.typeExist();
       Deque<SAR> sas = visitor.getSemanticActionStack();
 
@@ -278,7 +278,7 @@ public class SemanticsVisitorTest {
     SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
     visitor.setScope(scope);
     
-    visitor.typePush(mockContext, text);
+    visitor.typePush(mockContext, text, null);
     visitor.typeExist();
     SAR sar = visitor.getSemanticActionStack().pop();
 

@@ -8,4 +8,5 @@ public class TemplateClass (T) {
 public static void main() {
     //TemplateClass templateclass = new TemplateClass();          // Don't allow
     TemplateClass<int> templateclass = new TemplateClass<int>();
+    //TemplateClass<TemplateClass<int>> templateclass = new TemplateClass<TemplateClass<int>>();
 }

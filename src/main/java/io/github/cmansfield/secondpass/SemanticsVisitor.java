@@ -285,6 +285,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     return ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.TypeContext)
+            .map(context -> (CclGrammarParser.TypeContext)context)
+            .map(this::visitType)
+            .map(text -> (String)text)
+            .collect(Collectors.toList());
   }
   
   /*
@@ -334,12 +338,23 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * #typePush
    * This method will push a new type semantic action record onto the SAS
    * 
-   * @param ctx   The context of where int the tree the visitor currently is
-   * @param text  The name of the type to be pushed
+   * @param ctx           The context of where int the tree the visitor currently is
+   * @param text          The name of the type to be pushed
+   * @param templateTypes The list of declared template types
    */
-  void typePush(ParserRuleContext ctx, String text) {
-    SAR sar = new SAR(SarType.TYPE, text);
-    sar.setLineNumber(ctx.start.getLine());
+  void typePush(ParserRuleContext ctx, String text, List<String> templateTypes) {
+    SAR sar;
+
+    if(CollectionUtils.isEmpty(templateTypes)) {
+      // Not a template
+      sar = new SAR(SarType.TYPE, text);
+      sar.setLineNumber(ctx.start.getLine());
+    }
+    else {
+      // Is a template
+      sar = new SAR(SarType.TEMPLATE, "", text, ctx.start.getLine(), templateTypes);
+    }
+
     sas.push(sar);
   }
 
@@ -1580,7 +1595,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       argListSar = sas.pop();
     }
     typeSar = sas.pop();
-    if(typeSar.getType() != SarType.TYPE) {
+    if(typeSar.getType() == SarType.TEMPLATE) {
+      // TODO - Search for an existing class that matches the supplied template types
+      // TODO - If one does not exist then create a new class based on the supplied types
+
+
+
+      System.out.println();
+    }
+    else if(typeSar.getType() != SarType.TYPE) {
       throw new IllegalStateException(String.format(
               "%s : Expecting a SAR type \'TYPE\', found \'%s\'",
               typeSar.getLineNumber(),
@@ -2072,16 +2095,21 @@ public class SemanticsVisitor extends CclCompilerVisitor {
                     .filter(node -> node instanceof CclGrammarParser.DeclaredTemplateTypeContext)
                     .findFirst()
                     .orElse(null));
-    
+    boolean isTemplate = CollectionUtils.isNotEmpty(templateTypes);
+
     // Semantic call #typePush
-    typePush(ctx, text);
+    typePush(ctx, text, templateTypes);
     // Semantic call #typeExist
     typeExist();
     
     if(!ParserUtils.isPrimitiveType(text)) {
       checkCanBeAccessedFromCurrentScope(symbols.get(sas.peek().getSymbolId()), ctx.start.getLine());  
     }
-    return text;
+    return text + String.format(
+            "%s%s%s",
+            isTemplate ? "<" : "",
+            templateTypes.stream().collect(Collectors.joining(",")),
+            isTemplate ? ">" : "");
   }
 
   @Override

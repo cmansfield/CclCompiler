@@ -12,6 +12,7 @@ Semantic Action Record
 public class SAR {
   private final String text;
   private List<String> symbolIds;
+  private List<String> templateTypes;
   private Integer lineNumber;
   private String symbolId;
   private SarType type;
@@ -33,8 +34,17 @@ public class SAR {
     this.lineNumber = lineNumber;
   }
 
+  public SAR(SarType type, String symbolId, String text, Integer lineNumber, List<String> templateTypes) {
+    this(type, symbolId, text, lineNumber);
+    this.templateTypes = templateTypes;
+  }
+
   public SarType getType() {
     return type;
+  }
+
+  public List<String> getTemplateTypes() {
+    return templateTypes == null ? Collections.emptyList() : templateTypes;
   }
 
   public void setType(SarType type) {
