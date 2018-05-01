@@ -3,6 +3,9 @@ package io.github.cmansfield.parser;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.stream.Collectors;
+import java.util.List;
+
 public class ParserUtils {
   private ParserUtils() {}
 
@@ -49,5 +52,20 @@ public class ParserUtils {
       return true;
     }
     return type.equals(Keyword.VOID.toString());
+  }
+
+  /**
+   * This will correctly format the defined template types into a formatted string
+   * 
+   * @param templateTypes   List of defined template types
+   * @return                A formatted String with the supplied types
+   */
+  public static String templateTextFormat(List<String> templateTypes) {
+    boolean isTemplate = !templateTypes.isEmpty();
+    return String.format(
+            "%s%s%s",
+            isTemplate ? "<" : "",
+            templateTypes.stream().collect(Collectors.joining(",")),
+            isTemplate ? ">" : "");
   }
 }

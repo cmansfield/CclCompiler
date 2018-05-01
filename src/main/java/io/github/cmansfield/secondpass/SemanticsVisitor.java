@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.*;
 
 
@@ -2095,8 +2096,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
                     .filter(node -> node instanceof CclGrammarParser.DeclaredTemplateTypeContext)
                     .findFirst()
                     .orElse(null));
-    boolean isTemplate = CollectionUtils.isNotEmpty(templateTypes);
 
+    // Remove the template types from the SAS
+    IntStream.range(0, templateTypes.size())
+            .forEach(val -> sas.pop());
+    
     // Semantic call #typePush
     typePush(ctx, text, templateTypes);
     // Semantic call #typeExist
@@ -2105,11 +2109,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(!ParserUtils.isPrimitiveType(text)) {
       checkCanBeAccessedFromCurrentScope(symbols.get(sas.peek().getSymbolId()), ctx.start.getLine());  
     }
-    return text + String.format(
-            "%s%s%s",
-            isTemplate ? "<" : "",
-            templateTypes.stream().collect(Collectors.joining(",")),
-            isTemplate ? ">" : "");
+    return text + ParserUtils.templateTextFormat(templateTypes);
   }
 
   @Override

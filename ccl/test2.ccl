@@ -1,12 +1,18 @@
 
+public class Employee {
+    public Employee() {}
+}
 
-
-public class TemplateClass (T) {
-    public TemplateClass() {}
+public class List (T) {
+    public List() {}
+    public void add(T value) {}
+    public T get() {}
 }
 
 public static void main() {
-    //TemplateClass templateclass = new TemplateClass();          // Don't allow
-    TemplateClass<int> templateclass = new TemplateClass<int>();
-    //TemplateClass<TemplateClass<int>> templateclass = new TemplateClass<TemplateClass<int>>();
+    //List List = new List();          // Don't allow
+    //List<int> numbers = new List<int>();
+    //List<List<int>> List = new List<List<int>>();
+    
+    List<Employee> employees = new List<Employee>();
 }

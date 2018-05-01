@@ -20,6 +20,7 @@ public enum SymbolKind {
   PACKAGE("D"),
   REFERENCE("R"),
   TEMPORARY("J"),
+  TEMPLATE("T"),
   UNKNOWN("U");
   
   private final String prefix;

@@ -86,6 +86,8 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
 
     String name = getClassName(ctx);
     List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
+    createTemplatePlaceHolderSymbols(templatePlaceHolders, symbolId);
+    
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     Data data = new DataBuilder()
             .accessModifiers(accessModifiers)
@@ -114,6 +116,12 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
+    // Get the list of template types housed in the class. If the class is a template class
+    // then we want the constructor return type to look something like 'ClassName<T>'
+    List<String> templateTypes = symbols
+            .get(SymbolUtils.getParentSymbolId(scopeOrig))
+            .getData()
+            .getTemplatePlaceHolders();
     String name = getMethodName(ctx);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     List<String> parameters = getParameters(ctx);
@@ -121,7 +129,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     Data data = new DataBuilder()
             .accessModifiers(accessModifiers)
             .parameters(parameters)
-            .returnType(name)
+            .returnType(name + ParserUtils.templateTextFormat(templateTypes))
             .build();
     addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data, symbolId);
 
@@ -312,6 +320,25 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .accessModifier(AccessModifier.PUBLIC)
             .build();
     addNewSymbol(value, symbolKind, GLOBAL_SCOPE, data);
+  }
+
+  /**
+   * This method will create new template Symbols for each of the supplied template place holders
+   * 
+   * @param templatePlaceHolders    List of template place holders
+   * @param classId                 The Symbol ID of the template class 
+   */
+  private void createTemplatePlaceHolderSymbols(List<String> templatePlaceHolders, String classId) {
+    for(String placeHolder : templatePlaceHolders) {
+      addNewSymbol(
+              placeHolder,
+              SymbolKind.TEMPLATE,
+              scope,
+              new DataBuilder()
+                      .accessModifier(AccessModifier.PUBLIC)
+                      .parameter(classId)
+                      .build());
+    }
   }
 
   @Override

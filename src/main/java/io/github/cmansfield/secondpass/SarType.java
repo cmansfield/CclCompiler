@@ -28,6 +28,7 @@ public enum SarType {
       case INSTANCE_VAR:
         return SarType.IDENTIFIER;
       case CLASS:
+      case TEMPLATE:
         return SarType.TYPE;
       case MAIN:
       case METHOD:
