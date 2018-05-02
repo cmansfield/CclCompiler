@@ -4,15 +4,21 @@ public class Employee {
 }
 
 public class List (T) {
+    private int size;
+    private T value;
+    
     public List() {}
     public void add(T value) {}
-    public T get() {}
+    public T get() {
+        T something;
+        return something;
+    }
 }
 
 public static void main() {
     //List List = new List();          // Don't allow
     //List<int> numbers = new List<int>();
-    //List<List<int>> List = new List<List<int>>();
+    List<List<int>> List = new List<List<int>>();
     
-    List<Employee> employees = new List<Employee>();
+    //List<Employee> employees = new List<Employee>();
 }

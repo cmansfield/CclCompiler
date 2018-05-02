@@ -7,15 +7,20 @@ import io.github.cmansfield.parser.ParserUtils;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.TemplateVisitor;
 import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.map.LinkedMap;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class TemplateSymbolVisitor extends SymbolTableVisitor implements TemplateVisitor {
+  private final Map<String,String> templateTypeMap;
   private List<String> templateTypes;
 
   public TemplateSymbolVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope) {
     super(symbols, templateClassContexts);
+    this.templateTypeMap = new LinkedMap<>();
     this.scope = scope;
   }
 
@@ -36,7 +41,23 @@ public class TemplateSymbolVisitor extends SymbolTableVisitor implements Templat
               templateClass.getText(),
               ParserUtils.templateTextFormat(templateClass.getData().getTemplatePlaceHolders())));
     }
+    
+    List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
 
+    if(templatePlaceHolders.size() != templateTypes.size()) {
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Number of template visitor's types \'<%s>\' don't match the supplied template class' placeholders \'<%s>\'",
+              lineNumber,
+              templateTypes.stream().collect(Collectors.joining(", ")),
+              templatePlaceHolders.stream().collect(Collectors.joining(", "))));
+    }
+    
+    for(int i = 0; i < templateTypes.size(); ++i) {
+      templateTypeMap.put(
+              templatePlaceHolders.get(i),
+              templateTypes.get(i));
+    }
+    
     ctx.accept(this);
   }
 
@@ -72,7 +93,28 @@ public class TemplateSymbolVisitor extends SymbolTableVisitor implements Templat
 
   @Override
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
-    return super.visitConstructorDeclaration(ctx);
+    SymbolKind symbolKind = SymbolKind.CONSTRUCTOR;
+    String symbolId = SymbolIdGenerator.generateId(symbolKind);
+    String scopeOrig = scope;
+    scope = scope + "." + symbolId;
+
+    // Get the list of template types housed in the class. If the class is a template class
+    // then we want the constructor return type to look something like 'ClassName<int>'
+    String name = getMethodName(ctx) + ParserUtils.templateTextFormat(templateTypes);
+    List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
+    List<String> parameters = getParameters(ctx);
+
+    Data data = new DataBuilder()
+            .accessModifiers(accessModifiers)
+            .parameters(parameters)
+            .returnType(name)
+            .build();
+    addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data, symbolId);
+
+    traverseMethodBody(ctx);
+    scope = scopeOrig;
+
+    return null;
   }
 
   @Override
@@ -92,7 +134,12 @@ public class TemplateSymbolVisitor extends SymbolTableVisitor implements Templat
 
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {
-    return super.visitType(ctx);
+    String text = (String)super.visitType(ctx);
+    if(templateTypeMap.containsKey(text)) {
+      text = templateTypeMap.get(text);
+    }
+    
+    return text;
   }
 
   @Override

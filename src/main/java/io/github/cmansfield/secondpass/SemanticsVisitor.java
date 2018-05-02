@@ -31,7 +31,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   
   private static final int DEFAULT_LINE_NUMBER = -1;
 
-  public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
+  SemanticsVisitor(BidiMap<String, Symbol> symbols) {
     super(symbols);
     sas = new LinkedList<>();
     operatorStack = new LinkedList<>();
@@ -154,7 +154,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param symbol      The Symbol object to check against
    * @param lineNumber  The line number this symbol was discovered
    */
-  private void checkForInvalidAccessModifiers(Symbol symbol, int lineNumber) {
+  void checkForInvalidAccessModifiers(Symbol symbol, int lineNumber) {
     if(symbol == null) {
       return;
     }
@@ -814,7 +814,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * 
    * @param ctx   The context of where int the tree the visitor currently is
    */
-  private void paramExist(ParserRuleContext ctx) {
+  void paramExist(ParserRuleContext ctx) {
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.ParameterListContext)
             .map(context -> (CclGrammarParser.ParameterListContext)context)
@@ -865,7 +865,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    *
    * @param name  The name of the constructor
    */
-  private void constructorCheck(String name) {
+  void constructorCheck(String name) {
     if(StringUtils.isBlank(name)) {
       throw new IllegalArgumentException("[Compiler Bug] Constructor name cannot be blank");
     }
@@ -2065,8 +2065,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {   // NOSONAR
-    List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx.getParent().getParent());
-    String name = getNameWithoutVisiting(ctx) + ParserUtils.templateTextFormat(templatePlaceHolders);
+    String name = getNameWithoutVisiting(ctx);
     List<String> paramTypes = traverseParameterList(ctx);
 
     String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
@@ -2153,8 +2152,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
-    List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx.getParent());
-    String name = getChildText(ctx) + ParserUtils.templateTextFormat(templatePlaceHolders);
+    String name = getChildText(ctx);
     duplicate(name, SymbolKind.CLASS);
     return name;
   }

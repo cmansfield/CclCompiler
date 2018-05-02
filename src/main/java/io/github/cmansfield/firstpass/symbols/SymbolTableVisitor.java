@@ -72,8 +72,8 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitParameter(CclGrammarParser.ParameterContext ctx) {
-    String type = ctx.children.get(0).getText();
-    String name = ctx.children.get(1).getText();
+    String type = getType(ctx);
+    String name = getName(ctx);
     boolean isArray = isArray(ctx);
     
     Data data = new DataBuilder()
@@ -94,7 +94,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     scope = scope + "." + symbolId;
 
     List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
-    String name = getClassName(ctx) + ParserUtils.templateTextFormat(templatePlaceHolders);
+    String name = getClassName(ctx);
 
     if(!templatePlaceHolders.isEmpty()) {
       templateClassContexts.add(ctx);
@@ -129,13 +129,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
-    // Get the list of template types housed in the class. If the class is a template class
-    // then we want the constructor return type to look something like 'ClassName<T>'
-    List<String> templateTypes = symbols
-            .get(SymbolUtils.getParentSymbolId(scopeOrig))
-            .getData()
-            .getTemplatePlaceHolders();
-    String name = getMethodName(ctx) + ParserUtils.templateTextFormat(templateTypes);
+    String name = getMethodName(ctx);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     List<String> parameters = getParameters(ctx);
 
@@ -252,7 +246,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
    * @param ctx     The current context to search for any parameter nodes
    * @return        A String List of symbol IDs for the newly created parameter symbols
    */
-  private List<String> getParameters(ParserRuleContext ctx) {
+  List<String> getParameters(ParserRuleContext ctx) {
     if(ctx == null) {
       return Collections.emptyList();
     }

@@ -3,6 +3,7 @@ package io.github.cmansfield.secondpass;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.Symbol;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.collections4.map.LinkedMap;
 import io.github.cmansfield.parser.TemplateVisitor;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
@@ -10,7 +11,9 @@ import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.CommonToken;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
@@ -79,20 +82,18 @@ public class TemplateSemanticsVisitor extends SemanticsVisitor implements Templa
    */
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {
-    TerminalNode originalNode = (TerminalNode)ctx.getChild(0);
+    List<ParseTree> originalNodes = ctx.children;
     String text = getChildText(ctx);
     
     if(templateTypeMap.containsKey(text)) {
-      ctx.children.clear();
       CommonToken commonToken = new CommonToken(CclGrammarParser.IDENTIFIER);
       commonToken.setText(templateTypeMap.get(text));
-      ctx.children.add(new TerminalNodeImpl(commonToken));
+      ctx.children = Collections.singletonList(new TerminalNodeImpl(commonToken));
     }
     
     Object type = super.visitType(ctx);
     
-    ctx.children.clear();
-    ctx.children.add(originalNode);
+    ctx.children = originalNodes;
     
     return type;
   }
@@ -112,5 +113,60 @@ public class TemplateSemanticsVisitor extends SemanticsVisitor implements Templa
   @Override
   public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
     throw new UnsupportedOperationException("Template visitors cannot visit CompilationUnits");
+  }
+
+  @Override
+  public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
+    String name = getNameWithoutVisiting(ctx) + ParserUtils.templateTextFormat(templateTypes);
+    List<String> paramTypes = traverseParameterList(ctx);
+
+    String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
+    checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());     // NOSONAR
+
+    String scopeOrig = scope;
+    scope = scope + "." + symbolId;
+
+    // Semantic #constructorCheck
+    constructorCheck(name);
+    // Semantic #paramExist
+    paramExist(ctx);
+    traverseMethodBody(ctx);
+    scope = scopeOrig;
+
+    return null;
+  }
+
+  @Override
+  public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
+    getType(ctx);
+    String name = getNameWithoutVisiting(ctx);
+    if(StringUtils.isBlank(name)) {
+      throw new IllegalStateException("[Compiler Bug] Method name came back blank, should not be blank after the first pass");
+    }
+    
+    List<String> paramTypes = traverseParameterList(ctx);
+    String symbolId = findMethodSymbolId(
+            name, 
+            SymbolKind.METHOD, 
+            paramTypes.stream()
+                    .map(param -> {
+                      if(templateTypeMap.containsKey(param)) {
+                        return templateTypeMap.get(param);
+                      }
+                      return param;
+                    })
+                    .collect(Collectors.toList()));
+
+    checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
+
+    String scopeOrig = scope;
+    scope = scope + "." + symbolId;
+
+    // Semantic #paramExist
+    paramExist(ctx);
+    traverseMethodBody(ctx);
+    scope = scopeOrig;
+
+    return null;
   }
 }
