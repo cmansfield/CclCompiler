@@ -27,7 +27,7 @@ import java.util.*;
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
   private final Deque<ParserRuleContext> operatorStack;
-  private final Deque<SAR> sas;
+  final Deque<SAR> sas;
   
   private static final int DEFAULT_LINE_NUMBER = -1;
 
@@ -213,7 +213,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param symbol      Symbol to validate
    * @param lineNumber  The line number this symbol was discovered
    */
-  private void checkCanBeAccessedFromCurrentScope(Symbol symbol, int lineNumber) {
+  void checkCanBeAccessedFromCurrentScope(Symbol symbol, int lineNumber) {
     if(symbol == null) {
       throw new IllegalStateException(String.format(
               "%s : [Compiler Bug] Supplied a null Symbol",
@@ -266,7 +266,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param ctx   Template type context to extract types from
    * @return      A list of found template types
    */
-  private List<String> getTemplateTypes(CclGrammarParser.DeclaredTemplateTypeContext ctx) {
+  List<String> getTemplateTypes(CclGrammarParser.DeclaredTemplateTypeContext ctx) {
     if(ctx == null) {
       return Collections.emptyList();
     }
@@ -323,7 +323,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     List<Symbol> classSymbols = symbols.entrySet().stream()
             .map(Map.Entry::getValue)
             .filter(symbol -> symbol.getSymbolKind() == SymbolKind.CLASS)
-            .filter(symbol -> sar.getText().equals(symbol.getText()))
+            .filter(symbol -> symbol.getText().equals(sar.getText() + ParserUtils.templateTextFormat(sar.getTemplateTypes())))
             .filter(symbol -> symbol.getData().getTemplatePlaceHolders().equals(templateTypes))
             .collect(Collectors.toList());
     
@@ -370,8 +370,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .build();
     List<Symbol> found = SymbolFilter.filter(symbols, filter);
 
-    // TODO - complete this
-    return null;
+    if(CollectionUtils.isEmpty(found)) {
+      
+    }
+    if(found.size() > 1) {
+      
+    }
+    
+    return found.get(0);
   }
   
   /*
@@ -547,20 +553,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             scope,
             sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     if(StringUtils.isBlank(symbolId)) {
-      Symbol symbol = null;
-      if(!sar.getTemplateTypes().isEmpty()) {
-        // TODO - Set the symbolId to the template class' ID
-        sar.setSymbolId("");
-        symbol = findOrCreateTemplateClassSymbol(sar);
-      }
-      if(symbol == null) {
-        throw new IllegalStateException(String.format(
-                "%s : The type \'%s\' does not exist!",
-                sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
-                sar.getText()));
-      }
+      throw new IllegalStateException(String.format(
+              "%s : The type \'%s\' does not exist!",
+              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              sar.getText()));
+    }
+    if(!sar.getTemplateTypes().isEmpty()) {
+      // TODO - Set the symbolId to the template class' ID
+      sar.setSymbolId(symbolId);
+      Symbol symbol = findOrCreateTemplateClassSymbol(sar);
       symbolId = symbol.getSymbolId();
     }
+
     sar.setSymbolId(symbolId);
     sas.push(sar);
   }
@@ -1692,9 +1696,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       // If one does not exist then create a new class based on the supplied types
       Symbol classSymbol = findOrCreateTemplateClassSymbol(typeSar);
       
-      // TODO - Create a new constructor SAR with the supplied class Symbol
-
-      System.out.println();
+      SAR definedTemplateSar = new SAR(
+              SarType.TYPE, 
+              classSymbol.getSymbolId(), 
+              classSymbol.getText(), 
+              typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
+      methodExist(
+              definedTemplateSar, 
+              argListSar, 
+              classSymbol, 
+              SymbolKind.CONSTRUCTOR, 
+              false);
+      return;
     }
     else if(typeSar.getType() != SarType.TYPE) {
       throw new IllegalStateException(String.format(

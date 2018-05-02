@@ -3,18 +3,18 @@ package io.github.cmansfield.secondpass;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.Symbol;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.collections4.map.LinkedMap;
 import io.github.cmansfield.parser.TemplateVisitor;
-import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.antlr.v4.runtime.CommonToken;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.List;
 import java.util.Map;
 
@@ -82,20 +82,29 @@ public class TemplateSemanticsVisitor extends SemanticsVisitor implements Templa
    */
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {
-    List<ParseTree> originalNodes = ctx.children;
     String text = getChildText(ctx);
-    
     if(templateTypeMap.containsKey(text)) {
-      CommonToken commonToken = new CommonToken(CclGrammarParser.IDENTIFIER);
-      commonToken.setText(templateTypeMap.get(text));
-      ctx.children = Collections.singletonList(new TerminalNodeImpl(commonToken));
+      text = templateTypeMap.get(text);
     }
-    
-    Object type = super.visitType(ctx);
-    
-    ctx.children = originalNodes;
-    
-    return type;
+
+    List<String> types = getTemplateTypes(
+            (CclGrammarParser.DeclaredTemplateTypeContext)ctx.children.stream()
+                    .filter(node -> node instanceof CclGrammarParser.DeclaredTemplateTypeContext)
+                    .findFirst()
+                    .orElse(null));
+    // Remove the template types from the SAS
+    IntStream.range(0, types.size())
+            .forEach(val -> sas.pop());
+
+    // Semantic call #typePush
+    typePush(ctx, text, types);
+    // Semantic call #typeExist
+    typeExist();
+
+    if(!ParserUtils.isPrimitiveType(text)) {
+      checkCanBeAccessedFromCurrentScope(symbols.get(sas.peek().getSymbolId()), ctx.start.getLine());
+    }
+    return text + ParserUtils.templateTextFormat(types);
   }
 
   @Override
@@ -103,16 +112,6 @@ public class TemplateSemanticsVisitor extends SemanticsVisitor implements Templa
     String name = getChildText(ctx) + ParserUtils.templateTextFormat(templateTypes);
     duplicate(name, SymbolKind.CLASS);
     return name;
-  }
-
-  @Override
-  public Object visitMainDeclaration(CclGrammarParser.MainDeclarationContext ctx) {
-    throw new UnsupportedOperationException("Template visitors cannot visit MainDeclarations");
-  }
-
-  @Override
-  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
-    throw new UnsupportedOperationException("Template visitors cannot visit CompilationUnits");
   }
 
   @Override
@@ -168,5 +167,15 @@ public class TemplateSemanticsVisitor extends SemanticsVisitor implements Templa
     scope = scopeOrig;
 
     return null;
+  }
+
+  @Override
+  public Object visitMainDeclaration(CclGrammarParser.MainDeclarationContext ctx) {
+    throw new UnsupportedOperationException("Template visitors cannot visit MainDeclarations");
+  }
+
+  @Override
+  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
+    throw new UnsupportedOperationException("Template visitors cannot visit CompilationUnits");
   }
 }
