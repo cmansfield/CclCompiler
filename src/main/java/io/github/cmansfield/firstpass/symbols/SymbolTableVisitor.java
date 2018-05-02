@@ -29,15 +29,12 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
-    boolean isTemplate = isTemplate(ctx);
-    // TODO - Add template placeholders if there are any
     SymbolKind symbolKind = SymbolKind.METHOD;
     String symbolId = SymbolIdGenerator.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
     String name = getMethodName(ctx);
-    List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     String returnType = getReturnType(ctx);
     List<String> parameters = getParameters(ctx);
@@ -46,7 +43,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .returnType(returnType)
             .accessModifiers(accessModifiers)
             .parameters(parameters)
-            .templatePlaceHolders(templatePlaceHolders)
             .build();
     addNewSymbol(
             name,

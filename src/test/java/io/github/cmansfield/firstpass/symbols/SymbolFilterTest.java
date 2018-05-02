@@ -68,26 +68,6 @@ public class SymbolFilterTest {
   }
 
   @Test
-  public void test_filter_Data() {
-    Data filterData = new DataBuilder()
-            .templatePlaceHolder("T")
-            .templatePlaceHolder("V")
-            .build();
-    Symbol filter = new SymbolBuilder()
-            .data(filterData)
-            .build();
-    List<Symbol> symbols = SymbolFilter.filter(
-            symbolTable,
-            filter);
-
-    assertTrue(CollectionUtils.isNotEmpty(symbols));
-    assertEquals(symbols.size(), 1);
-    Symbol found = symbols.get(0);
-    assertEquals(found.getSymbolKind(), SymbolKind.METHOD);
-    assertEquals(found.getText(), "doSomething");
-  }
-
-  @Test
   public void test_filter_allPrivateWithInScope() {
     Data filterData = new DataBuilder()
             .accessModifier(AccessModifier.PRIVATE)

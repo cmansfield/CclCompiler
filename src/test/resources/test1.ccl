@@ -16,7 +16,7 @@ private class MyClass (A, B, C) {
         return num + val - 3;
     }
     
-    public (T, K, V) int doSomething(T template, K key, V val) {
+    public int doSomething(T template, K key, V val) {
         return 0;
     }
 }

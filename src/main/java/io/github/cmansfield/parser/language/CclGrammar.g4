@@ -21,7 +21,7 @@ classMemberDeclaration
     | constructorDeclaration
     ;
 
-methodDeclaration : modifier* templateDeclaration? type methodName '(' parameterList? ')'
+methodDeclaration : modifier* type methodName '(' parameterList? ')'
         methodBody ;
 
 fieldDeclaration : modifier* type name (arrayDeclaration)? (assignmentOperation)? ';' ;

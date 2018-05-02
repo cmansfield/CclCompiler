@@ -416,20 +416,6 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor implement
             .map(value -> (String)value)
             .collect(Collectors.toList());
   }
-
-  /**
-   * This will get the children from the context and then check for any template nodes 
-   * and return true if any are found
-   *
-   * @param ctx     The current context to search for any template nodes
-   * @return        Boolean, if template nodes were found
-   */
-  protected boolean isTemplate(ParserRuleContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
-            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
-            .count() > 0;
-  }
   
   @Override
   public Object visitParameterList(CclGrammarParser.ParameterListContext ctx) {
