@@ -3,38 +3,37 @@ package io.github.cmansfield.secondpass;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.Symbol;
-import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.collections4.map.LinkedMap;
 import io.github.cmansfield.parser.TemplateVisitor;
 import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.List;
 import java.util.Map;
 
 
-public class TemplateSemanticsVisitor extends SemanticsVisitor implements TemplateVisitor {
+final class TemplateSemanticsVisitor extends SemanticsVisitor implements TemplateVisitor {
   private final Map<String,String> templateTypeMap;
   private List<String> templateTypes;
 
-  public TemplateSemanticsVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope) {
+  TemplateSemanticsVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope) {
     super(symbols, templateClassContexts);
     this.templateTypeMap = new LinkedMap<>();
     this.scope = scope;
   }
 
   /**
+   * This method is used to kick off the generation of a newly defined class from 
+   * a template class. As soon as this is finished a new class matching the supplied
+   * defined template types will be generated
    *
-   *
-   * @param templateClass
-   * @param templateTypes
-   * @param lineNumber
+   * @param templateClass   The template class the new class should be modeled after
+   * @param templateTypes   The list of defined types to take the place of the 
+   *                        template placeholders
+   * @param lineNumber      The line number this operation occurred
    */
   @Override
   public void compileTemplateClass(Symbol templateClass, List<String> templateTypes, int lineNumber) {
@@ -48,7 +47,7 @@ public class TemplateSemanticsVisitor extends SemanticsVisitor implements Templa
             .orElse(null);
     if(ctx == null) {
       throw new IllegalStateException(String.format(
-              "%s : [Compiler Bug] Could not find the template class context matching \'%s%s\'",
+              "%s : [Compiler Bug] Template Semantics: Could not find the template class context matching \'%s%s\'",
               lineNumber,
               templateClass.getText(),
               ParserUtils.templateTextFormat(templateClass.getData().getTemplatePlaceHolders())));
@@ -58,7 +57,7 @@ public class TemplateSemanticsVisitor extends SemanticsVisitor implements Templa
 
     if(templatePlaceHolders.size() != templateTypes.size()) {
       throw new IllegalStateException(String.format(
-              "%s : [Compiler Bug] Number of template visitor's types \'<%s>\' don't match the supplied template class' placeholders \'<%s>\'",
+              "%s : [Compiler Bug] Template Semantics: Number of template visitor's types \'<%s>\' don't match the supplied template class' placeholders \'<%s>\'",
               lineNumber,
               templateTypes.stream().collect(Collectors.joining(", ")),
               templatePlaceHolders.stream().collect(Collectors.joining(", "))));
@@ -76,9 +75,6 @@ public class TemplateSemanticsVisitor extends SemanticsVisitor implements Templa
   /**
    * This method will replace all template place holders with the declared template type for 
    * this class creation
-   * 
-   * @param ctx
-   * @return
    */
   @Override
   public Object visitType(CclGrammarParser.TypeContext ctx) {

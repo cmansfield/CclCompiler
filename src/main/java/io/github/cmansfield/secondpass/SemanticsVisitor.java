@@ -347,12 +347,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * This method will create a newly type defined class from a template class
    * 
-   * 
-   * @param templateClass
-   * @param templateTypes
-   * @param lineNumber
-   * @return
+   * @param templateClass   The template class to model the new class after
+   * @param templateTypes   The list of defined template types
+   * @param lineNumber      The line number this operation occurred 
+   * @return                The Symbol of the newly defined class
    */
   private Symbol createNewClassFromTemplate(Symbol templateClass, List<String> templateTypes, int lineNumber) {
     // First pass
@@ -371,10 +371,16 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     List<Symbol> found = SymbolFilter.filter(symbols, filter);
 
     if(CollectionUtils.isEmpty(found)) {
-      
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Unable to find the newly created template defined class Symbol \'%s\'",
+              lineNumber,
+              templateClass.getText() + ParserUtils.templateTextFormat(templateTypes)));
     }
     if(found.size() > 1) {
-      
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Found too many template defined class Symbols \'%s\'",
+              lineNumber,
+              templateClass.getText() + ParserUtils.templateTextFormat(templateTypes)));
     }
     
     return found.get(0);
@@ -559,7 +565,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               sar.getText()));
     }
     if(!sar.getTemplateTypes().isEmpty()) {
-      // TODO - Set the symbolId to the template class' ID
       sar.setSymbolId(symbolId);
       Symbol symbol = findOrCreateTemplateClassSymbol(sar);
       symbolId = symbol.getSymbolId();

@@ -4,8 +4,8 @@ TODO List
         Add jackson deserialization
 
     Semantics
-        #templates
-
+        Add unit tests for templates
+    
     iCode
         serialize and deserialize iCode objects
     
@@ -15,3 +15,4 @@ TODO List
     Compiler
         Create a new error listener for the SymbolTableVisitor to store syntax errors into 
             compiler's exception list
+

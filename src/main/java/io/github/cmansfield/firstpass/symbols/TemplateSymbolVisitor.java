@@ -1,20 +1,20 @@
 package io.github.cmansfield.firstpass.symbols;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
-import io.github.cmansfield.firstpass.symbols.data.Data;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
-import io.github.cmansfield.parser.ParserUtils;
 import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.parser.TemplateVisitor;
-import org.apache.commons.collections4.BidiMap;
+import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.map.LinkedMap;
+import io.github.cmansfield.parser.TemplateVisitor;
+import io.github.cmansfield.parser.ParserUtils;
+import org.apache.commons.collections4.BidiMap;
 
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
-public class TemplateSymbolVisitor extends SymbolTableVisitor implements TemplateVisitor {
+public final class TemplateSymbolVisitor extends SymbolTableVisitor implements TemplateVisitor {
   private final Map<String,String> templateTypeMap;
   private List<String> templateTypes;
 
@@ -36,7 +36,7 @@ public class TemplateSymbolVisitor extends SymbolTableVisitor implements Templat
             .orElse(null);
     if(ctx == null) {
       throw new IllegalStateException(String.format(
-              "%s : [Compiler Bug] Could not find the template class context matching \'%s%s\'",
+              "%s : [Compiler Bug] Template Syntax: Could not find the template class context matching \'%s%s\'",
               lineNumber,
               templateClass.getText(),
               ParserUtils.templateTextFormat(templateClass.getData().getTemplatePlaceHolders())));
@@ -46,7 +46,7 @@ public class TemplateSymbolVisitor extends SymbolTableVisitor implements Templat
 
     if(templatePlaceHolders.size() != templateTypes.size()) {
       throw new IllegalStateException(String.format(
-              "%s : [Compiler Bug] Number of template visitor's types \'<%s>\' don't match the supplied template class' placeholders \'<%s>\'",
+              "%s : [Compiler Bug] Template Syntax: Number of template visitor's types \'<%s>\' don't match the supplied template class' placeholders \'<%s>\'",
               lineNumber,
               templateTypes.stream().collect(Collectors.joining(", ")),
               templatePlaceHolders.stream().collect(Collectors.joining(", "))));
@@ -118,18 +118,8 @@ public class TemplateSymbolVisitor extends SymbolTableVisitor implements Templat
   }
 
   @Override
-  public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
-    return super.visitMethodDeclaration(ctx);
-  }
-
-  @Override
   public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
     return super.visitClassName(ctx) + ParserUtils.templateTextFormat(templateTypes);
-  }
-
-  @Override
-  public Object visitMethodName(CclGrammarParser.MethodNameContext ctx) {
-    return super.visitMethodName(ctx);
   }
 
   @Override
