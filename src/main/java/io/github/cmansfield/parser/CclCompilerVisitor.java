@@ -15,25 +15,38 @@ import java.util.stream.Collectors;
 import java.util.*;
 
 
-public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
+public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor implements CompilerVisitor {
   public static final String GLOBAL_SCOPE = "g";
-  protected final BidiMap<String, Symbol> symbols;
+  protected final List<CclGrammarParser.ClassDeclarationContext> templateClassContexts;
+  protected BidiMap<String, Symbol> symbols;
   protected String scope;
 
   protected CclCompilerVisitor() {
+    this.templateClassContexts = new ArrayList<>();
     this.symbols = new DualHashBidiMap<>();
     this.scope = GLOBAL_SCOPE;
   }
 
   protected CclCompilerVisitor(BidiMap<String, Symbol> symbols) {
     this.symbols = symbols == null ? new DualHashBidiMap<>() : new DualHashBidiMap<>(symbols);
+    this.templateClassContexts = new ArrayList<>();
+    this.scope = GLOBAL_SCOPE;
+  }
+
+  protected CclCompilerVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
+    this.symbols = symbols == null ? new DualHashBidiMap<>() : new DualHashBidiMap<>(symbols);
+    this.templateClassContexts = templateClassContexts == null ? new ArrayList<>() : templateClassContexts;
     this.scope = GLOBAL_SCOPE;
   }
   
   public BidiMap<String, Symbol> getSymbols() {
     return symbols;
   }
-  
+
+  public List<CclGrammarParser.ClassDeclarationContext> getTemplateClassContexts() {
+    return templateClassContexts;
+  }
+
   /**
    * This will reset the scope to the new package and create a
    * new Symbol for the package if one does not already exist
@@ -142,6 +155,22 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
   }
 
   /**
+   * This will get the children from the context and then traverse any template nodes and
+   * return a String List with all of the found template placeholders
+   *
+   * @param ctx     The current context to search for any template nodes
+   * @return        A String List of found template placeholders
+   */
+  protected List<String> getTemplatePlaceHolders(ParserRuleContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
+            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
+            .map(this::visitTemplateDeclaration)
+            .flatMap(val -> ((List<String>)val).stream())
+            .collect(Collectors.toList());
+  }
+
+  /**
    * This will get the children from the context and then traverse any name nodes 
    * and return the name if found
    *
@@ -231,6 +260,27 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
             .map(context -> (CclGrammarParser.ClassNameContext)context)
             .map(this::visitClassName)
             .map(val -> (String)val)
+            .findFirst()
+            .orElse(null);
+  }
+
+  /**
+   * Get the method name or identifier name from the child node without
+   * running the visitName or visitMethodName methods
+   *
+   * @param ctx The context to get child text from
+   * @return    The child's name
+   */
+  protected String getNameWithoutVisiting(ParserRuleContext ctx) {
+    if(ctx == null) {
+      return null;
+    }
+
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.NameContext
+                    || node instanceof CclGrammarParser.MethodNameContext
+                    || node instanceof CclGrammarParser.ClassNameContext)
+            .map(context -> context.getChild(0).getText())
             .findFirst()
             .orElse(null);
   }
@@ -389,5 +439,33 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor {
             .map(this::visitParameter)
             .map(val -> (String)val)
             .collect(Collectors.toList());
+  }
+
+  @Override
+  public Object visitTemplateDeclaration(CclGrammarParser.TemplateDeclarationContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplateListContext)
+            .map(context -> (CclGrammarParser.TemplateListContext)context)
+            .map(this::visitTemplateList)
+            .findFirst()
+            .orElse(Collections.emptyList());
+  }
+
+  @Override
+  public Object visitTemplateList(CclGrammarParser.TemplateListContext ctx) {
+    return ctx.children.stream()
+            .filter(node -> node instanceof CclGrammarParser.TemplatePlaceHolderContext)
+            .map(context -> (CclGrammarParser.TemplatePlaceHolderContext)context)
+            .map(this::visitTemplatePlaceHolder)
+            .map(value -> (String)value)
+            .collect(Collectors.toList());
+  }
+
+  @Override
+  public Object visitTemplatePlaceHolder(CclGrammarParser.TemplatePlaceHolderContext ctx) {
+    return ctx.children.stream()
+            .map(ParseTree::getText)
+            .findFirst()
+            .orElse("");
   }
 }

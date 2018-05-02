@@ -29,6 +29,7 @@ public class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
   private final List<String> exceptions;
   private final Set<CompilerOptions> options;
+  private List<CclGrammarParser.ClassDeclarationContext> templateClassContexts;
   private BidiMap<String, Symbol> symbolTable;
 
   public Compiler(CompilerOptions... options) {
@@ -109,7 +110,7 @@ public class Compiler {
    * @return          A boolean true if everything ran correctly
    */
   private boolean runSecondPass(final String fileName) throws IOException {
-    return runPass(fileName, new SemanticsVisitor(symbolTable));
+    return runPass(fileName, new SemanticsVisitor(symbolTable, templateClassContexts));
   }
 
   /**
@@ -164,6 +165,7 @@ public class Compiler {
     }
 
     symbolTable = visitor.getSymbols();
+    templateClassContexts = visitor.getTemplateClassContexts();
 
     if(logger.isDebugEnabled()) {
       logger.debug(visitor.toString());

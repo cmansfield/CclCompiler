@@ -6,6 +6,7 @@ import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
+import io.github.cmansfield.parser.TemplateVisitor;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.parser.ParserUtils;
@@ -32,6 +33,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   public SemanticsVisitor(BidiMap<String, Symbol> symbols) {
     super(symbols);
+    sas = new LinkedList<>();
+    operatorStack = new LinkedList<>();
+  }
+
+  public SemanticsVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
+    super(symbols, templateClassContexts);
     sas = new LinkedList<>();
     operatorStack = new LinkedList<>();
   }
@@ -138,26 +145,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     
     return found.get(0).getSymbolId();
-  }
-
-  /**
-   * Get the method name or identifier name from the child node without
-   * running the visitName or visitMethodName methods
-   *
-   * @param ctx The context to get child text from
-   * @return    The child's name
-   */
-  private String getNameWithoutVisiting(ParserRuleContext ctx) {
-    if(ctx == null) {
-      return null;
-    }
-
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.NameContext
-                    || node instanceof CclGrammarParser.MethodNameContext)
-            .map(context -> context.getChild(0).getText())
-            .findFirst()
-            .orElse(null);
   }
 
   /**
@@ -368,10 +355,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @return
    */
   private Symbol createNewClassFromTemplate(Symbol templateClass, List<String> templateTypes, int lineNumber) {
+    // First pass
+    TemplateVisitor templateVisitor = new TemplateSymbolVisitor(symbols, templateClassContexts, templateClass.getScope());
+    templateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
+    symbols = templateVisitor.getSymbols();
+    // Second pass
+    templateVisitor = new TemplateSemanticsVisitor(symbols, templateClassContexts, templateClass.getScope());
+    templateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
+    symbols = templateVisitor.getSymbols();
+
+    Symbol filter = new SymbolBuilder()
+            .text(templateClass.getText() + ParserUtils.templateTextFormat(templateTypes))
+            .symbolKind(SymbolKind.CLASS)
+            .build();
+    List<Symbol> found = SymbolFilter.filter(symbols, filter);
+
     // TODO - complete this
-    
-    
-    
     return null;
   }
   
@@ -548,10 +547,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             scope,
             sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     if(StringUtils.isBlank(symbolId)) {
-      throw new IllegalStateException(String.format(
-              "%s : The type \'%s\' does not exist!",
-              sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
-              sar.getText()));
+      Symbol symbol = null;
+      if(!sar.getTemplateTypes().isEmpty()) {
+        // TODO - Set the symbolId to the template class' ID
+        sar.setSymbolId("");
+        symbol = findOrCreateTemplateClassSymbol(sar);
+      }
+      if(symbol == null) {
+        throw new IllegalStateException(String.format(
+                "%s : The type \'%s\' does not exist!",
+                sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+                sar.getText()));
+      }
+      symbolId = symbol.getSymbolId();
     }
     sar.setSymbolId(symbolId);
     sas.push(sar);
@@ -2057,7 +2065,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {   // NOSONAR
-    String name = getNameWithoutVisiting(ctx);
+    List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx.getParent().getParent());
+    String name = getNameWithoutVisiting(ctx) + ParserUtils.templateTextFormat(templatePlaceHolders);
     List<String> paramTypes = traverseParameterList(ctx);
 
     String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
@@ -2144,9 +2153,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitClassName(CclGrammarParser.ClassNameContext ctx) {
-    String name = getChildText(ctx);
+    List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx.getParent());
+    String name = getChildText(ctx) + ParserUtils.templateTextFormat(templatePlaceHolders);
     duplicate(name, SymbolKind.CLASS);
-    return getChildText(ctx);
+    return name;
   }
 
   @Override
@@ -2157,7 +2167,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             ctx.parent instanceof CclGrammarParser.ConstructorDeclarationContext 
                     ? SymbolKind.CONSTRUCTOR 
                     : SymbolKind.METHOD);
-    return getChildText(ctx);
+    return name;
   }
 
   @Override

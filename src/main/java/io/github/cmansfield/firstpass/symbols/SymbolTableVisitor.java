@@ -6,6 +6,7 @@ import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
+import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.parser.ParserUtils;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,14 @@ import java.util.*;
 
 
 public class SymbolTableVisitor extends CclCompilerVisitor {
+
+  public SymbolTableVisitor() {
+    super();
+  }
+
+  protected SymbolTableVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
+    super(symbols, templateClassContexts);
+  }
 
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
@@ -84,8 +93,12 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
-    String name = getClassName(ctx);
     List<String> templatePlaceHolders = getTemplatePlaceHolders(ctx);
+    String name = getClassName(ctx) + ParserUtils.templateTextFormat(templatePlaceHolders);
+
+    if(!templatePlaceHolders.isEmpty()) {
+      templateClassContexts.add(ctx);
+    }
     createTemplatePlaceHolderSymbols(templatePlaceHolders, symbolId);
     
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
@@ -122,14 +135,14 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .get(SymbolUtils.getParentSymbolId(scopeOrig))
             .getData()
             .getTemplatePlaceHolders();
-    String name = getMethodName(ctx);
+    String name = getMethodName(ctx) + ParserUtils.templateTextFormat(templateTypes);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     List<String> parameters = getParameters(ctx);
 
     Data data = new DataBuilder()
             .accessModifiers(accessModifiers)
             .parameters(parameters)
-            .returnType(name + ParserUtils.templateTextFormat(templateTypes))
+            .returnType(name)
             .build();
     addNewSymbol(name, SymbolKind.CONSTRUCTOR, scopeOrig, data, symbolId);
 
@@ -212,34 +225,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
     return super.visitSpecialLiteral(ctx);
   }
 
-  @Override
-  public Object visitTemplateDeclaration(CclGrammarParser.TemplateDeclarationContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TemplateListContext)
-            .map(context -> (CclGrammarParser.TemplateListContext)context)
-            .map(this::visitTemplateList)
-            .findFirst()
-            .orElse(Collections.emptyList());
-  }
-
-  @Override
-  public Object visitTemplateList(CclGrammarParser.TemplateListContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TemplatePlaceHolderContext)
-            .map(context -> (CclGrammarParser.TemplatePlaceHolderContext)context)
-            .map(this::visitTemplatePlaceHolder)
-            .map(value -> (String)value)
-            .collect(Collectors.toList());
-  }
-  
-  @Override
-  public Object visitTemplatePlaceHolder(CclGrammarParser.TemplatePlaceHolderContext ctx) {
-    return ctx.children.stream()
-            .map(ParseTree::getText)
-            .findFirst()
-            .orElse("");
-  }
-
   /**
    * This will get the children from the context and then traverse any modifier nodes and
    * return a list of discovered access modifiers
@@ -247,7 +232,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
    * @param ctx     The current context to search for access modifiers
    * @return        List of found access modifiers
    */
-  private List<AccessModifier> getAccessModifiers(ParserRuleContext ctx) {
+  protected List<AccessModifier> getAccessModifiers(ParserRuleContext ctx) {
     if(ctx == null) {
       return Collections.emptyList();
     }
@@ -278,22 +263,6 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
             .map(this::visitParameterList)
             .map(val -> (List<String>)val)
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-  }
-  
-  /**
-   * This will get the children from the context and then traverse any template nodes and
-   * return a String List with all of the found template placeholders
-   *
-   * @param ctx     The current context to search for any template nodes
-   * @return        A String List of found template placeholders 
-   */
-  private List<String> getTemplatePlaceHolders(ParserRuleContext ctx) {
-    return ctx.children.stream()
-            .filter(node -> node instanceof CclGrammarParser.TemplateDeclarationContext)
-            .map(context -> (CclGrammarParser.TemplateDeclarationContext)context)
-            .map(this::visitTemplateDeclaration)
-            .flatMap(val -> ((List<String>)val).stream())
             .collect(Collectors.toList());
   }
 
