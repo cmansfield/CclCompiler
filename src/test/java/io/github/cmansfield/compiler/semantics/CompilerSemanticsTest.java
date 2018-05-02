@@ -738,6 +738,84 @@ public class CompilerSemanticsTest {
     assertEquals(exceptions.size(), 2);
     assertTrue("4 : Not all of the values in the brace initializer are the same type, found '{int, int, bool, int}'".equals(exceptions.get(1)));
   }
+
+  @Test
+  public void test_templates() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test93.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_templates_objects() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test94.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_templates_templatesOfTemplates() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test95.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_templates_templatesOfTemplateObjects() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test96.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_templates_assignNull() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test100.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+  }
+
+  @Test
+  public void test_fail_templates_initTemplateClass() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test97.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("15 : Class 'List<T>' is a template class and cannot be instantiated".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_templates_wrongType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test98.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("19 : Cannot perform assignment operation 'List<Employee> = List<int>'".equals(exceptions.get(1)));
+  }
+
+  @Test
+  public void test_fail_templates_missingType() throws IOException {
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test99.ccl");
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isNotEmpty(exceptions));
+    assertEquals(exceptions.size(), 2);
+    assertTrue("19 : Cannot perform assignment operation 'List = List<Employee>'".equals(exceptions.get(1)));
+  }
   
   // TODO - Complete this mega compile file
   @Test (enabled = false)

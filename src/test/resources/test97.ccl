@@ -1,0 +1,16 @@
+
+public class List (T) {
+    private int size;
+    private T value;
+    
+    public List() {}
+    public void add(T value) {}
+    public T get() {
+        T something;
+        return something;
+    }
+}
+
+public static void main() {
+    List list = new List();
+}

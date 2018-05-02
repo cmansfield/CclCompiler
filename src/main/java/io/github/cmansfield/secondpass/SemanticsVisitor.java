@@ -385,6 +385,25 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     return found.get(0);
   }
+
+  /**
+   * This method will check to make sure that the supplied class Symbol is not 
+   * a template class
+   * 
+   * @param classSymbol   The class to verify if it's a template class or not
+   * @return              Boolean true if the class is a template class
+   */
+  private boolean isTemplateClass(Symbol classSymbol) {
+    return classSymbol.getData().getTemplatePlaceHolders().stream()
+            .map(placeholder -> findSymbolId(
+                    new SymbolBuilder()
+                            .text(placeholder)
+                            .build(), 
+                    false))
+            .filter(Objects::nonNull)
+            .map(symbols::get)
+            .anyMatch(symbol -> symbol.getSymbolKind() == SymbolKind.TEMPLATE);
+  }
   
   /*
     **************************************
@@ -529,7 +548,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     if(StringUtils.isBlank(symbolId)) {
       throw new IllegalStateException(String.format(
-              "%s : The identifier \'%s\' does not exist!",
+              "%s : The identifier \'%s\' does not exist",
               sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               sar.getText()));
     }
@@ -1720,8 +1739,17 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               typeSar.getLineNumber(),
               typeSar.getType().toString()));
     }
-    
+
     Symbol classSymbol = symbols.get(typeSar.getSymbolId());
+    if(isTemplateClass(classSymbol)) {
+      throw new IllegalStateException(String.format(
+              "%s : Class \'%s\' is a template class and cannot be instantiated",
+              typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              classSymbol.getText() 
+                      + ParserUtils.templateTextFormat(
+                              classSymbol.getData().getTemplatePlaceHolders())));
+    }
+    
     methodExist(typeSar, argListSar, classSymbol, SymbolKind.CONSTRUCTOR, false);
   }
 

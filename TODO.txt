@@ -3,9 +3,6 @@ TODO List
     Symbol
         Add jackson deserialization
 
-    Semantics
-        Add unit tests for templates
-    
     iCode
         serialize and deserialize iCode objects
     

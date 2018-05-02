@@ -16,9 +16,5 @@ public class List (T) {
 }
 
 public static void main() {
-    //List List = new List();          // Don't allow
-    //List<int> numbers = new List<int>();
-    //List<List<int>> List = new List<List<int>>();
-    
-    //List<Employee> employees = new List<Employee>();
+    List employees = new List<Employee>();
 }
