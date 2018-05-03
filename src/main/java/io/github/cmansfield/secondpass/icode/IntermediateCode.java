@@ -7,11 +7,11 @@ import java.util.List;
 public class IntermediateCode {
   private List<Quad> iCode;
   
-  IntermediateCode() {
+  public IntermediateCode() {
     iCode = new ArrayList<>();
   }
 
-  void addQuad(Quad quad) {
+  public void add(Quad quad) {
     if(quad == null) {
       throw new IllegalArgumentException("Quads cannot be null");
     }

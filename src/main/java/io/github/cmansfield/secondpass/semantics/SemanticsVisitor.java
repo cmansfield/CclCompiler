@@ -1,9 +1,12 @@
 package io.github.cmansfield.secondpass.semantics;
 
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
+import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
-import io.github.cmansfield.parser.language.CclGrammarParser;
+import io.github.cmansfield.secondpass.icode.IntermediateCode;
 import io.github.cmansfield.secondpass.semantics.sar.SarType;
+import io.github.cmansfield.parser.language.CclGrammarParser;
+import io.github.cmansfield.secondpass.icode.QuadBuilder;
 import io.github.cmansfield.secondpass.semantics.sar.SAR;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,6 +32,7 @@ import java.util.*;
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
   private final Deque<ParserRuleContext> operatorStack;
+  private final IntermediateCode iCode;       // TODO - Include this in the TemplateSemanticVisitor class
   final Deque<SAR> sas;
   
   private static final int DEFAULT_LINE_NUMBER = -1;
@@ -36,12 +40,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   SemanticsVisitor(BidiMap<String, Symbol> symbols) {
     super(symbols);
     sas = new LinkedList<>();
+    iCode = new IntermediateCode();
     operatorStack = new LinkedList<>();
   }
 
   public SemanticsVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
     super(symbols, templateClassContexts);
     sas = new LinkedList<>();
+    iCode = new IntermediateCode();
     operatorStack = new LinkedList<>();
   }
 
@@ -49,6 +55,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     return sas == null ? new LinkedList<>() : sas;
   }
 
+  public IntermediateCode getiCode() {
+    return iCode;
+  }
+  
   void setScope(String scope) {
     this.scope = scope;
   }
@@ -1124,12 +1134,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
         if(!ParserUtils.isPrimitiveType(op2Type) && Keyword.NULL.toString().equals(op1Type)) {
           // Object assignment of null
           // employee = null
-          sas.push(operand2);
-          return;
         }
-        operatorException(operatorCtx.start.getLine(), "assignment", operator, op1Type, op2Type);
+        else {
+          operatorException(operatorCtx.start.getLine(), "assignment", operator, op1Type, op2Type);
+        }
       }
-      if(op2Symbol.getData().getAccessModifiers().contains(AccessModifier.CONST)
+      else if(op2Symbol.getData().getAccessModifiers().contains(AccessModifier.CONST)
               && !(operatorCtx.getParent() instanceof CclGrammarParser.FieldDeclarationContext)) {
         // Anything with a 'const' access modifier should not be assigned to
         throw new IllegalStateException(String.format(
@@ -1139,6 +1149,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
                 op2Symbol.getText()));
       }
       
+      iCode.add(new QuadBuilder()
+              .opcode(IntermediateOpcodes.Other.MOV.toString())
+              .operand1(op1Symbol.getSymbolId())
+              .operand2(op2Symbol.getSymbolId())
+              .build());
       sas.push(operand2);
       return;
     }

@@ -1,5 +1,6 @@
 package io.github.cmansfield.compiler;
 
+import io.github.cmansfield.secondpass.icode.IntermediateCode;
 import io.github.cmansfield.secondpass.semantics.SemanticsVisitor;
 import io.github.cmansfield.firstpass.symbols.SymbolTableVisitor;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
@@ -31,6 +32,7 @@ public class Compiler {
   private final Set<CompilerOptions> options;
   private List<CclGrammarParser.ClassDeclarationContext> templateClassContexts;
   private BidiMap<String, Symbol> symbolTable;
+  private IntermediateCode iCode;
 
   public Compiler(CompilerOptions... options) {
     if(options != null) {
@@ -110,7 +112,10 @@ public class Compiler {
    * @return          A boolean true if everything ran correctly
    */
   private boolean runSecondPass(final String fileName) throws IOException {
-    return runPass(fileName, new SemanticsVisitor(symbolTable, templateClassContexts));
+    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable, templateClassContexts);
+    boolean success = runPass(fileName, visitor);
+    iCode = visitor.getiCode();
+    return success;
   }
 
   /**
