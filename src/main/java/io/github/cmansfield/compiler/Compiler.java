@@ -1,5 +1,6 @@
 package io.github.cmansfield.compiler;
 
+import io.github.cmansfield.secondpass.semantics.SemanticsVisitor;
 import io.github.cmansfield.firstpass.symbols.SymbolTableVisitor;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -7,7 +8,6 @@ import io.github.cmansfield.parser.include.ImportGrammarLexer;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.language.CclGrammarLexer;
 import io.github.cmansfield.firstpass.symbols.SymbolUtils;
-import io.github.cmansfield.secondpass.SemanticsVisitor;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import io.github.cmansfield.io.SymbolTableWriter;

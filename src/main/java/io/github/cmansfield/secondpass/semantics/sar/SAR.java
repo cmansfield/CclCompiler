@@ -1,4 +1,4 @@
-package io.github.cmansfield.secondpass;
+package io.github.cmansfield.secondpass.semantics.sar;
 
 import java.util.stream.Collectors;
 import java.util.Collections;

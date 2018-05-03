@@ -1,4 +1,4 @@
-package io.github.cmansfield.secondpass;
+package io.github.cmansfield.secondpass.semantics;
 
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
