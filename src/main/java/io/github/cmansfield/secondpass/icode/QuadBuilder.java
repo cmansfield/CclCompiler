@@ -44,6 +44,11 @@ public class QuadBuilder {
     if(StringUtils.isBlank(opcode)) {
       throw new IllegalArgumentException("A quad's opcode cannot be blank");
     }
+    if(!IntermediateOpcodes.isOpcode(opcode)) {
+      throw new IllegalArgumentException(String.format(
+              "Opcode \'%s\' is not a valid opcode",
+              opcode));
+    }
     
     Quad quad = new Quad(opcode, operand1, operand2, operand3);
     quad.setLabel(label);

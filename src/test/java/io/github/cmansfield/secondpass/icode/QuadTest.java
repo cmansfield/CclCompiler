@@ -7,8 +7,7 @@ import java.util.List;
 
 public class QuadTest {
   
-//  @Test (enabled = false)
-  @Test
+  @Test (enabled = false)
   public void test_quad_toString() {
     List<Quad> quads = new ArrayList<>();
     quads.add(new Quad("AND", "L00001", "I00001", "T00001"));
@@ -20,5 +19,14 @@ public class QuadTest {
     quads.add(new Quad("FRAME", "L00001", "I00001"));
 
     quads.forEach(System.out::println);
+  }
+  
+  @Test (enabled = false)
+  public void test_deleteMe() {
+    boolean isOpcode = IntermediateOpcodes.isOpcode("METH");
+    boolean isOpcode2 = IntermediateOpcodes.isOpcode("MUL");
+    boolean isOpcode3 = IntermediateOpcodes.isOpcode("HOT");
+
+    System.out.println();
   }
 }
