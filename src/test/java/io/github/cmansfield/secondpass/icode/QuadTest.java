@@ -23,9 +23,7 @@ public class QuadTest {
   
   @Test (enabled = false)
   public void test_deleteMe() {
-    boolean isOpcode = IntermediateOpcodes.isOpcode("METH");
-    boolean isOpcode2 = IntermediateOpcodes.isOpcode("MUL");
-    boolean isOpcode3 = IntermediateOpcodes.isOpcode("HOT");
+    String opcode = IntermediateOpcodes.getOpcode("<");
 
     System.out.println();
   }

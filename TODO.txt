@@ -13,3 +13,4 @@ TODO List
         Create a new error listener for the SymbolTableVisitor to store syntax errors into 
             compiler's exception list
 
+    Update README.md

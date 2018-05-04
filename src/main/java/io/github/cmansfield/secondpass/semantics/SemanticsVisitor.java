@@ -1180,8 +1180,34 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     tempSar.addSymbolId(op2Symbol.getSymbolId());
     tempSar.addSymbolId(op1Symbol.getSymbolId());
     sas.push(tempSar);
+
+    String opcode = getOpcode(operator, operand1.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
+    iCode.add(new QuadBuilder()
+            .opcode(opcode)
+            .operand1(op2Symbol.getSymbolId())
+            .operand2(op1Symbol.getSymbolId())
+            .operand3(tempSymbol.getSymbolId())
+            .build());
   }
 
+  /**
+   * Factored out the logic for getting a valid opcode
+   * 
+   * @param operator    The operator used to find the corresponding opcode
+   * @param lineNumber  The line number of code to get here
+   * @return            The valid opcode for the supplied operator
+   */
+  private String getOpcode(String operator, int lineNumber) {
+    String opcode = IntermediateOpcodes.getOpcode(operator);
+    if(StringUtils.isBlank(opcode)) {
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Could not find the matching opcode for operator \'%s\'",
+              lineNumber,
+              operator));
+    }
+    return opcode;
+  }
+  
   /**
    * This will push the supplied operator onto the operator stack. It will continue to process
    * operators on the operator stack until the stack is empty or the top operator has a lower
@@ -1641,6 +1667,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             booleanSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(symbol.getSymbolId());
     sas.push(tempSar);
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Logic.NOT.toString())
+            .operand1(symbol.getSymbolId())
+            .operand2(tempSymbol.getSymbolId())
+            .build());
   }
   
   /**

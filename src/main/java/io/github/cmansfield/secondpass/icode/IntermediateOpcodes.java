@@ -1,8 +1,11 @@
 package io.github.cmansfield.secondpass.icode;
 
 import org.apache.commons.lang3.StringUtils;
+import io.github.cmansfield.parser.Keyword;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -25,7 +28,23 @@ public class IntermediateOpcodes {
     ADI,
     SUB,
     MUL,
-    DIV
+    DIV;
+    
+    public static String getOpcode(String operand) {
+      if(Keyword.PLUS.toString().equals(operand)) {
+        return ADD.toString();
+      }
+      if(Keyword.MINUS.toString().equals(operand)) {
+        return SUB.toString();
+      }
+      if(Keyword.MULTI.toString().equals(operand)) {
+        return MUL.toString();
+      }
+      if(Keyword.DIV.toString().equals(operand)) {
+        return DIV.toString();
+      }
+      return null;
+    }
   }
   public enum Bool {
     LT,
@@ -33,12 +52,47 @@ public class IntermediateOpcodes {
     NE,
     EQ,
     LE,
-    GE
+    GE;
+
+    public static String getOpcode(String operand) {
+      if(Keyword.LESS.toString().equals(operand)) {
+        return LT.toString();
+      }
+      if(Keyword.GREATER.toString().equals(operand)) {
+        return GT.toString();
+      }
+      if(Keyword.NOT_EQ.toString().equals(operand)) {
+        return NE.toString();
+      }
+      if(Keyword.EQUALS.toString().equals(operand)) {
+        return EQ.toString();
+      }
+      if(Keyword.LESS_EQ.toString().equals(operand)) {
+        return LE.toString();
+      }
+      if(Keyword.GREAT_EQ.toString().equals(operand)) {
+        return GE.toString();
+      }
+      return null;
+    }
   }
   public enum Logic {
     AND,
     OR,
-    NOT
+    NOT;
+
+    public static String getOpcode(String operand) {
+      if(Keyword.AND.toString().equals(operand)) {
+        return AND.toString();
+      }
+      if(Keyword.OR.toString().equals(operand)) {
+        return OR.toString();
+      }
+      if(Keyword.NOT.toString().equals(operand)) {
+        return NOT.toString();
+      }
+      return null;
+    }
   }
   public enum Flow {
     BF,
@@ -70,7 +124,13 @@ public class IntermediateOpcodes {
     REF,
     AREF
   }
-  
+
+  /**
+   * A boolean check to see if the supplied string is a valid opcode
+   * 
+   * @param opcode  String opcode to check if valid
+   * @return        Boolean true if the supplied value is a valid opcode
+   */
   public static boolean isOpcode(String opcode) {
     if(StringUtils.isBlank(opcode)) {
       return false;
@@ -83,5 +143,31 @@ public class IntermediateOpcodes {
       }
     }
     return false;
+  }
+
+  /**
+   * This will return the corresponding opcode for the supplied operator
+   * 
+   * @param operator  The operator to convert to opcode
+   * @return          The corresponding opcode if found
+   */
+  public static String getOpcode(String operator) {
+    List<Class<?>> classes = Arrays.asList(IntermediateOpcodes.class.getDeclaredClasses());
+    
+    for(Class<?> clazz : classes) {
+      try {
+        Method method = clazz.getDeclaredMethod("getOpcode", String.class);
+        String opcode = (String)method.invoke(null, operator);
+
+        if(StringUtils.isNotBlank(opcode)) {
+          return opcode;
+        }
+      }
+      catch(Exception e) {
+        // Move onto the next class
+      }
+    }
+    
+    return "";
   }
 }

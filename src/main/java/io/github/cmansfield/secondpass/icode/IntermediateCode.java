@@ -11,6 +11,10 @@ public class IntermediateCode {
     iCode = new ArrayList<>();
   }
 
+  public List<Quad> getICode() {
+    return new ArrayList<>(iCode);
+  }
+  
   public void add(Quad quad) {
     if(quad == null) {
       throw new IllegalArgumentException("Quads cannot be null");
