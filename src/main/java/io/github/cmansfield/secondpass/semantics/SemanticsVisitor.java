@@ -708,6 +708,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     refSar.addSymbolId(fieldSar.getSymbolId());
     fieldSar.getSymbolIds().forEach(refSar::addSymbolId);
     sas.push(refSar);
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.REF.toString())
+            .operand1(parentSar.getSymbolId())
+            .operand2(fieldSar.getSymbolId())
+            .operand3(referenceSymbol.getSymbolId())
+            .build());
   }
 
   /**
@@ -756,6 +763,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     arraySar.addSymbolId(parentSar.getSymbolId());
     arraySar.addSymbolId(fieldSar.getSymbolIds().get(0));
     sas.push(arraySar);
+    
+    // TODO - Uncomment for array iCode
+//    iCode.add(new QuadBuilder()
+//            .opcode(IntermediateOpcodes.Other.REF.toString())
+//            .operand1(parentSar.getSymbolId())
+//            .operand2(fieldSar.getSymbolId())
+//            .operand3(referenceSymbol.getSymbolId())
+//            .build());
   }
 
   /**
@@ -1430,6 +1445,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               type));
     }
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.PRINT.toString())
+            .operand1(symbol.getSymbolId())
+            .build());
   }
 
   /**
@@ -1465,6 +1485,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
               type));
     }
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.READ.toString())
+            .operand1(symbol.getSymbolId())
+            .build());
   }
 
   /**
@@ -1527,6 +1552,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               Keyword.IF.toString(),
               type));
     }
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Flow.BF.toString())
+            .operand1(booleanSymbol.getSymbolId())
+            .operand2("SKIP_IF")        // TODO - add the correct label
+            .build());
   }
 
   /**

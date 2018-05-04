@@ -1,18 +1,12 @@
 
 
 public static void main() {
-    int number = 2;
-    4 + 2;
-    4 - 2;
-    4 * 2;
-    4 / 2;
-    true && true;
-    true || false;
-    !true;
-    3 > 2;
-    2 < 3;
-    3 >= 2;
-    2 <= 3;
-    3 != 2;
-    3 == 3;
+    int x;
+    int y;
+      
+    if(x < y) {
+        print("Hello");
+    }
+    
+    print("end");
 }

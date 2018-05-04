@@ -41,6 +41,8 @@ public class App {
       return;
     }
 
+    compiler.getICode().forEach(System.out::println);
+    
     LOGGER.info("Complete");
   }
 }
