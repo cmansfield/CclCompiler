@@ -19,6 +19,7 @@ import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.compiler.Compiler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
+import io.github.cmansfield.compiler.Label;
 import io.github.cmansfield.parser.Keyword;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.CommonToken;
@@ -1557,7 +1558,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Flow.BF.toString())
             .operand1(booleanSymbol.getSymbolId())
-            .operand2("SKIP_IF")        // TODO - add the correct label
+            .operand2(compiler.generateLabel(Label.ENDIF))
             .build());
   }
 

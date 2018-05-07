@@ -30,8 +30,8 @@ public class Compiler {
   private final List<String> exceptions;
   private final Set<CompilerOptions> options;
   private List<CclGrammarParser.ClassDeclarationContext> templateClassContexts;
+  private LabelAndIdGenerator labelAndIdGenerator;
   private BidiMap<String, Symbol> symbolTable;
-  private LabelAndIdGenerator symbolIdGenerator;
   private IntermediateCode iCode;
 
   public Compiler(CompilerOptions... options) {
@@ -41,7 +41,7 @@ public class Compiler {
     else {
       this.options = Collections.emptySet();
     }
-    symbolIdGenerator = new LabelAndIdGenerator();
+    labelAndIdGenerator = new LabelAndIdGenerator();
     exceptions = new LinkedList<>();
   }
   
@@ -58,7 +58,11 @@ public class Compiler {
   }
 
   public String generateId(SymbolKind symbolKind) {
-    return symbolIdGenerator == null ? "" : symbolIdGenerator.generateId(symbolKind);
+    return labelAndIdGenerator == null ? "" : labelAndIdGenerator.generateId(symbolKind);
+  }
+  
+  public String generateLabel(Label label) {
+    return labelAndIdGenerator == null ? "" : labelAndIdGenerator.generateLabel(label);
   }
 
   /**
