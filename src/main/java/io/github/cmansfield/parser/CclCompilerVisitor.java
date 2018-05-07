@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.firstpass.symbols.*;
 import org.apache.commons.collections4.BidiMap;
 import org.antlr.v4.runtime.ParserRuleContext;
+import io.github.cmansfield.compiler.Compiler;
 import org.apache.commons.lang3.StringUtils;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -18,25 +19,29 @@ import java.util.*;
 public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor implements CompilerVisitor {
   public static final String GLOBAL_SCOPE = "g";
   protected final List<CclGrammarParser.ClassDeclarationContext> templateClassContexts;
+  protected final Compiler compiler;
   protected BidiMap<String, Symbol> symbols;
   protected String scope;
 
-  protected CclCompilerVisitor() {
+  protected CclCompilerVisitor(Compiler compiler) {
     this.templateClassContexts = new ArrayList<>();
     this.symbols = new DualHashBidiMap<>();
     this.scope = GLOBAL_SCOPE;
+    this.compiler = compiler;
   }
 
-  protected CclCompilerVisitor(BidiMap<String, Symbol> symbols) {
+  protected CclCompilerVisitor(Compiler compiler, BidiMap<String, Symbol> symbols) {
     this.symbols = symbols == null ? new DualHashBidiMap<>() : new DualHashBidiMap<>(symbols);
     this.templateClassContexts = new ArrayList<>();
     this.scope = GLOBAL_SCOPE;
+    this.compiler = compiler;
   }
 
-  protected CclCompilerVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
+  protected CclCompilerVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
     this.symbols = symbols == null ? new DualHashBidiMap<>() : new DualHashBidiMap<>(symbols);
     this.templateClassContexts = templateClassContexts == null ? new ArrayList<>() : templateClassContexts;
     this.scope = GLOBAL_SCOPE;
+    this.compiler = compiler;
   }
   
   public BidiMap<String, Symbol> getSymbols() {
@@ -67,14 +72,14 @@ public abstract class CclCompilerVisitor extends CclGrammarBaseVisitor implement
             false);
 
     if(StringUtils.isBlank(symbolId)) {
-      symbolId = SymbolIdGenerator.generateId(SymbolKind.PACKAGE);
+      symbolId = compiler.generateId(SymbolKind.PACKAGE);
       addNewSymbol(packageName, SymbolKind.PACKAGE, GLOBAL_SCOPE, new Data(), symbolId);
     }
     scope = GLOBAL_SCOPE + "." + symbolId;
   }
 
   protected Symbol addNewSymbol(String identifier, SymbolKind symbolKind, String scope, Data data) {
-    return addNewSymbol(identifier, symbolKind, scope, data, SymbolIdGenerator.generateId(symbolKind));
+    return addNewSymbol(identifier, symbolKind, scope, data, compiler.generateId(symbolKind));
   }
 
   /**

@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import org.apache.commons.collections4.BidiMap;
 import io.github.cmansfield.parser.ParserUtils;
+import io.github.cmansfield.compiler.Compiler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.parser.Keyword;
@@ -19,18 +20,18 @@ import java.util.*;
 
 public class SymbolTableVisitor extends CclCompilerVisitor {
 
-  public SymbolTableVisitor() {
-    super();
+  public SymbolTableVisitor(Compiler compiler) {
+    super(compiler);
   }
 
-  protected SymbolTableVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
-    super(symbols, templateClassContexts);
+  protected SymbolTableVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
+    super(compiler, symbols, templateClassContexts);
   }
 
   @Override
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {
     SymbolKind symbolKind = SymbolKind.METHOD;
-    String symbolId = SymbolIdGenerator.generateId(symbolKind);
+    String symbolId = compiler.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
@@ -85,7 +86,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   @Override
   public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
     SymbolKind symbolKind = SymbolKind.CLASS;
-    String symbolId = SymbolIdGenerator.generateId(symbolKind);
+    String symbolId = compiler.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
@@ -121,7 +122,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   @Override
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
     SymbolKind symbolKind = SymbolKind.CONSTRUCTOR;
-    String symbolId = SymbolIdGenerator.generateId(symbolKind);
+    String symbolId = compiler.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
@@ -164,7 +165,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
   @Override
   public Object visitMainDeclaration(CclGrammarParser.MainDeclarationContext ctx) {
     SymbolKind symbolKind = SymbolKind.MAIN;
-    String symbolId = SymbolIdGenerator.generateId(symbolKind);
+    String symbolId = compiler.generateId(symbolKind);
     List<AccessModifier> accessModifiers = getAccessModifiers(ctx);
     Data data = new DataBuilder()
             .returnType(Keyword.VOID.toString())
@@ -222,7 +223,7 @@ public class SymbolTableVisitor extends CclCompilerVisitor {
    * @param ctx     The current context to search for access modifiers
    * @return        List of found access modifiers
    */
-  protected List<AccessModifier> getAccessModifiers(ParserRuleContext ctx) {
+  List<AccessModifier> getAccessModifiers(ParserRuleContext ctx) {
     if(ctx == null) {
       return Collections.emptyList();
     }

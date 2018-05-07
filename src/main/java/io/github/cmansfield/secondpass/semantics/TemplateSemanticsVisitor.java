@@ -1,5 +1,6 @@
 package io.github.cmansfield.secondpass.semantics;
 
+import io.github.cmansfield.compiler.Compiler;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.Symbol;
@@ -19,8 +20,8 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
   private final Map<String,String> templateTypeMap;
   private List<String> templateTypes;
 
-  TemplateSemanticsVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope) {
-    super(symbols, templateClassContexts);
+  TemplateSemanticsVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope) {
+    super(compiler, symbols, templateClassContexts);
     this.templateTypeMap = new LinkedMap<>();
     this.scope = scope;
   }

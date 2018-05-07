@@ -1,16 +1,14 @@
 package io.github.cmansfield.compiler;
 
+import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.secondpass.semantics.SemanticsVisitor;
-import io.github.cmansfield.firstpass.symbols.SymbolTableVisitor;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
 import io.github.cmansfield.parser.include.ImportGrammarLexer;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.language.CclGrammarLexer;
-import io.github.cmansfield.firstpass.symbols.SymbolUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
-import io.github.cmansfield.firstpass.symbols.Symbol;
 import io.github.cmansfield.secondpass.icode.Quad;
 import io.github.cmansfield.io.SymbolTableWriter;
 import org.apache.commons.collections4.BidiMap;
@@ -33,6 +31,7 @@ public class Compiler {
   private final Set<CompilerOptions> options;
   private List<CclGrammarParser.ClassDeclarationContext> templateClassContexts;
   private BidiMap<String, Symbol> symbolTable;
+  private LabelAndIdGenerator symbolIdGenerator;
   private IntermediateCode iCode;
 
   public Compiler(CompilerOptions... options) {
@@ -42,6 +41,7 @@ public class Compiler {
     else {
       this.options = Collections.emptySet();
     }
+    symbolIdGenerator = new LabelAndIdGenerator();
     exceptions = new LinkedList<>();
   }
   
@@ -56,7 +56,11 @@ public class Compiler {
   public List<Quad> getICode() {
     return iCode.getICode();
   }
-  
+
+  public String generateId(SymbolKind symbolKind) {
+    return symbolIdGenerator == null ? "" : symbolIdGenerator.generateId(symbolKind);
+  }
+
   /**
    * This will compile the file supplied
    * 
@@ -106,7 +110,7 @@ public class Compiler {
     if(symbolTable != null) {
       symbolTable.clear();
     }
-    return runPass(fileName, new SymbolTableVisitor());
+    return runPass(fileName, new SymbolTableVisitor(this));
   }
 
   /**
@@ -117,7 +121,7 @@ public class Compiler {
    * @return          A boolean true if everything ran correctly
    */
   private boolean runSecondPass(final String fileName) throws IOException {
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable, templateClassContexts);
+    SemanticsVisitor visitor = new SemanticsVisitor(this, symbolTable, templateClassContexts);
     boolean success = runPass(fileName, visitor);
     iCode = visitor.getiCode();
     return success;

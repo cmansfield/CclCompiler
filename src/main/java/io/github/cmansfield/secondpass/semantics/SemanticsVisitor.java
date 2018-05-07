@@ -16,6 +16,7 @@ import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
+import io.github.cmansfield.compiler.Compiler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.parser.Keyword;
@@ -37,15 +38,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   
   private static final int DEFAULT_LINE_NUMBER = -1;
 
-  SemanticsVisitor(BidiMap<String, Symbol> symbols) {
-    super(symbols);
+  SemanticsVisitor(Compiler compiler, BidiMap<String, Symbol> symbols) {
+    super(compiler, symbols);
     sas = new LinkedList<>();
     iCode = new IntermediateCode();
     operatorStack = new LinkedList<>();
   }
 
-  public SemanticsVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
-    super(symbols, templateClassContexts);
+  public SemanticsVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
+    super(compiler, symbols, templateClassContexts);
     sas = new LinkedList<>();
     iCode = new IntermediateCode();
     operatorStack = new LinkedList<>();
@@ -368,11 +369,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private Symbol createNewClassFromTemplate(Symbol templateClass, List<String> templateTypes, int lineNumber) {
     // First pass
-    TemplateVisitor templateVisitor = new TemplateSymbolVisitor(symbols, templateClassContexts, templateClass.getScope());
+    TemplateVisitor templateVisitor = new TemplateSymbolVisitor(compiler, symbols, templateClassContexts, templateClass.getScope());
     templateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
     symbols = templateVisitor.getSymbols();
     // Second pass
-    templateVisitor = new TemplateSemanticsVisitor(symbols, templateClassContexts, templateClass.getScope());
+    templateVisitor = new TemplateSemanticsVisitor(compiler, symbols, templateClassContexts, templateClass.getScope());
     templateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
     symbols = templateVisitor.getSymbols();
 
@@ -1009,7 +1010,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               integerType));
     }
 
-    String tempSymbolId = SymbolIdGenerator.generateId(SymbolKind.TEMPORARY);
+    String tempSymbolId = compiler.generateId(SymbolKind.TEMPORARY);
     String tempText = String.format("cast %s to %s",
             type,
             integerType);
@@ -1054,7 +1055,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               charType));
     }
 
-    String tempSymbolId = SymbolIdGenerator.generateId(SymbolKind.TEMPORARY);
+    String tempSymbolId = compiler.generateId(SymbolKind.TEMPORARY);
     String tempText = String.format("cast %s to %s",
             type,
             charType);
@@ -2113,7 +2114,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void forStatement(CclGrammarParser.StatementWithScopeContext ctx) {
     String scopeOrig = scope;
-    String symbolId = SymbolIdGenerator.generateId(SymbolKind.FOR);
+    String symbolId = compiler.generateId(SymbolKind.FOR);
     scope = scope + "." + symbolId;
 
     Data data = new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
@@ -2145,7 +2146,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    */
   private void blockStatement(ParserRuleContext ctx) {
     String scopeOrig = scope;
-    String symbolId = SymbolIdGenerator.generateId(SymbolKind.BLOCK);
+    String symbolId = compiler.generateId(SymbolKind.BLOCK);
     scope = scope + "." + symbolId;
 
     Data data = new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();

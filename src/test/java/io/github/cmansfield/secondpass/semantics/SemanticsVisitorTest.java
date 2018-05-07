@@ -1,5 +1,6 @@
 package io.github.cmansfield.secondpass.semantics;
 
+import io.github.cmansfield.compiler.Compiler;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -116,7 +117,7 @@ public class SemanticsVisitorTest {
     String text = "name";
 
     BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile(fileName);
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Symbol filter = new SymbolBuilder()
             .symbolKind(symbolKind)
             .text(text)
@@ -135,7 +136,7 @@ public class SemanticsVisitorTest {
   @Test
   public void test_traceScopeToFindSymbolId_notFound() throws IOException {
     BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test7.ccl");
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     String symbolId = visitor.traceScopeToFindSymbolId("something", SarType.IDENTIFIER, "g.D00001.C00001.M00001", -1);
 
     assertNull(symbolId);
@@ -143,7 +144,7 @@ public class SemanticsVisitorTest {
 
   @Test
   public void test_traceScopeToFindSymbolId_noText() throws IOException {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     String symbolId = visitor.traceScopeToFindSymbolId("", SarType.IDENTIFIER, "g.D00001.C00001.M00001", -1);
 
     assertNotNull(symbolId);
@@ -157,7 +158,7 @@ public class SemanticsVisitorTest {
     String text = "name";
 
     BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile(fileName);
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Symbol filter = new SymbolBuilder()
             .symbolKind(SymbolKind.LOCAL_VAR)
             .text("last")
@@ -175,7 +176,7 @@ public class SemanticsVisitorTest {
   @Test
   public void test_duplicate() throws IOException {
     BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test10.ccl", CompilerOptions.FIRST_PASS_ONLY);
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
 
     symbolTable.entrySet().stream()
             .map(Map.Entry::getValue)
@@ -193,7 +194,7 @@ public class SemanticsVisitorTest {
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_duplicate_fail_duplicateClasses() throws IOException {
     BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test11.ccl", CompilerOptions.FIRST_PASS_ONLY);
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
 
     symbolTable.entrySet().stream()
             .map(Map.Entry::getValue)
@@ -209,7 +210,7 @@ public class SemanticsVisitorTest {
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_duplicate_fail_duplicateMethods() throws IOException {
     BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test12.ccl", CompilerOptions.FIRST_PASS_ONLY);
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
 
     symbolTable.entrySet().stream()
             .map(Map.Entry::getValue)
@@ -225,7 +226,7 @@ public class SemanticsVisitorTest {
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_duplicate_fail_duplicateConstructors() throws IOException {
     BidiMap<String, Symbol> symbolTable = CompilerTestUtils.compile("test13.ccl", CompilerOptions.FIRST_PASS_ONLY);
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
 
     symbolTable.entrySet().stream()
             .map(Map.Entry::getValue)
@@ -250,7 +251,7 @@ public class SemanticsVisitorTest {
             Keyword.VOID.toString());
 
     for(String type : primitiveTypes) {
-      SemanticsVisitor visitor = new SemanticsVisitor(null);
+      SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
       visitor.typePush(mockContext, type, null);
       visitor.typeExist();
       Deque<SAR> sas = visitor.getSemanticActionStack();
@@ -277,7 +278,7 @@ public class SemanticsVisitorTest {
             .symbolKind(SymbolKind.CLASS)
             .text(text)
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     visitor.setScope(scope);
     
     visitor.typePush(mockContext, text, null);
@@ -293,7 +294,7 @@ public class SemanticsVisitorTest {
   
   @Test
   public void test_endOfArgumentList() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.BEGINNING_ARG_LIST, "", "", 5));
     sas.push(new SAR(SarType.IDENTIFIER, "I00001", "", 5));
@@ -319,14 +320,14 @@ public class SemanticsVisitorTest {
 
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_endOfArgumentList_emtpySas() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     
     visitor.endOfArgumentList();
   }
 
   @Test (expectedExceptions = IllegalStateException.class)
   public void test_endOfArgumentList_noBal() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.IDENTIFIER, "I00001", "", 5));
     sas.push(new SAR(SarType.IDENTIFIER, "I00002", "", 5));
@@ -337,7 +338,7 @@ public class SemanticsVisitorTest {
 
   @Test
   public void test_endOfArgumentList_missingSymbolId() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.BEGINNING_ARG_LIST, "", "", 5));
     sas.push(new SAR(SarType.IDENTIFIER, "I00002", "", 5));
@@ -387,7 +388,7 @@ public class SemanticsVisitorTest {
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.IDENTIFIER, instanceId, instanceText, 5));
     sas.push(new SAR(SarType.IDENTIFIER, instanceVarId, instanceVarText, 5));
@@ -444,7 +445,7 @@ public class SemanticsVisitorTest {
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.IDENTIFIER, instanceId, instanceText, 5));
     sas.push(new SAR(SarType.IDENTIFIER, methodId, methodText, 5));
@@ -491,7 +492,7 @@ public class SemanticsVisitorTest {
                     .accessModifier(AccessModifier.STATIC)
                     .build())
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.TYPE, classId, className, 5));
     sas.push(new SAR(SarType.IDENTIFIER, instanceVarId, instanceVarText, 5));
@@ -538,7 +539,7 @@ public class SemanticsVisitorTest {
                     .accessModifier(AccessModifier.STATIC)
                     .build())
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.TYPE, classId, className, 5));
     sas.push(new SAR(SarType.IDENTIFIER, methodId, methodText, 5));
@@ -562,7 +563,7 @@ public class SemanticsVisitorTest {
 
   @Test
   public void test_referenceExist_fail_emptySas() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     
     try {
       visitor.referenceExist();
@@ -575,7 +576,7 @@ public class SemanticsVisitorTest {
 
   @Test
   public void test_referenceExist_fail_tooFewSars() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.TYPE, "C00001", "MyClass", 5));
     
@@ -590,7 +591,7 @@ public class SemanticsVisitorTest {
 
   @Test
   public void test_referenceExist_fail_badFieldSarType() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.TYPE, "C00001", "MyClass", 5));
     sas.push(new SAR(SarType.TYPE, "C00002", "SomeOtherClass", 5));
@@ -607,7 +608,7 @@ public class SemanticsVisitorTest {
   // TODO - Update this test
   @Test (enabled = false)
   public void test_referenceExist_fail_missingType() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.IDENTIFIER, "I00001", "number", 5));
     sas.push(new SAR(SarType.IDENTIFIER, "L00001", "MyClass", 5));
@@ -623,7 +624,7 @@ public class SemanticsVisitorTest {
 
   @Test
   public void test_referenceExist_fail_badParentSarType() {
-    SemanticsVisitor visitor = new SemanticsVisitor(null);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), null);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.LITERAL, "I00001", "13", 5));
     sas.push(new SAR(SarType.IDENTIFIER, "M00001", "someMethod", 5));
@@ -662,7 +663,7 @@ public class SemanticsVisitorTest {
                     .accessModifier(AccessModifier.STATIC)
                     .build())
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.TYPE, classId, className, 5));
     sas.push(new SAR(SarType.IDENTIFIER, instanceVarId, instanceVarText, 5));
@@ -700,7 +701,7 @@ public class SemanticsVisitorTest {
                     .accessModifier(AccessModifier.PUBLIC)
                     .build())
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.TYPE, classId, className, 5));
     sas.push(new SAR(SarType.IDENTIFIER, instanceVarId, instanceVarText, 5));
@@ -730,7 +731,7 @@ public class SemanticsVisitorTest {
                     .build())
             .scope(scope)
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.LITERAL, literalVarId, literalVarText, 5));
 
@@ -767,7 +768,7 @@ public class SemanticsVisitorTest {
                     .build())
             .scope(scope)
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.IDENTIFIER, varId, varText, 5));
 
@@ -796,7 +797,7 @@ public class SemanticsVisitorTest {
                     .build())
             .scope(scope)
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.LITERAL, literalVarId, literalVarText, 5));
 
@@ -832,7 +833,7 @@ public class SemanticsVisitorTest {
                     .build())
             .scope(scope)
             .build());
-    SemanticsVisitor visitor = new SemanticsVisitor(symbolTable);
+    SemanticsVisitor visitor = new SemanticsVisitor(new Compiler(), symbolTable);
     Deque<SAR> sas = visitor.getSemanticActionStack();
     sas.push(new SAR(SarType.LITERAL, literalVarId, literalVarText, 5));
 
@@ -869,7 +870,7 @@ public class SemanticsVisitorTest {
             .symbolKind(symbolKind)
             .text(symbolText)
             .build());
-    SemanticsVisitor semanticsVisitor = new SemanticsVisitor(symbols);
+    SemanticsVisitor semanticsVisitor = new SemanticsVisitor(new Compiler(), symbols);
     semanticsVisitor.resetToNewPackage(fakePackageName);
     
     CommonToken startToken = new CommonToken(parserIndex);

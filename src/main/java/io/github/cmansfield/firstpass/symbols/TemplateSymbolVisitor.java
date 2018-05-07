@@ -1,5 +1,6 @@
 package io.github.cmansfield.firstpass.symbols;
 
+import io.github.cmansfield.compiler.Compiler;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.parser.language.CclGrammarParser;
@@ -18,8 +19,8 @@ public final class TemplateSymbolVisitor extends SymbolTableVisitor implements T
   private final Map<String,String> templateTypeMap;
   private List<String> templateTypes;
 
-  public TemplateSymbolVisitor(BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope) {
-    super(symbols, templateClassContexts);
+  public TemplateSymbolVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope) {
+    super(compiler, symbols, templateClassContexts);
     this.templateTypeMap = new LinkedMap<>();
     this.scope = scope;
   }
@@ -64,7 +65,7 @@ public final class TemplateSymbolVisitor extends SymbolTableVisitor implements T
   @Override
   public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {
     SymbolKind symbolKind = SymbolKind.CLASS;
-    String symbolId = SymbolIdGenerator.generateId(symbolKind);
+    String symbolId = compiler.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
@@ -94,7 +95,7 @@ public final class TemplateSymbolVisitor extends SymbolTableVisitor implements T
   @Override
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {
     SymbolKind symbolKind = SymbolKind.CONSTRUCTOR;
-    String symbolId = SymbolIdGenerator.generateId(symbolKind);
+    String symbolId = compiler.generateId(symbolKind);
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
