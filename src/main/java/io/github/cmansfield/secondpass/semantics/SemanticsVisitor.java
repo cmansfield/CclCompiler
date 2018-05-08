@@ -2587,12 +2587,29 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     semanticIf();             // Semantic call #if
 
     // Visit 'if' statement and 'else' statement if one exists
-    ctx.children.stream()
+    List<CclGrammarParser.StatementContext> statements = ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.StatementContext)
             .map(context -> (CclGrammarParser.StatementContext)context)
-            .forEach(this::visitStatement);
-    
-    iCode.setNextLabel(iCode.popLabel(Label.ENDIF));
+            .collect(Collectors.toList());
+    if(!statements.isEmpty()) {
+      visitStatement(statements.get(0));
+      iCode.setNextLabel(iCode.popLabel(Label.ENDIF));
+    }
+    if(statements.size() > 1) {
+      String endIfLabel = iCode.getNextLabel();
+      iCode.clearNextLabel();
+      String endElseLabel = compiler.generateLabel(Label.ENDELSE);
+      iCode.pushLabel(Label.ENDELSE, endElseLabel);
+      iCode.add(new QuadBuilder()
+              .opcode(IntermediateOpcodes.Flow.JMP.toString())
+              .operand1(endElseLabel)
+              .build());
+      iCode.setNextLabel(endIfLabel);
+      
+      visitStatement(statements.get(1));
+      
+      iCode.setNextLabel(iCode.popLabel(Label.ENDELSE));
+    }
   }
 
   @Override

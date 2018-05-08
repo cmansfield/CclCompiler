@@ -4,10 +4,11 @@ public static void main() {
     int x;
     int y;
      
-    if(true) {
-        if(x < y) {
-            print("Hello");
-        }
+    if(x < y) {
+        print("Hello");
+    }
+    else {
+        print("World");
     }
     
     print("end");

@@ -42,6 +42,10 @@ public class IntermediateCode {
     iCode.add(quad);    
   }
 
+  public void clearNextLabel() {
+    nextLabel = null;
+  }
+  
   /**
    * Set the label to be applied to the next quad added
    * 
@@ -52,6 +56,10 @@ public class IntermediateCode {
       backPropagate(label);
     }
     nextLabel = label;
+  }
+  
+  public String getNextLabel() {
+    return nextLabel;
   }
 
   /**
