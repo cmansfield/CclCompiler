@@ -1555,10 +1555,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               type));
     }
 
+    String endIfLabel = compiler.generateLabel(Label.ENDIF);
+    iCode.pushLabel(Label.ENDIF, endIfLabel);
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Flow.BF.toString())
             .operand1(booleanSymbol.getSymbolId())
-            .operand2(compiler.generateLabel(Label.ENDIF))
+            .operand2(endIfLabel)
             .build());
   }
 
@@ -2589,6 +2591,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .filter(node -> node instanceof CclGrammarParser.StatementContext)
             .map(context -> (CclGrammarParser.StatementContext)context)
             .forEach(this::visitStatement);
+    
+    iCode.setNextLabel(iCode.popLabel(Label.ENDIF));
   }
 
   @Override

@@ -3,9 +3,11 @@
 public static void main() {
     int x;
     int y;
-      
-    if(x < y) {
-        print("Hello");
+     
+    if(true) {
+        if(x < y) {
+            print("Hello");
+        }
     }
     
     print("end");

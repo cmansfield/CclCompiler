@@ -30,6 +30,18 @@ public class Quad {
     this.label = StringUtils.isBlank(label) ? "" : label;
   }
   
+  void setOperand1(String operand1) {
+    this.operand1 = operand1;
+  }
+  
+  void setOperand2(String operand2) {
+    this.operand2 = operand2;
+  }
+  
+  void setOperand3(String operand3) {
+    this.operand3 = operand3;
+  }
+  
   void setComment(String comment) {
     this.comment = comment;
   }
@@ -61,9 +73,9 @@ public class Quad {
   @Override
   public String toString() {
     return String.format(
-            "%-50s%s", 
+            "%-55s%s", 
             String.format(
-              "%-15s%-6s%s%s%s", 
+              "%-20s%-6s%s%s%s", 
               label,
               opcode, 
               StringUtils.isBlank(operand1) ? "" : operand1,
