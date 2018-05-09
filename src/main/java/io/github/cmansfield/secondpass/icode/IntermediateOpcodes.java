@@ -10,7 +10,9 @@ import java.util.List;
 
 
 public class IntermediateOpcodes {
-  private static List<Class<? extends Enum>> opcodeClasses;
+  static List<Class<? extends Enum>> opcodeClasses;
+  private static List<Method> opcodeMethods;
+  
   static {
     opcodeClasses = new ArrayList<>();
     opcodeClasses.add(Math.class);
@@ -21,6 +23,16 @@ public class IntermediateOpcodes {
     opcodeClasses.add(Other.class);
     opcodeClasses.add(Invoke.class);
     opcodeClasses.add(Allowcate.class);
+
+    opcodeMethods = new ArrayList<>();
+    for(Class<?> clazz : IntermediateOpcodes.class.getDeclaredClasses()) {
+      try {
+        opcodeMethods.add(clazz.getDeclaredMethod("getOpcode", String.class));
+      }
+      catch(Exception e) {
+        // Move onto the next class
+      }
+    }
   }
   
   public enum Math {
@@ -152,11 +164,8 @@ public class IntermediateOpcodes {
    * @return          The corresponding opcode if found
    */
   public static String getOpcode(String operator) {
-    List<Class<?>> classes = Arrays.asList(IntermediateOpcodes.class.getDeclaredClasses());
-    
-    for(Class<?> clazz : classes) {
+    for(Method method : opcodeMethods) {
       try {
-        Method method = clazz.getDeclaredMethod("getOpcode", String.class);
         String opcode = (String)method.invoke(null, operator);
 
         if(StringUtils.isNotBlank(opcode)) {

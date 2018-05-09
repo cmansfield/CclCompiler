@@ -1643,6 +1643,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               Keyword.WHILE.toString(),
               type));
     }
+
+    String endWhileLabel = compiler.generateLabel(Label.ENDWHILE);
+    iCode.pushLabel(Label.ENDWHILE, endWhileLabel);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Flow.BF.toString())
+            .operand1(booleanSymbol.getSymbolId())
+            .operand2(endWhileLabel)
+            .build());
   }
 
   /**
@@ -2562,6 +2570,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param ctx   The 'while' statement context
    */
   private void whileStatement(CclGrammarParser.StatementContext ctx) {
+    // iCode: BEGIN
+    String beginLabel = compiler.generateLabel(Label.BEGIN);
+//    iCode.pushLabel(Label.BEGIN, beginLabel);
+    iCode.setNextLabel(beginLabel);
+    
     ParseTree child;
     Iterator<ParseTree> childIter = ctx.children.iterator();
     while(!((child = childIter.next()) instanceof CclGrammarParser.StatementContext)) {
@@ -2571,6 +2584,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     // Visit 'while' statement
     child.accept(this);
+
+//    beginLabel = iCode.popLabel(Label.BEGIN);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Flow.JMP.toString())
+            .operand1(beginLabel)
+            .build());
+    iCode.setNextLabel(iCode.popLabel(Label.ENDWHILE));
   }
 
   /**
@@ -2681,6 +2701,18 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     super.visitBraceEnclosedInitializer(ctx);
 
     braceInitializer();      // Semantic #braceInitializer
+    
+    return null;
+  }
+
+  @Override
+  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
+    super.visitCompilationUnit(ctx);
+
+    // Last quad to be added just in case there is an unused label waiting
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.PRINT.toString())
+            .build());
     
     return null;
   }
