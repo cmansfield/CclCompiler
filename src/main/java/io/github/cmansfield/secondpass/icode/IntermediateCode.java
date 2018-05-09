@@ -13,8 +13,8 @@ public class IntermediateCode {
   private String nextLabel;
   
   public IntermediateCode() {
-    iCode = new ArrayList<>();
     labelStackMap = new EnumMap<>(Label.class);
+    iCode = new ArrayList<>();
   }
 
   public List<Quad> getICode() {
@@ -117,6 +117,19 @@ public class IntermediateCode {
     }
     
     return labelStackMap.get(label).pop();
+  }
+
+  /**
+   * This method will check to see if the latest quad matches the supplied opcode
+   * 
+   * @param opcode  Opcode to compare with
+   * @return        Boolean true if they match
+   */
+  public boolean isLastOpcode(String opcode) {
+    if(StringUtils.isBlank(opcode) || iCode.isEmpty()) {
+      return false;
+    }
+    return opcode.equals(iCode.get(iCode.size() - 1).getOpcode());
   }
   
   @Override

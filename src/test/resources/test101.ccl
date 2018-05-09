@@ -1,0 +1,12 @@
+
+
+public static void main() {
+    int x;
+    int y;
+     
+    while(x < y) {
+        int number;
+        print("Hello");
+        read(number);
+    }
+}

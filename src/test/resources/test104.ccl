@@ -1,0 +1,17 @@
+
+
+public static void main() {
+    int x;
+    int y;
+    int z;
+     
+    while(x < y) {
+        int number;
+        print("Hello");
+        read(number);
+    }
+    while(z != 3) {
+        print("world");
+    }
+    print("end");
+}

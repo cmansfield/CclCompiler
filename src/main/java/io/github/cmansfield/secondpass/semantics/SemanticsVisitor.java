@@ -1510,6 +1510,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       symbol = symbols.get(sar.getSymbolId());
     }
     if(symbol == null) {
+      iCode.add(new QuadBuilder()
+              .opcode(IntermediateOpcodes.Method.RTN.toString())
+              .build());
       return;
     }
 
@@ -1534,6 +1537,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               type,
               SymbolUtils.formatMethodText(symbols, methodSymbol)));
     }
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.RTN.toString())
+            .operand1(symbol.getSymbolId())
+            .build());
   }
 
   /**
@@ -2141,8 +2149,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
           isSecondSemicolon = true;
         }
         else {
-          // Check to make sure the second for-loop expression is a
-          // boolean type
+          // Check to make sure the second for-loop expression is a boolean type
           semanticFor();         // Semantic call #for
         }
       }
@@ -2209,6 +2216,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
     checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());     // NOSONAR
 
+    iCode.setNextLabel(symbolId);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FUNC.toString())
+            .operand1(symbolId)
+            .build());
+    
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
     
@@ -2234,6 +2247,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String symbolId = findMethodSymbolId(name, SymbolKind.METHOD, paramTypes);
     checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
 
+    iCode.setNextLabel(symbolId);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FUNC.toString())
+            .operand1(symbolId)
+            .build());
+    
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
@@ -2241,7 +2260,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     paramExist(ctx);
     traverseMethodBody(ctx);
     scope = scopeOrig;
-
+    
     return null;
   }
 
@@ -2250,6 +2269,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     String symbolId = findSymbolId(Keyword.MAIN.toString(), SymbolKind.MAIN);
     checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
 
+    iCode.setNextLabel(symbolId);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FUNC.toString())
+            .operand1(symbolId)
+            .build());
+    
     String scopeOrig = scope;
     scope = String.format("%s.%s", scope, symbolId);
     traverseMethodBody(ctx);
@@ -2572,7 +2597,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private void whileStatement(CclGrammarParser.StatementContext ctx) {
     // iCode: BEGIN
     String beginLabel = compiler.generateLabel(Label.BEGIN);
-//    iCode.pushLabel(Label.BEGIN, beginLabel);
     iCode.setNextLabel(beginLabel);
     
     ParseTree child;
@@ -2585,7 +2609,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     // Visit 'while' statement
     child.accept(this);
 
-//    beginLabel = iCode.popLabel(Label.BEGIN);
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Flow.JMP.toString())
             .operand1(beginLabel)
@@ -2706,13 +2729,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   @Override
-  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
-    super.visitCompilationUnit(ctx);
-
-    // Last quad to be added just in case there is an unused label waiting
-    iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Other.PRINT.toString())
-            .build());
+  public Object visitMethodBody(CclGrammarParser.MethodBodyContext ctx) {
+    super.visitMethodBody(ctx);
+    
+    if(!iCode.isLastOpcode(IntermediateOpcodes.Method.RTN.toString())) {
+      iCode.add(new QuadBuilder()
+              .opcode(IntermediateOpcodes.Method.RTN.toString())
+              .build());
+    }
     
     return null;
   }

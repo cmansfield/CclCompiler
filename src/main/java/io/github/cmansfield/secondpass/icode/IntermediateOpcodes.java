@@ -3,15 +3,13 @@ package io.github.cmansfield.secondpass.icode;
 import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.parser.Keyword;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
 public class IntermediateOpcodes {
   static List<Class<? extends Enum>> opcodeClasses;
-  private static List<Method> opcodeMethods;
+  private static List<java.lang.reflect.Method> opcodeMethods;
   
   static {
     opcodeClasses = new ArrayList<>();
@@ -21,7 +19,7 @@ public class IntermediateOpcodes {
     opcodeClasses.add(Logic.class);
     opcodeClasses.add(Stack.class);
     opcodeClasses.add(Other.class);
-    opcodeClasses.add(Invoke.class);
+    opcodeClasses.add(Method.class);
     opcodeClasses.add(Allowcate.class);
 
     opcodeMethods = new ArrayList<>();
@@ -116,11 +114,11 @@ public class IntermediateOpcodes {
     POP,
     PEEK
   }
-  public enum Invoke {
+  public enum Method {
     FRAME,
     CALL,
     RTN,
-    METH
+    FUNC
   }
   public enum Allowcate {
     NEWI,
@@ -164,7 +162,7 @@ public class IntermediateOpcodes {
    * @return          The corresponding opcode if found
    */
   public static String getOpcode(String operator) {
-    for(Method method : opcodeMethods) {
+    for(java.lang.reflect.Method method : opcodeMethods) {
       try {
         String opcode = (String)method.invoke(null, operator);
 

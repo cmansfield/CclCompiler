@@ -1,12 +1,13 @@
 
 
-public static void main() {
-    int x;
-    int y;
-     
-    while(x < y) {
-        int number;
-        print("Hello");
-        read(number);
+public class Test {
+    public Test() {}
+    public int method() {
+        return 10;
     }
+}
+
+public static void main() {
+    //Test test = new Test();
+    //test.method();
 }

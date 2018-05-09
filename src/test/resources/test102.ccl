@@ -1,0 +1,13 @@
+
+
+public static void main() {
+    int x;
+    int y;
+     
+    if(x < y) {
+        print("Hello");
+    }
+    else {
+        print("World");
+    }
+}
