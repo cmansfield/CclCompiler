@@ -632,7 +632,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     else if(parentSar.getType() == SarType.TYPE) {
       referenceExistTypeBase(parentSar, fieldSar);
     }
-    else if(parentSar.getType() == SarType.REFERENCE) {
+    else if(parentSar.getType() == SarType.REFERENCE || parentSar.getType() == SarType.TEMPORARY) {
       referenceExistReferenceBase(parentSar, fieldSar);
     }
     else {
@@ -969,8 +969,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
 
     methodExist(methodNameSar, argListSar, classSymbol, SymbolKind.METHOD, Keyword.THIS.toString().equalsIgnoreCase(instanceSar.getText()));
-
     Symbol methodSymbol = symbols.get(sas.peek().getSymbolId());
+    sas.push(instanceSar);
+    
     List<AccessModifier> accessModifiers = methodSymbol.getData().getAccessModifiers();
     if(instanceSar.getType() == SarType.TYPE && !accessModifiers.contains(AccessModifier.STATIC)) {
       throw new IllegalStateException(String.format(
@@ -987,6 +988,26 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               methodNameSar.getText(),
               instanceSar.getText()));
     }
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FRAME.toString())
+            .operand1(methodSymbol.getSymbolId())
+            .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Stack.PUSH.toString())
+            .operand1(instanceSar.getSymbolId())
+            .build());
+    if(argListSar != null) {
+      argListSar.getSymbolIds()
+              .forEach(id -> iCode.add(new QuadBuilder()
+                      .opcode(IntermediateOpcodes.Stack.PUSH.toString())
+                      .operand1(id)
+                      .build()));
+    }
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.CALL.toString())
+            .operand1(methodSymbol.getSymbolId())
+            .build());
   }
 
   /**
@@ -1105,6 +1126,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     String operator = getChildText(operatorCtx);
     String tempType = null;
+    
+    if(",".equals(operator)) {
+      return;
+    }
     
     SAR operand1 = sas.pop();
     SAR operand2 = sas.pop();
@@ -1319,8 +1344,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * EndOfExpression, this method will pop operators off the operator stack and process the
    * required SARs from the SAS for that operation 
    */
-  private void endOfExpression() {
-    while(CollectionUtils.isNotEmpty(operatorStack) && !"(".equals(getChildText(operatorStack.peek()))) {
+  private void endOfExpression(String... stopEvaluatingStackIfFound) {
+    List<String> stopOperators = Arrays.asList(stopEvaluatingStackIfFound);
+    
+    while(CollectionUtils.isNotEmpty(operatorStack) 
+            && !stopOperators.contains(getChildText(operatorStack.peek()))) {
       evaluateOperator(operatorStack.pop());
     }
   }
@@ -1412,6 +1440,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             indexSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(indexSymbol.getSymbolId());
     sas.push(tempSar);
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.AREF.toString())
+            .operand1(objSymbol.getSymbolId())
+            .operand2(indexSymbol.getSymbolId())
+            .operand3(tempSymbol.getSymbolId())
+            .build());
   }
   
   /**
@@ -1422,7 +1457,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private void print() {
     int lineNumber = sas.isEmpty() ? DEFAULT_LINE_NUMBER : sas.peek().getLineNumber().orElse(DEFAULT_LINE_NUMBER);
     
-    endOfExpression();
+    endOfExpression("(");
 
     if(CollectionUtils.isEmpty(sas)) {
       throw new IllegalStateException(String.format(
@@ -1462,7 +1497,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   private void read() {
     int lineNumber = sas.isEmpty() ? DEFAULT_LINE_NUMBER : sas.peek().getLineNumber().orElse(DEFAULT_LINE_NUMBER);
     
-    endOfExpression();
+    endOfExpression("(");
 
     if(CollectionUtils.isEmpty(sas)) {
       throw new IllegalStateException(String.format(
@@ -1503,7 +1538,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Symbol symbol = null;
     SAR sar = null;
             
-    endOfExpression();
+    endOfExpression("(");
 
     if(CollectionUtils.isNotEmpty(sas)) {
       sar = sas.pop();
@@ -1808,6 +1843,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * sar
    */
   private void newObject() {
+    Symbol classSymbol;
     SAR argListSar = null;
     SAR typeSar;
     
@@ -1815,10 +1851,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       argListSar = sas.pop();
     }
     typeSar = sas.pop();
+    
     if(typeSar.getType() == SarType.TEMPLATE) {
       // Search for an existing class that matches the supplied template types
       // If one does not exist then create a new class based on the supplied types
-      Symbol classSymbol = findOrCreateTemplateClassSymbol(typeSar);
+      classSymbol = findOrCreateTemplateClassSymbol(typeSar);
       
       SAR definedTemplateSar = new SAR(
               SarType.TYPE, 
@@ -1831,7 +1868,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               classSymbol, 
               SymbolKind.CONSTRUCTOR, 
               false);
-      return;
     }
     else if(typeSar.getType() != SarType.TYPE) {
       throw new IllegalStateException(String.format(
@@ -1839,18 +1875,68 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               typeSar.getLineNumber(),
               typeSar.getType().toString()));
     }
+    else {
+      classSymbol = symbols.get(typeSar.getSymbolId());
+      if(isTemplateClass(classSymbol)) {
+        throw new IllegalStateException(String.format(
+                "%s : Class \'%s\' is a template class and cannot be instantiated",
+                typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+                classSymbol.getText()
+                        + ParserUtils.templateTextFormat(
+                        classSymbol.getData().getTemplatePlaceHolders())));
+      }
 
-    Symbol classSymbol = symbols.get(typeSar.getSymbolId());
-    if(isTemplateClass(classSymbol)) {
-      throw new IllegalStateException(String.format(
-              "%s : Class \'%s\' is a template class and cannot be instantiated",
-              typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
-              classSymbol.getText() 
-                      + ParserUtils.templateTextFormat(
-                              classSymbol.getData().getTemplatePlaceHolders())));
+      methodExist(typeSar, argListSar, classSymbol, SymbolKind.CONSTRUCTOR, false);
     }
+
+    String constructorSymbolId = sas.peek().getSymbolId();
     
-    methodExist(typeSar, argListSar, classSymbol, SymbolKind.CONSTRUCTOR, false);
+    // iCode: new object
+    String tempText = String.format(
+            "%s %s",
+            Keyword.NEW,
+            classSymbol.getText());
+    String tempSymbolId = compiler.generateId(SymbolKind.TEMPORARY);
+    addNewSymbol(
+            tempText,
+            SymbolKind.TEMPORARY,
+            scope,
+            new DataBuilder()
+                    .type(SymbolUtils.getSymbolType(classSymbol))
+                    .build(),
+            tempSymbolId);
+
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY,
+            tempSymbolId,
+            tempText,
+            typeSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
+    sas.push(tempSar);
+    
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Allowcate.NEWI.toString())
+            .operand1(SymbolUtils.calculateSizeInBytes(symbols, classSymbol).toString())
+            .operand2(tempSymbolId)
+            .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FRAME.toString())
+            .operand1(constructorSymbolId)
+            .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Stack.PUSH.toString())
+            .operand1(tempSymbolId)
+            .build());
+    if(argListSar != null) {
+      argListSar.getSymbolIds()
+              .forEach(id -> iCode.add(new QuadBuilder()
+                      .opcode(IntermediateOpcodes.Stack.PUSH.toString())
+                      .operand1(id)
+                      .build()));
+    }
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.CALL.toString())
+            .operand1(constructorSymbolId)
+            .build());
   }
 
   /**
@@ -2094,7 +2180,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     traverseAssignmentOperation(ctx);
     
     // Semantic call #EOE
-    endOfExpression();
+    endOfExpression("(");
     
     return null;
   }
@@ -2122,7 +2208,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               String.format("[Compiler Bug] Unknown statement \"%s\" found", StringUtils.isBlank(child.getText()) ? "" : child.getText()));
     }
 
-    endOfExpression();
+    endOfExpression("(");
     return null;
   }
 
@@ -2142,7 +2228,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     boolean isSecondSemicolon = false;
     for(ParseTree child : ctx.children) {
       child.accept(this);
-      endOfExpression();
+      endOfExpression("(");
 
       if(";".equals(child.getText())) {
         if(!isSecondSemicolon) {
@@ -2386,6 +2472,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .anyMatch(node -> node instanceof CclGrammarParser.InvokeOperatorContext);
     if(isMethodCall) {
       methodCall();       // Semantic method
+      peek();             // iCode PEEK
     }
     else {
       referenceExist();   // Semantic method
@@ -2398,6 +2485,62 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     return null;
   }
 
+  /**
+   * #iCode PEEK
+   * This method adds the required temporary Symbol to the Symbol table and creates the iCode
+   * command 'PEEK' to store the return value of a method into the temporary Symbol
+   */
+  private void peek() {
+    SAR instance = sas.pop();
+    SAR method = sas.pop();
+    
+    Symbol methodSymbol = symbols.get(method.getSymbolId());
+    String methodReturnType = SymbolUtils.getSymbolType(methodSymbol);
+    
+    if(Keyword.VOID.toString().equals(methodReturnType)) {
+      // No need to add an iCode PEEK if there is no return value
+      return;
+    }
+    
+    String tempText = String.format(
+            "%s.%s(%s)",
+            instance.getText(),
+            method.getText(),
+            methodSymbol.getData().getParameters().stream()
+                    .map(symbols::get)
+                    .map(Symbol::getData)
+                    .map(Data::getType)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.joining(", ")));
+
+    String tempSymbolId = compiler.generateId(SymbolKind.TEMPORARY);
+    addNewSymbol(
+            tempText,
+            SymbolKind.TEMPORARY,
+            scope,
+            new DataBuilder()
+                    .type(methodReturnType)
+                    .parameter(instance.getSymbolId())
+                    .parameter(method.getSymbolId())
+                    .build(),
+            tempSymbolId);
+
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY,
+            tempSymbolId,
+            tempText,
+            instance.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
+    tempSar.addSymbolId(instance.getSymbolId());
+    tempSar.addSymbolId(method.getSymbolId());
+    sas.push(tempSar);
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Stack.PEEK.toString())
+            .operand1(tempSymbolId)
+            .build());
+  }
+  
   @Override
   public String toString() {
     return String.format("SymbolTable:%n\t%s%nSemantic Action Stack%n\t%s",
@@ -2413,7 +2556,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitAssignmentOperation(CclGrammarParser.AssignmentOperationContext ctx) {
     pushOperatorOntoStack(ctx);
     super.visitAssignmentOperation(ctx);
-    endOfExpression();
+    endOfExpression("(");
     
     return null;
   }
@@ -2445,9 +2588,14 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitArgumentList(CclGrammarParser.ArgumentListContext ctx) {
     balPush(ctx);
-    Object result = super.visitArgumentList(ctx);
+    
+    ctx.children.forEach(node -> {
+      node.accept(this);
+      endOfExpression("(", ",", Keyword.ASSIGN.toString());
+    });
+    
     endOfArgumentList();
-    return result;
+    return null;
   }
 
   @Override
@@ -2456,7 +2604,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     checkCanBeAccessedFromCurrentScope(symbols.get(sas.peek().getSymbolId()), ctx.start.getLine());
     // Semantic call #EOE
-    endOfExpression();
+    endOfExpression("(");
     
     return null;
   }
@@ -2566,7 +2714,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     }
     else if(Keyword.SPAWN.toString().equals(text)) {
       super.visitStatement(ctx);
-      spawn();              // Semantic call #spawn
+      // TODO - re-enable this when spawn's semantics have been figured out
+      //spawn();              // Semantic call #spawn
     }
     else if(Keyword.LOCK.toString().equals(text)) {
       super.visitStatement(ctx);
@@ -2584,7 +2733,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       super.visitStatement(ctx);
     }
 
-    endOfExpression();      // Clear the operator stack
+    endOfExpression("(");      // Clear the operator stack
     
     return null;
   }
@@ -2663,6 +2812,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(childNode instanceof CclGrammarParser.InvokeOperatorContext) {
       // Creating a new object
       newObject();            // Semantic call #newObject
+      peek();                 // iCode PEEK
     }
     else if(childNode instanceof CclGrammarParser.ArrayOperatorContext) {
       // create a new array
@@ -2704,13 +2854,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
       for(ParseTree child : ctx.children) {
         child.accept(this);
-        endOfExpression();
+        endOfExpression("(");
       }
 
       visitInvokeOperatorEnd(null);
       ternary();              // Semantic #ternary
 
-      endOfExpression();
+      endOfExpression("(");
     }
     else {
       super.visitExpression(ctx);
@@ -2733,11 +2883,25 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     super.visitMethodBody(ctx);
     
     if(!iCode.isLastOpcode(IntermediateOpcodes.Method.RTN.toString())) {
-      iCode.add(new QuadBuilder()
-              .opcode(IntermediateOpcodes.Method.RTN.toString())
-              .build());
+      if(ctx.parent instanceof CclGrammarParser.ConstructorDeclarationContext) {
+        iCode.add(new QuadBuilder()
+                .opcode(IntermediateOpcodes.Method.RTN.toString())
+                .operand1(Keyword.THIS.toString())
+                .build());
+      }
+      else {
+        iCode.add(new QuadBuilder()
+                .opcode(IntermediateOpcodes.Method.RTN.toString())
+                .build());
+      }
     }
     
+    return null;
+  }
+
+  @Override
+  public Object visitListSeparatorOperator(CclGrammarParser.ListSeparatorOperatorContext ctx) {
+    operatorStack.push(ctx);
     return null;
   }
 }

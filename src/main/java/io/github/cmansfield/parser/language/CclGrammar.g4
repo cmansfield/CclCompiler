@@ -125,13 +125,15 @@ invokeOperator : '(' ;
 
 invokeOperatorEnd : ')';
 
+listSeparatorOperator : ',' ;
+
 arrayOperator : '[' ;
 
 arrayOperatorEnd : ']' ;
 
 arrayDeclaration : '[' ']' ;
 
-argumentList : assignmentExpression (',' assignmentExpression)* ;
+argumentList : assignmentExpression (listSeparatorOperator assignmentExpression)* ;
 
 modifier : MODIFIER ;
 

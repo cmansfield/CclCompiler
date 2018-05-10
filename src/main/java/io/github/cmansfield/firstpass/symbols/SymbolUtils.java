@@ -14,6 +14,17 @@ import static io.github.cmansfield.parser.CclCompilerVisitor.GLOBAL_SCOPE;
 
 
 public class SymbolUtils {
+  private static final Map<String,Integer> primaryTypeSizes;
+  private static final int ADDRESS_SIZE = 4;
+  
+  static {
+    primaryTypeSizes = new HashMap<>();
+    primaryTypeSizes.put(Keyword.INT.toString(), 4);
+    primaryTypeSizes.put(Keyword.CHAR.toString(), 1);
+    primaryTypeSizes.put(Keyword.BOOL.toString(), 1);
+    primaryTypeSizes.put(Keyword.STRING.toString(), ADDRESS_SIZE);
+  }
+  
   private SymbolUtils() {}
 
   /**
@@ -140,6 +151,35 @@ public class SymbolUtils {
     return data.getReturnType().orElse("") + (isArray ? "[]" : "");
   }
 
+  /**
+   * 
+   * 
+   * @param symbol
+   * @return
+   */
+  public static Integer calculateSizeInBytes(BidiMap<String, Symbol> symbolTable, Symbol symbol) {
+    if(symbol == null) {
+      return 0;
+    }
+    
+    return SymbolFilter.filter(
+            symbolTable, 
+            new SymbolBuilder()
+                    .scope(symbol.getScope() + "." + symbol.getSymbolId())
+                    .build()).stream()
+            .filter(sym -> sym.getSymbolKind() != SymbolKind.METHOD)
+            .filter(sym -> sym.getSymbolKind() != SymbolKind.CONSTRUCTOR)
+            .map(SymbolUtils::getSymbolType)
+            .map(primaryTypeSizes::get)
+            .map(size -> {
+              if(size == null) {
+                return ADDRESS_SIZE;
+              }
+              else return size;
+            })
+            .reduce(0, (a, b) -> a + b);
+  }
+  
   /**
    * This method will simplify method text formatting for logging and errors
    *

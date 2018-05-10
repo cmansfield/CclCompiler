@@ -486,7 +486,7 @@ public class CompilerSemanticsTest {
     assertTrue(CollectionUtils.isEmpty(exceptions));
   }
 
-  @Test
+  @Test (enabled = false)
   public void test_fail_spawn_badSetType() throws IOException {
     Compiler compiler = CompilerTestUtils.compileNoThrow("test63.ccl");
 
@@ -497,7 +497,7 @@ public class CompilerSemanticsTest {
     assertTrue("12 : The set type of a spawned thread must be of type 'int', found 'spawn METHOD set bool'".equals(exceptions.get(1)));
   }
 
-  @Test
+  @Test (enabled = false)
   public void test_fail_spawn_badSpawnType() throws IOException {
     Compiler compiler = CompilerTestUtils.compileNoThrow("test64.ccl");
 

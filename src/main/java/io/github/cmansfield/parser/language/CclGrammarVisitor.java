@@ -191,6 +191,12 @@ public interface CclGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInvokeOperatorEnd(CclGrammarParser.InvokeOperatorEndContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CclGrammarParser#listSeparatorOperator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitListSeparatorOperator(CclGrammarParser.ListSeparatorOperatorContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CclGrammarParser#arrayOperator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
