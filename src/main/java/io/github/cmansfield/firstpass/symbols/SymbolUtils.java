@@ -152,14 +152,34 @@ public class SymbolUtils {
   }
 
   /**
+   * This method will return the size of the supplied type in bytes
    * 
+   * @param type  The type to get the size of
+   * @return      The size of the type in bytes 
+   */
+  public static Integer calculateSizeInBytes(String type) {
+    if(StringUtils.isBlank(type)) {
+      return 0;
+    }
+    if(primaryTypeSizes.containsKey(type)) {
+      return primaryTypeSizes.get(type);
+    }
+    return 0;
+  }
+  
+  /**
+   * This method will return the total size of the supplied Symbol type in bytes
    * 
-   * @param symbol
-   * @return
+   * @param symbol  The Symbol to evaluate
+   * @return        The size of the Symbol type in bytes
    */
   public static Integer calculateSizeInBytes(BidiMap<String, Symbol> symbolTable, Symbol symbol) {
     if(symbol == null) {
       return 0;
+    }
+    String type = getSymbolType(symbol);
+    if(primaryTypeSizes.containsKey(type)) {
+      return primaryTypeSizes.get(type);
     }
     
     return SymbolFilter.filter(

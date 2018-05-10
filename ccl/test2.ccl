@@ -1,29 +1,16 @@
 
 
-public class MyClass {
 
-}
-
-public class Test {
+public class Cat {
     private int number;
-    private int numbers[];
-    private bool isTest;
-    private string name;
-    private MyClass myClass;
-    
-    public Test(int num1, int num2) {
-        this.number = num1 + num2;
-    }
-    public void f(int num, bool isTest) {
-        if(isTest) {
-            number = num + 10;
-        }
-    }
+    private bool test;
+    public Cat() {}
 }
 
 public static void main() {
     //int numbers[] = {4, 5, 2, 8};
-    int x;
     
-    Test test = new Test(7, x);
+    int r;
+    int k;
+    int a[] = new int[r * k];
 }

@@ -765,14 +765,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     arraySar.addSymbolId(parentSar.getSymbolId());
     arraySar.addSymbolId(fieldSar.getSymbolIds().get(0));
     sas.push(arraySar);
-    
-    // TODO - Uncomment for array iCode
-//    iCode.add(new QuadBuilder()
-//            .opcode(IntermediateOpcodes.Other.REF.toString())
-//            .operand1(parentSar.getSymbolId())
-//            .operand2(fieldSar.getSymbolId())
-//            .operand3(referenceSymbol.getSymbolId())
-//            .build());
   }
 
   /**
@@ -2069,6 +2061,27 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             quantitySar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(quantitySymbol.getSymbolId());
     sas.push(tempSar);
+
+    Symbol tempQuantitySymbol = addNewSymbol(
+            "",
+            SymbolKind.TEMPORARY,
+            scope,
+            new DataBuilder()
+                    .type(Keyword.INT.toString())
+                    .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Math.MUL.toString())
+            .operand1(typeSymbol == null 
+                    ? SymbolUtils.calculateSizeInBytes(type).toString()
+                    : SymbolUtils.calculateSizeInBytes(symbols, typeSymbol).toString())
+            .operand2(quantitySymbol.getSymbolId())
+            .operand3(tempQuantitySymbol.getSymbolId())
+            .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Allowcate.NEW.toString())
+            .operand1(tempQuantitySymbol.getSymbolId())
+            .operand2(tempSymbol.getSymbolId())
+            .build());
   }
 
   /**
