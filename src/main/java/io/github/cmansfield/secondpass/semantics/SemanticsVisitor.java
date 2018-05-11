@@ -2156,10 +2156,53 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     newArray();
     SAR tempArrSar = sas.peek();
 
-    // TODO - Assign each brace value into the temp array 
+    // Assign each brace value into the temp array
+    for (int i = 0; i < ids.size(); ++i) {
+      storeBraceInitializedValue(i, valueTypes.get(0), ids.get(i), tempArrSar);
+    }
+  }
 
-    // Ensure the temp array is at the top of the sas at the end of this method
-    sas.push(tempArrSar);
+  /**
+   * #iCode
+   * This method will push each element in the brace initializer into the newly created array 
+   * 
+   * @param index           The index of the element in the brace initializer 
+   * @param type            The type of the element being stored
+   * @param idToStore       The Symbol ID of the element being stored
+   * @param arrayToStoreTo  The SAR of the newly created array
+   */
+  private void storeBraceInitializedValue(int index, String type, String idToStore, SAR arrayToStoreTo) {
+    Symbol indexSymbol = addNewSymbol(
+            Integer.toString(index),
+            SymbolKind.INT_LIT,
+            GLOBAL_SCOPE,
+            new DataBuilder()
+                    .accessModifier(AccessModifier.PUBLIC)
+                    .type(Keyword.INT.toString())
+                    .build());
+    Symbol tempSymbol = addNewSymbol(
+            "",
+            SymbolKind.TEMPORARY,
+            scope,
+            new DataBuilder()
+                    .parameter(arrayToStoreTo.getSymbolId())
+                    .parameter(indexSymbol.getSymbolId())
+                    .type(type)
+                    .build());
+    
+    // AREF arrayToStoreTo, indexId, temp
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.AREF.toString())
+            .operand1(arrayToStoreTo.getSymbolId())
+            .operand2(indexSymbol.getSymbolId())
+            .operand3(tempSymbol.getSymbolId())
+            .build());
+    // MOV idToStore, temp
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.MOV.toString())
+            .operand1(idToStore)
+            .operand2(tempSymbol.getSymbolId())
+            .build());
   }
   
   /*

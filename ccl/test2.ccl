@@ -8,9 +8,5 @@ public class Cat {
 }
 
 public static void main() {
-    //int numbers[] = {4, 5, 2, 8};
-    
-    int r;
-    int k;
-    int a[] = new int[r * k];
+    int numbers[] = {4, 5, 2, 8};
 }

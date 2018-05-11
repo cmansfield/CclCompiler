@@ -4,7 +4,6 @@ TODO List
         Add jackson deserialization
 
     Semantics
-        Assign each brace value into an temp array element
         Fix spawn's semantics
 
     iCode
