@@ -4,6 +4,7 @@ import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
+import io.github.cmansfield.secondpass.icode.Quad;
 import io.github.cmansfield.secondpass.semantics.sar.SarType;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.secondpass.icode.QuadBuilder;
@@ -34,7 +35,9 @@ import java.util.*;
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
   private final Deque<ParserRuleContext> operatorStack;
-  private final IntermediateCode iCode;       // TODO - Include this in the TemplateSemanticVisitor class
+  // TODO - Include this in the TemplateSemanticVisitor class
+  // Templates will likely need their own IntermediateCode object
+  private final IntermediateCode iCode;
   final Deque<SAR> sas;
   
   private static final int DEFAULT_LINE_NUMBER = -1;
@@ -1225,24 +1228,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
-   * Factored out the logic for getting a valid opcode
-   * 
-   * @param operator    The operator used to find the corresponding opcode
-   * @param lineNumber  The line number of code to get here
-   * @return            The valid opcode for the supplied operator
-   */
-  private String getOpcode(String operator, int lineNumber) {
-    String opcode = IntermediateOpcodes.getOpcode(operator);
-    if(StringUtils.isBlank(opcode)) {
-      throw new IllegalStateException(String.format(
-              "%s : [Compiler Bug] Could not find the matching opcode for operator \'%s\'",
-              lineNumber,
-              operator));
-    }
-    return opcode;
-  }
-  
-  /**
    * This will push the supplied operator onto the operator stack. It will continue to process
    * operators on the operator stack until the stack is empty or the top operator has a lower
    * precedence than the operator being pushed on
@@ -2185,11 +2170,17 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       storeBraceInitializedValue(i, valueTypes.get(0), ids.get(i), tempArrSar);
     }
   }
-
+  
+  /*
+  **************************************
+  *           iCode methods
+  **************************************
+ */
+  
   /**
    * #iCode
    * This method will push each element in the brace initializer into the newly created array 
-   * 
+   *
    * @param index           The index of the element in the brace initializer 
    * @param type            The type of the element being stored
    * @param idToStore       The Symbol ID of the element being stored
@@ -2213,7 +2204,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
                     .parameter(indexSymbol.getSymbolId())
                     .type(type)
                     .build());
-    
+
     // AREF arrayToStoreTo, indexId, temp
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Other.AREF.toString())
@@ -2227,6 +2218,97 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .operand1(idToStore)
             .operand2(tempSymbol.getSymbolId())
             .build());
+  }
+  
+  /**
+   * #iCode PEEK
+   * This method adds the required temporary Symbol to the Symbol table and creates the iCode
+   * command 'PEEK' to store the return value of a method into the temporary Symbol
+   */
+  private void peek() {
+    SAR instance = sas.pop();
+    SAR method = sas.pop();
+
+    Symbol methodSymbol = symbols.get(method.getSymbolId());
+    String methodReturnType = SymbolUtils.getSymbolType(methodSymbol);
+
+    if(Keyword.VOID.toString().equals(methodReturnType)) {
+      // No need to add an iCode PEEK if there is no return value
+      return;
+    }
+
+    String tempText = String.format(
+            "%s.%s(%s)",
+            instance.getText(),
+            method.getText(),
+            methodSymbol.getData().getParameters().stream()
+                    .map(symbols::get)
+                    .map(Symbol::getData)
+                    .map(Data::getType)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.joining(", ")));
+
+    String tempSymbolId = compiler.generateId(SymbolKind.TEMPORARY);
+    addNewSymbol(
+            tempText,
+            SymbolKind.TEMPORARY,
+            scope,
+            new DataBuilder()
+                    .type(methodReturnType)
+                    .parameter(instance.getSymbolId())
+                    .parameter(method.getSymbolId())
+                    .build(),
+            tempSymbolId);
+
+    SAR tempSar = new SAR(
+            SarType.TEMPORARY,
+            tempSymbolId,
+            tempText,
+            instance.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
+    tempSar.addSymbolId(instance.getSymbolId());
+    tempSar.addSymbolId(method.getSymbolId());
+    sas.push(tempSar);
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Stack.PEEK.toString())
+            .operand1(tempSymbolId)
+            .build());
+  }
+
+
+  /**
+   * #iCode
+   * Factored out the logic for getting a valid opcode
+   *
+   * @param operator    The operator used to find the corresponding opcode
+   * @param lineNumber  The line number of code to get here
+   * @return            The valid opcode for the supplied operator
+   */
+  private String getOpcode(String operator, int lineNumber) {
+    String opcode = IntermediateOpcodes.getOpcode(operator);
+    if(StringUtils.isBlank(opcode)) {
+      throw new IllegalStateException(String.format(
+              "%s : [Compiler Bug] Could not find the matching opcode for operator \'%s\'",
+              lineNumber,
+              operator));
+    }
+    return opcode;
+  }
+
+
+  /**
+   * #iCode
+   * This method will place the iCode for static initializers in the correct location
+   * 
+   * @param classSymbol       The Symbol of the class that houses these field declarations 
+   * @param initSymbol        The Symbol of the hidden class init method
+   */
+  private void processClassStaticInitializers(Symbol classSymbol, Symbol initSymbol) {
+    List<Quad> staticInitICode = iCode.popAllStaticInitializerICode();
+
+    // TODO - Complete this method
+    
   }
   
   /*
@@ -2347,7 +2429,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitClassDeclaration(CclGrammarParser.ClassDeclarationContext ctx) {     // NOSONAR
     String name = getClassName(ctx);
     String scopeOrig = scope;
-
+    
     String symbolId = findSymbolId(
             new SymbolBuilder()
               .text(name)
@@ -2365,12 +2447,31 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     checkForInvalidAccessModifiers(symbol, ctx.start.getLine());
 
     scope = scope + "." + symbolId;
+
+    // This constructor is used execute static initializers
+    // public class test {                  // NOSONAR
+    //  private int number = 10;            // NOSONAR
+    Symbol initSymbol = addNewSymbol(
+            "_" + name + "_init", 
+            SymbolKind.CONSTRUCTOR, 
+            scope, 
+            new DataBuilder()
+                    .accessModifier(AccessModifier.PRIVATE)
+                    .returnType(name)
+                    .build());
+    
     ctx.children.stream()
             .filter(node -> node instanceof CclGrammarParser.ClassMemberDeclarationContext)
             .map(context -> (CclGrammarParser.ClassMemberDeclarationContext)context)
             .forEach(this::visitClassMemberDeclaration);
-    scope = scopeOrig;
+
+    if(iCode.hasStaticInitializers()) {
+      // TODO - Add hidden class method for initializing static fields
+      processClassStaticInitializers(symbol, initSymbol);
+    }
     
+    scope = scopeOrig;
+
     return null; 
   }
 
@@ -2564,62 +2665,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .forEach(this::visitMemberRefz);
     return null;
   }
-
-  /**
-   * #iCode PEEK
-   * This method adds the required temporary Symbol to the Symbol table and creates the iCode
-   * command 'PEEK' to store the return value of a method into the temporary Symbol
-   */
-  private void peek() {
-    SAR instance = sas.pop();
-    SAR method = sas.pop();
-    
-    Symbol methodSymbol = symbols.get(method.getSymbolId());
-    String methodReturnType = SymbolUtils.getSymbolType(methodSymbol);
-    
-    if(Keyword.VOID.toString().equals(methodReturnType)) {
-      // No need to add an iCode PEEK if there is no return value
-      return;
-    }
-    
-    String tempText = String.format(
-            "%s.%s(%s)",
-            instance.getText(),
-            method.getText(),
-            methodSymbol.getData().getParameters().stream()
-                    .map(symbols::get)
-                    .map(Symbol::getData)
-                    .map(Data::getType)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.joining(", ")));
-
-    String tempSymbolId = compiler.generateId(SymbolKind.TEMPORARY);
-    addNewSymbol(
-            tempText,
-            SymbolKind.TEMPORARY,
-            scope,
-            new DataBuilder()
-                    .type(methodReturnType)
-                    .parameter(instance.getSymbolId())
-                    .parameter(method.getSymbolId())
-                    .build(),
-            tempSymbolId);
-
-    SAR tempSar = new SAR(
-            SarType.TEMPORARY,
-            tempSymbolId,
-            tempText,
-            instance.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
-    tempSar.addSymbolId(instance.getSymbolId());
-    tempSar.addSymbolId(method.getSymbolId());
-    sas.push(tempSar);
-
-    iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Stack.PEEK.toString())
-            .operand1(tempSymbolId)
-            .build());
-  }
   
   @Override
   public String toString() {
@@ -2680,12 +2725,17 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
   @Override
   public Object visitFieldDeclaration(CclGrammarParser.FieldDeclarationContext ctx) {
+    // We have to do this to deffer adding static field initialization iCode in the middle 
+    // of a class, it will need to be moved into a special class initializer method
+    iCode.isFieldDeclaration = true;
+    
     super.visitFieldDeclaration(ctx);
 
     checkCanBeAccessedFromCurrentScope(symbols.get(sas.peek().getSymbolId()), ctx.start.getLine());
     // Semantic call #EOE
     endOfExpression("(");
     
+    iCode.isFieldDeclaration = false;
     return null;
   }
 

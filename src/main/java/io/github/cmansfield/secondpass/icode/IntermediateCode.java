@@ -9,18 +9,39 @@ import java.util.*;
 
 public class IntermediateCode {
   private Map<Label,Deque<String>> labelStackMap;
+  private List<Quad> staticICode;
   private List<Quad> iCode;
   private String nextLabel;
   
+  public boolean isFieldDeclaration;        // NOSONAR
+  
   public IntermediateCode() {
     labelStackMap = new EnumMap<>(Label.class);
+    staticICode = new ArrayList<>();
     iCode = new ArrayList<>();
+    isFieldDeclaration = false;
   }
 
   public List<Quad> getICode() {
     return new ArrayList<>(iCode);
   }
 
+  /**
+   * This method will 'pop' all of the static initialized field declaration iCode and return
+   * the list of quads
+   * 
+   * @return    A list of quads
+   */
+  public List<Quad> popAllStaticInitializerICode() {
+    List<Quad> staticInitICode = this.staticICode;
+    this.staticICode = new ArrayList<>();
+    return staticInitICode;
+  }
+  
+  public boolean hasStaticInitializers() {
+    return !staticICode.isEmpty();
+  }
+  
   /**
    * Add a new quad to the list of quads
    * 
@@ -38,8 +59,13 @@ public class IntermediateCode {
       quad.setLabel(nextLabel);
       nextLabel = null;
     }
-    
-    iCode.add(quad);    
+
+    if(isFieldDeclaration) {
+      staticICode.add(quad);
+    }
+    else {
+      iCode.add(quad);
+    }
   }
 
   public void clearNextLabel() {
