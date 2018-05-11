@@ -20,6 +20,7 @@ public class IntermediateOpcodes {
     opcodeClasses.add(Stack.class);
     opcodeClasses.add(Other.class);
     opcodeClasses.add(Method.class);
+    opcodeClasses.add(Threading.class);
     opcodeClasses.add(Allowcate.class);
 
     opcodeMethods = new ArrayList<>();
@@ -122,10 +123,14 @@ public class IntermediateOpcodes {
   }
   public enum Allowcate {
     NEWI,
-    NEW,
-    RTN,
-    METH
+    NEW
   }
+  public enum Threading {
+    BLCK,
+    LOCK,
+    SPWN,
+    UNLCK
+  }  
   public enum Other {
     MOV,
     MOVI,

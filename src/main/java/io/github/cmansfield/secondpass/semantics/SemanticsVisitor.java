@@ -1802,6 +1802,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               Keyword.INT.toString(),
               type));
     }
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Threading.LOCK.toString())
+            .operand1(symbol.getSymbolId())
+            .build());
   }
 
   /**
@@ -1809,7 +1814,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * This will check to make sure the mutex unlock is an integer
    */
   private void unlock() {
-    lock();     // Semantic check for #unlock is the same as #lock
+    SAR mutexSar = sas.pop();
+    Symbol symbol = symbols.get(mutexSar.getSymbolId());
+    String type = SymbolUtils.getSymbolType(symbol);
+
+    if(!Keyword.INT.toString().equals(type)) {
+      throw new IllegalStateException(String.format(
+              "%s : Mutex locks must be of type \'%s\', found \'%s\'",
+              mutexSar.getLineNumber().orElse(DEFAULT_LINE_NUMBER),
+              Keyword.INT.toString(),
+              type));
+    }
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Threading.UNLCK.toString())
+            .operand1(symbol.getSymbolId())
+            .build());
   }
 
   /**
@@ -1826,6 +1846,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               Keyword.BLOCK.toString(),
               Keyword.MAIN.toString()));
     }
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Threading.BLCK.toString())
+            .build());
   }
 
   /**

@@ -2,11 +2,10 @@
 
 
 public class Cat {
-    private int number;
-    private bool test;
+    private int number = 10;
     public Cat() {}
 }
 
 public static void main() {
-    int numbers[] = {4, 5, 2, 8};
+    Cat cat = new Cat();    
 }
