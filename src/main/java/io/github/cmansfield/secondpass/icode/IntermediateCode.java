@@ -9,6 +9,7 @@ import java.util.*;
 
 public class IntermediateCode {
   private Map<Label,Deque<String>> labelStackMap;
+  private List<Quad> staticInitializedICode;
   private List<Quad> staticICode;
   private List<Quad> iCode;
   private String nextLabel;
@@ -17,6 +18,7 @@ public class IntermediateCode {
   
   public IntermediateCode() {
     labelStackMap = new EnumMap<>(Label.class);
+    staticInitializedICode = new ArrayList<>();
     staticICode = new ArrayList<>();
     iCode = new ArrayList<>();
     isFieldDeclaration = false;
@@ -33,8 +35,8 @@ public class IntermediateCode {
    * @return    A list of quads
    */
   public List<Quad> popAllStaticInitializerICode() {
-    List<Quad> staticInitICode = this.staticICode;
-    this.staticICode = new ArrayList<>();
+    List<Quad> staticInitICode = this.staticInitializedICode;
+    this.staticInitializedICode = new ArrayList<>();
     return staticInitICode;
   }
 
@@ -57,13 +59,33 @@ public class IntermediateCode {
     }
 
     if(isFieldDeclaration) {
-      staticICode.add(quad);
+      staticInitializedICode.add(quad);
     }
     else {
       iCode.add(quad);
     }
   }
 
+  /**
+   * This method will add a quad to the list of quads that will be added to the code segment
+   * Any iCode that is produced by a static variable will be added to this list and then
+   * initialized in the code segment before executing main.
+   * 
+   * public class MyClass {
+   *   private static int number = 10;
+   * }
+   * 
+   * Quad: 'MOV 10, number' would get added here
+   * 
+   * @param quad    The quad to be added to the static iCode list
+   */
+  public void addStatic(Quad quad) {
+    if(quad == null) {
+      throw new IllegalArgumentException("Quads cannot be null");
+    }
+    staticICode.add(quad);
+  }
+  
   public void clearNextLabel() {
     nextLabel = null;
   }

@@ -9,6 +9,7 @@ public enum SymbolKind {
   CONSTRUCTOR("N"),
   PARAM("P"),
   INSTANCE_VAR("V"),      // Class Field / Instance variable
+//  STATIC_VAR("H"),        // Class Field / Static variable
   LOCAL_VAR("L"),         // Local variable
   INT_LIT("I"),           // Integer literal
   CHAR_LIT("A"),          // Character literal

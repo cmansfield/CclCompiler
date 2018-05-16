@@ -4,6 +4,7 @@ import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
+import io.github.cmansfield.secondpass.icode.Quad;
 import io.github.cmansfield.secondpass.semantics.sar.SarType;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.secondpass.icode.QuadBuilder;
@@ -1198,12 +1199,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
                 op2Symbol.getSymbolKind(),
                 op2Symbol.getText()));
       }
-      
-      iCode.add(new QuadBuilder()
+
+      Quad quad = new QuadBuilder()
               .opcode(IntermediateOpcodes.Other.MOV.toString())
               .operand1(op1Symbol.getSymbolId())
               .operand2(op2Symbol.getSymbolId())
-              .build());
+              .build();
+      
+      // If the variable being assigned to is a static variable then stored this quad into
+      // the list of static quads to be added to the code segment before main
+      if(op2Symbol.getData().getAccessModifiers().contains(AccessModifier.STATIC)) {
+        iCode.addStatic(quad);
+      }
+      else {
+        iCode.add(quad);
+      }
+      
       sas.push(operand2);
       return;
     }
