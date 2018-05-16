@@ -9,7 +9,6 @@ TODO List
     iCode
         serialize and deserialize iCode objects
         Remaining iCode to add:
-            type cast
             for-loop
             this
             static

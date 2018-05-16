@@ -17,5 +17,7 @@ public class Cat {
 }
 
 public static void main() {
-    Cat cat = new Cat();    
+    //Cat cat = new Cat();
+    
+    char c = (char)10;    
 }

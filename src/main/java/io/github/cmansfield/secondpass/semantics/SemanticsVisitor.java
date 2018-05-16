@@ -1048,6 +1048,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(sar.getSymbolId());
     sas.push(tempSar);
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.MOV.toString())
+            .operand1(symbol.getSymbolId())
+            .operand2(tempSymbolId)
+            .build());
   }
 
   /**
@@ -1093,6 +1099,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             sar.getLineNumber().orElse(DEFAULT_LINE_NUMBER));
     tempSar.addSymbolId(sar.getSymbolId());
     sas.push(tempSar);
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Other.MOV.toString())
+            .operand1(symbol.getSymbolId())
+            .operand2(tempSymbolId)
+            .build());
   }
 
   private void operatorException(int lineNumber, String operation, String operator, String op1Type, String op2Type) {
