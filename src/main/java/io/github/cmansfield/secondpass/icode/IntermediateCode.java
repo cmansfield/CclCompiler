@@ -37,11 +37,7 @@ public class IntermediateCode {
     this.staticICode = new ArrayList<>();
     return staticInitICode;
   }
-  
-  public boolean hasStaticInitializers() {
-    return !staticICode.isEmpty();
-  }
-  
+
   /**
    * Add a new quad to the list of quads
    * 

@@ -2305,10 +2305,16 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * @param initSymbol        The Symbol of the hidden class init method
    */
   private void processClassStaticInitializers(Symbol classSymbol, Symbol initSymbol) {
-    List<Quad> staticInitICode = iCode.popAllStaticInitializerICode();
-
-    // TODO - Complete this method
-    
+    iCode.setNextLabel(initSymbol.getSymbolId());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FUNC.toString())
+            .operand1(initSymbol.getSymbolId())
+            .build());
+    iCode.popAllStaticInitializerICode().forEach(iCode::add);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.RTN.toString())
+            .operand1(Keyword.THIS.toString())
+            .build());
   }
   
   /*
@@ -2465,10 +2471,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .map(context -> (CclGrammarParser.ClassMemberDeclarationContext)context)
             .forEach(this::visitClassMemberDeclaration);
 
-    if(iCode.hasStaticInitializers()) {
-      // TODO - Add hidden class method for initializing static fields
-      processClassStaticInitializers(symbol, initSymbol);
-    }
+    processClassStaticInitializers(symbol, initSymbol);
     
     scope = scopeOrig;
 
@@ -2496,6 +2499,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     constructorCheck(name);
     // Semantic #paramExist
     paramExist(ctx);
+
+    // Each class constructor must call the class' init constructor
+    String initSymoblId = findSymbolId("_" + name + "_init", SymbolKind.CONSTRUCTOR);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FRAME.toString())
+            .operand1(initSymoblId)
+            .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Stack.PUSH.toString())
+            .operand1(Keyword.THIS.toString())
+            .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.CALL.toString())
+            .operand1(initSymoblId)
+            .build());
+    
     traverseMethodBody(ctx);
     scope = scopeOrig;
 
