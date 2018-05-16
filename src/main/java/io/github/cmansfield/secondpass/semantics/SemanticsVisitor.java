@@ -4,7 +4,6 @@ import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
-import io.github.cmansfield.secondpass.icode.Quad;
 import io.github.cmansfield.secondpass.semantics.sar.SarType;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.secondpass.icode.QuadBuilder;
@@ -1587,8 +1586,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               type));
     }
 
-    String endIfLabel = compiler.generateLabel(Label.ENDIF);
-    iCode.pushLabel(Label.ENDIF, endIfLabel);
+    String endIfLabel = compiler.generateLabel(Label.END_IF);
+    iCode.pushLabel(Label.END_IF, endIfLabel);
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Flow.BF.toString())
             .operand1(booleanSymbol.getSymbolId())
@@ -1676,8 +1675,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               type));
     }
 
-    String endWhileLabel = compiler.generateLabel(Label.ENDWHILE);
-    iCode.pushLabel(Label.ENDWHILE, endWhileLabel);
+    String endWhileLabel = compiler.generateLabel(Label.END_WHILE);
+    iCode.pushLabel(Label.END_WHILE, endWhileLabel);
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Flow.BF.toString())
             .operand1(booleanSymbol.getSymbolId())
@@ -1705,7 +1704,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               type));
     }
 
-    sas.push(booleanSar);
+    String endForLabel = compiler.generateLabel(Label.END_FOR);
+    iCode.pushLabel(Label.END_FOR, endForLabel);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Flow.BF.toString())
+            .operand1(booleanSymbol.getSymbolId())
+            .operand2(endForLabel)
+            .build());
   }
 
   /**
@@ -2405,6 +2410,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     Data data = new DataBuilder().accessModifier(AccessModifier.PRIVATE).build();
     addNewSymbol(symbolId, SymbolKind.FOR, scopeOrig, data, symbolId);
 
+    // iCode created for-loop label
+    String forLabel = compiler.generateLabel(Label.FOR);
+    iCode.pushLabel(Label.FOR, forLabel);
+    
     boolean isSecondSemicolon = false;
     for(ParseTree child : ctx.children) {
       child.accept(this);
@@ -2413,6 +2422,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       if(";".equals(child.getText())) {
         if(!isSecondSemicolon) {
           isSecondSemicolon = true;
+          iCode.setNextLabel(forLabel);          
         }
         else {
           // Check to make sure the second for-loop expression is a boolean type
@@ -2421,6 +2431,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       }
     }
     scope = scopeOrig;
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Flow.JMP.toString())
+            .operand1(iCode.popLabel(Label.FOR))
+            .build());
+    iCode.setNextLabel(iCode.popLabel(Label.END_FOR));
   }
 
   /**
@@ -2923,7 +2939,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .opcode(IntermediateOpcodes.Flow.JMP.toString())
             .operand1(beginLabel)
             .build());
-    iCode.setNextLabel(iCode.popLabel(Label.ENDWHILE));
+    iCode.setNextLabel(iCode.popLabel(Label.END_WHILE));
   }
 
   /**
@@ -2946,13 +2962,13 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .collect(Collectors.toList());
     if(!statements.isEmpty()) {
       visitStatement(statements.get(0));
-      iCode.setNextLabel(iCode.popLabel(Label.ENDIF));
+      iCode.setNextLabel(iCode.popLabel(Label.END_IF));
     }
     if(statements.size() > 1) {
       String endIfLabel = iCode.getNextLabel();
       iCode.clearNextLabel();
-      String endElseLabel = compiler.generateLabel(Label.ENDELSE);
-      iCode.pushLabel(Label.ENDELSE, endElseLabel);
+      String endElseLabel = compiler.generateLabel(Label.END_ELSE);
+      iCode.pushLabel(Label.END_ELSE, endElseLabel);
       iCode.add(new QuadBuilder()
               .opcode(IntermediateOpcodes.Flow.JMP.toString())
               .operand1(endElseLabel)
@@ -2961,7 +2977,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       
       visitStatement(statements.get(1));
       
-      iCode.setNextLabel(iCode.popLabel(Label.ENDELSE));
+      iCode.setNextLabel(iCode.popLabel(Label.END_ELSE));
     }
   }
 

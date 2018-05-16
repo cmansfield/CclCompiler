@@ -8,8 +8,8 @@ TODO List
 
     iCode
         serialize and deserialize iCode objects
+        Remove size calculation from iCode and move that into tCode
         Remaining iCode to add:
-            for-loop
             this
             static
             strings

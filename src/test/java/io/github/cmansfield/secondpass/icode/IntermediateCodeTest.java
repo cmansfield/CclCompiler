@@ -92,7 +92,7 @@ public class IntermediateCodeTest {
     
     iCode.pushLabel(Label.BEGIN, "Test");
     iCode.pushLabel(Label.BEGIN, label);
-    iCode.pushLabel(Label.ENDIF, "Another test");
+    iCode.pushLabel(Label.END_IF, "Another test");
     String poppedLabel = iCode.popLabel(Label.BEGIN);
     
     assertTrue(StringUtils.isNotBlank(poppedLabel));

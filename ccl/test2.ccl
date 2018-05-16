@@ -1,23 +1,13 @@
 
 
-public class Toy {
-    private string name;
-    
-    public Toy(string name) {
-        this.name = name;
-    }
-}
-
-public class Cat {
-    private int number = 10;
-    private Toy favoriteToy = new Toy("Yarn Ball");
-    private bool isMale = false;
-    
-    public Cat() {}
-}
 
 public static void main() {
-    //Cat cat = new Cat();
-    
-    char c = (char)10;    
+
+    int max = 10;
+    int i = 0;
+
+    for(; i < max;) {
+        i = i + 1;
+        print(i);
+    }
 }
