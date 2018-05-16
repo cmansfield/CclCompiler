@@ -989,7 +989,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .build());
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Stack.PUSH.toString())
-            .operand1(instanceSar.getSymbolId())
+            .operand1(Keyword.THIS.toString().equals(instanceSar.getText()) 
+                    ? Keyword.THIS.toString() 
+                    : instanceSar.getSymbolId())
             .build());
     if(argListSar != null) {
       argListSar.getSymbolIds()
@@ -2529,10 +2531,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     paramExist(ctx);
 
     // Each class constructor must call the class' init constructor
-    String initSymoblId = findSymbolId("_" + name + "_init", SymbolKind.CONSTRUCTOR);
+    String initSymbolId = findSymbolId(new SymbolBuilder()
+                    .text("_" + name + "_init")
+                    .symbolKind(SymbolKind.CONSTRUCTOR)
+                    .build(),
+            false);
+    
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FRAME.toString())
-            .operand1(initSymoblId)
+            .operand1(initSymbolId)
             .build());
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Stack.PUSH.toString())
@@ -2540,7 +2547,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .build());
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.CALL.toString())
-            .operand1(initSymoblId)
+            .operand1(initSymbolId)
             .build());
     
     traverseMethodBody(ctx);
