@@ -1947,8 +1947,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Allowcate.NEWI.toString())
-            .operand1(SymbolUtils.calculateSizeInBytes(symbols, classSymbol).toString())
+            .operand1(classSymbol.getSymbolId())
             .operand2(tempSymbolId)
+            .comment(String.format("tCode: replace \'%s\' with its size in bytes", classSymbol.getSymbolId()))
             .build());
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FRAME.toString())
@@ -2112,10 +2113,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Math.MUL.toString())
             .operand1(typeSymbol == null 
-                    ? SymbolUtils.calculateSizeInBytes(type).toString()
-                    : SymbolUtils.calculateSizeInBytes(symbols, typeSymbol).toString())
+                    ? type
+                    : typeSymbol.getSymbolId())
             .operand2(quantitySymbol.getSymbolId())
             .operand3(tempQuantitySymbol.getSymbolId())
+            .comment(String.format(
+                    "tCode: replace \'%s\' with its size in bytes", 
+                    typeSymbol == null
+                            ? type
+                            : typeSymbol.getSymbolId()))
             .build());
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Allowcate.NEW.toString())
@@ -3106,6 +3112,34 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     // End of compile. Insert each end of segment iCode to the main list of iCode
     iCode.getEndOfCodeSegICode().forEach(iCode::add);
+    
+    Symbol mainSymbol = symbols.get(
+            findSymbolId(
+                    new SymbolBuilder()
+                            .text(Keyword.MAIN.toString())
+                            .symbolKind(SymbolKind.MAIN)
+                            .build(), 
+                    false));
+    if(mainSymbol != null) {
+      // Generate iCode to call main
+      List<Quad> firstICode = iCode.popAllStaticICode();
+      firstICode.add(new QuadBuilder()
+              .opcode(IntermediateOpcodes.Method.FRAME.toString())
+              .operand1(mainSymbol.getSymbolId())
+              .build());
+      firstICode.add(new QuadBuilder()
+              .opcode(IntermediateOpcodes.Method.CALL.toString())
+              .operand1(mainSymbol.getSymbolId())
+              .comment("Call main method")
+              .build());
+      firstICode.add(new QuadBuilder()
+              .opcode(IntermediateOpcodes.Flow.HALT.toString())
+              .comment("Halt the program")
+              .build());
+
+      iCode.addAllFrontICode(firstICode);
+    }
+    
     
     return null;
   }

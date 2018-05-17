@@ -11,8 +11,8 @@ public class IntermediateCode {
   private final Map<Label,Deque<String>> labelStackMap;
   private final List<Quad> endOfCodeSegICode;
   private List<Quad> staticInitializedICode;
-  private final List<Quad> staticICode;
   private final List<Quad> iCode;
+  private List<Quad> staticICode;
   private String nextLabel;
   
   public boolean isFieldDeclaration;        // NOSONAR
@@ -44,6 +44,15 @@ public class IntermediateCode {
   public void addAllEndOfCodeSegICode(List<Quad> endOfCodeSegICode) {
     this.endOfCodeSegICode.addAll(endOfCodeSegICode);
   }
+
+  /**
+   * This method will add all of the supplied iCode to the front of the list of the main iCode
+   * 
+   * @param frongICode    The new iCode to push to the front of the main body of iCode
+   */
+  public void addAllFrontICode(List<Quad> frongICode) {
+    iCode.addAll(0, frongICode);
+  }
   
   /**
    * This method will 'pop' all of the static initialized field declaration iCode and return
@@ -57,6 +66,17 @@ public class IntermediateCode {
     return staticInitICode;
   }
 
+  /**
+   * This method will 'pop' all of the static field iCode and return the list of quads
+   * 
+   * @return    A list of quads
+   */
+  public List<Quad> popAllStaticICode() {
+    List<Quad> staticQuads = staticICode;
+    staticICode = new ArrayList<>();
+    return staticQuads;
+  }
+  
   /**
    * Add a new quad to the list of quads
    * 

@@ -22,6 +22,9 @@ public class CompilerIntermediateCodeTest {
   @Test
   public void test_while() throws IOException {
     List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FRAME.toString(),
+            IntermediateOpcodes.Method.CALL.toString(),
+            IntermediateOpcodes.Flow.HALT.toString(),
             IntermediateOpcodes.Method.FUNC.toString(),
             IntermediateOpcodes.Bool.LT.toString(),
             IntermediateOpcodes.Flow.BF.toString(),
@@ -38,8 +41,8 @@ public class CompilerIntermediateCodeTest {
     List<Quad> iCode = compiler.getICode();
     assertTrue(CollectionUtils.isNotEmpty(iCode));
     assertEquals(iCode.size(), expectedOpcodes.size());
-    assertEquals(iCode.get(1).getLabel(), iCode.get(5).getOperand1());
-    assertEquals(iCode.get(2).getOperand2(), iCode.get(6).getLabel());
+    assertEquals(iCode.get(4).getLabel(), iCode.get(8).getOperand1());
+    assertEquals(iCode.get(5).getOperand2(), iCode.get(9).getLabel());
     
     for (int i = 0; i < iCode.size(); ++i) {
       assertEquals(iCode.get(i).getOpcode(), expectedOpcodes.get(i));  
@@ -49,6 +52,9 @@ public class CompilerIntermediateCodeTest {
   @Test
   public void test_if_else() throws IOException {
     List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FRAME.toString(),
+            IntermediateOpcodes.Method.CALL.toString(),
+            IntermediateOpcodes.Flow.HALT.toString(),
             IntermediateOpcodes.Method.FUNC.toString(),
             IntermediateOpcodes.Bool.LT.toString(),
             IntermediateOpcodes.Flow.BF.toString(),
@@ -65,8 +71,8 @@ public class CompilerIntermediateCodeTest {
     List<Quad> iCode = compiler.getICode();
     assertTrue(CollectionUtils.isNotEmpty(iCode));
     assertEquals(iCode.size(), expectedOpcodes.size());
-    assertEquals(iCode.get(2).getOperand2(), iCode.get(5).getLabel());
-    assertEquals(iCode.get(4).getOperand1(), iCode.get(6).getLabel());
+    assertEquals(iCode.get(5).getOperand2(), iCode.get(8).getLabel());
+    assertEquals(iCode.get(7).getOperand1(), iCode.get(9).getLabel());
 
     for (int i = 0; i < iCode.size(); ++i) {
       assertEquals(iCode.get(i).getOpcode(), expectedOpcodes.get(i));
@@ -76,6 +82,9 @@ public class CompilerIntermediateCodeTest {
   @Test
   public void test_nestedIf() throws IOException {
     List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FRAME.toString(),
+            IntermediateOpcodes.Method.CALL.toString(),
+            IntermediateOpcodes.Flow.HALT.toString(),
             IntermediateOpcodes.Method.FUNC.toString(),
             IntermediateOpcodes.Flow.BF.toString(),
             IntermediateOpcodes.Bool.LT.toString(),
@@ -91,8 +100,8 @@ public class CompilerIntermediateCodeTest {
     List<Quad> iCode = compiler.getICode();
     assertTrue(CollectionUtils.isNotEmpty(iCode));
     assertEquals(iCode.size(), expectedOpcodes.size());
-    assertEquals(iCode.get(1).getOperand2(), iCode.get(5).getLabel());
-    assertEquals(iCode.get(3).getOperand2(), iCode.get(5).getLabel());
+    assertEquals(iCode.get(4).getOperand2(), iCode.get(8).getLabel());
+    assertEquals(iCode.get(6).getOperand2(), iCode.get(8).getLabel());
 
     for (int i = 0; i < iCode.size(); ++i) {
       assertEquals(iCode.get(i).getOpcode(), expectedOpcodes.get(i));
@@ -102,6 +111,9 @@ public class CompilerIntermediateCodeTest {
   @Test
   public void test_while_backToBack() throws IOException {
     List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FRAME.toString(),
+            IntermediateOpcodes.Method.CALL.toString(),
+            IntermediateOpcodes.Flow.HALT.toString(),
             IntermediateOpcodes.Method.FUNC.toString(),
             IntermediateOpcodes.Bool.LT.toString(),
             IntermediateOpcodes.Flow.BF.toString(),
@@ -123,10 +135,10 @@ public class CompilerIntermediateCodeTest {
     List<Quad> iCode = compiler.getICode();
     assertTrue(CollectionUtils.isNotEmpty(iCode));
     assertEquals(iCode.size(), expectedOpcodes.size());
-    assertEquals(iCode.get(1).getLabel(), iCode.get(5).getOperand1());
-    assertEquals(iCode.get(2).getOperand2(), iCode.get(6).getLabel());
-    assertEquals(iCode.get(2).getOperand2(), iCode.get(9).getOperand1());
-    assertEquals(iCode.get(7).getOperand2(), iCode.get(10).getLabel());
+    assertEquals(iCode.get(4).getLabel(), iCode.get(8).getOperand1());
+    assertEquals(iCode.get(5).getOperand2(), iCode.get(9).getLabel());
+    assertEquals(iCode.get(5).getOperand2(), iCode.get(12).getOperand1());
+    assertEquals(iCode.get(10).getOperand2(), iCode.get(13).getLabel());
 
     for (int i = 0; i < iCode.size(); ++i) {
       assertEquals(iCode.get(i).getOpcode(), expectedOpcodes.get(i));

@@ -1,6 +1,7 @@
 
 
 public class Animal(T) {
+    public static int test = 4;
     private T type;
     public Animal() {}
     public void setType(T type) {

@@ -108,7 +108,8 @@ public class IntermediateOpcodes {
   public enum Flow {
     BF,
     BT,
-    JMP
+    JMP,
+    HALT
   }
   public enum Stack {
     PUSH,

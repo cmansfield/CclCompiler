@@ -8,10 +8,8 @@ TODO List
 
     iCode
         serialize and deserialize iCode objects
-        Add all static quads to the code seg before main gets called
-        Remove size calculation from iCode and move that into tCode
-        Remaining iCode to add:
-            spawn
+        Add comments to the iCode quads
+        Enable and fix spawn
     
     tCode    
         Use an interface with tCode manager to allow different types of tCode generation 
