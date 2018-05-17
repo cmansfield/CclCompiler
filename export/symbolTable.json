@@ -1,488 +1,40 @@
 {
-  "I00024" : {
-    "scope" : "g",
-    "symbolId" : "I00024",
-    "text" : "45",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "I00021" : {
-    "scope" : "g",
-    "symbolId" : "I00021",
-    "text" : "3",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "S00007" : {
-    "scope" : "g",
-    "symbolId" : "S00007",
-    "text" : "test",
-    "symbolKind" : "STR_LIT",
-    "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "S00004" : {
-    "scope" : "g",
-    "symbolId" : "S00004",
-    "text" : "Hello",
-    "symbolKind" : "STR_LIT",
-    "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "S00003" : {
-    "scope" : "g",
-    "symbolId" : "S00003",
-    "text" : "Hello World",
-    "symbolKind" : "STR_LIT",
-    "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "S00006" : {
-    "scope" : "g",
-    "symbolId" : "S00006",
-    "text" : "world",
-    "symbolKind" : "STR_LIT",
-    "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "S00005" : {
-    "scope" : "g",
-    "symbolId" : "S00005",
-    "text" : "ccl",
-    "symbolKind" : "STR_LIT",
-    "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "M00001" : {
+  "V00001" : {
     "scope" : "g.D00001.C00001",
-    "symbolId" : "M00001",
-    "text" : "length",
-    "symbolKind" : "METHOD",
+    "symbolId" : "V00001",
+    "text" : "test",
+    "symbolKind" : "INSTANCE_VAR",
     "data" : {
-      "returnType" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "M00002" : {
-    "scope" : "g.D00002.C00002",
-    "symbolId" : "M00002",
-    "text" : "add",
-    "symbolKind" : "METHOD",
-    "data" : {
-      "returnType" : "int",
+      "type" : "int",
       "accessModifiers" : [ "PUBLIC", "STATIC" ],
-      "parameters" : [ "P00002", "P00003" ],
-      "typeAnArray" : false
-    }
-  },
-  "M00003" : {
-    "scope" : "g.D00003.T00001",
-    "symbolId" : "M00003",
-    "text" : "add",
-    "symbolKind" : "METHOD",
-    "data" : {
-      "returnType" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "parameters" : [ "P00004" ],
-      "typeAnArray" : false
-    }
-  },
-  "M00004" : {
-    "scope" : "g.D00003.C00003",
-    "symbolId" : "M00004",
-    "text" : "add",
-    "symbolKind" : "METHOD",
-    "data" : {
-      "returnType" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "parameters" : [ "P00008" ],
-      "typeAnArray" : false
-    }
-  },
-  "M00005" : {
-    "scope" : "g.D00003.C00004",
-    "symbolId" : "M00005",
-    "text" : "someMethod",
-    "symbolKind" : "METHOD",
-    "data" : {
-      "returnType" : "void",
-      "accessModifiers" : [ "STATIC", "PUBLIC" ],
-      "parameters" : [ "P00009" ],
-      "typeAnArray" : false
-    }
-  },
-  "D00001" : {
-    "scope" : "g",
-    "symbolId" : "D00001",
-    "text" : "ccl\\String.ccl",
-    "symbolKind" : "PACKAGE",
-    "data" : {
-      "accessModifiers" : [ "PROJECT" ],
-      "typeAnArray" : false
-    }
-  },
-  "D00002" : {
-    "scope" : "g",
-    "symbolId" : "D00002",
-    "text" : "ccl\\Math.ccl",
-    "symbolKind" : "PACKAGE",
-    "data" : {
-      "accessModifiers" : [ "PROJECT" ],
-      "typeAnArray" : false
-    }
-  },
-  "D00003" : {
-    "scope" : "g",
-    "symbolId" : "D00003",
-    "text" : "ccl\\test.ccl",
-    "symbolKind" : "PACKAGE",
-    "data" : {
-      "accessModifiers" : [ "PROJECT" ],
-      "typeAnArray" : false
-    }
-  },
-  "A00001" : {
-    "scope" : "g",
-    "symbolId" : "A00001",
-    "text" : "b",
-    "symbolKind" : "CHAR_LIT",
-    "data" : {
-      "type" : "char",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "X00003" : {
-    "scope" : "g.D00003",
-    "symbolId" : "X00003",
-    "text" : "main",
-    "symbolKind" : "MAIN",
-    "data" : {
-      "returnType" : "void",
-      "accessModifiers" : [ "PUBLIC" ],
       "typeAnArray" : false
     }
   },
   "C00002" : {
-    "scope" : "g.D00002",
+    "scope" : "g.D00001",
     "symbolId" : "C00002",
-    "text" : "Math",
+    "text" : "Animal<int>",
     "symbolKind" : "CLASS",
     "data" : {
-      "accessModifiers" : [ "PUBLIC", "STATIC" ],
+      "accessModifiers" : [ "PUBLIC" ],
+      "templatePlaceHolders" : [ "int" ],
       "typeAnArray" : false
     }
   },
   "C00001" : {
     "scope" : "g.D00001",
     "symbolId" : "C00001",
-    "text" : "String",
+    "text" : "Animal",
     "symbolKind" : "CLASS",
     "data" : {
       "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "I00006" : {
-    "scope" : "g",
-    "symbolId" : "I00006",
-    "text" : "500",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "I00007" : {
-    "scope" : "g",
-    "symbolId" : "I00007",
-    "text" : "2",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "I00008" : {
-    "scope" : "g",
-    "symbolId" : "I00008",
-    "text" : "10",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
+      "templatePlaceHolders" : [ "T" ],
       "typeAnArray" : false
     }
   },
   "I00001" : {
     "scope" : "g",
     "symbolId" : "I00001",
-    "text" : "1",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "I00002" : {
-    "scope" : "g",
-    "symbolId" : "I00002",
-    "text" : "0",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "I00003" : {
-    "scope" : "g",
-    "symbolId" : "I00003",
-    "text" : "5",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "T00001" : {
-    "scope" : "g.D00003",
-    "symbolId" : "T00001",
-    "text" : "MyClass",
-    "symbolKind" : "TEMPLATE_CLASS",
-    "data" : {
-      "accessModifiers" : [ "PRIVATE" ],
-      "templatePlaceHolders" : [ "A", "B", "C" ],
-      "typeAnArray" : false
-    }
-  },
-  "P00008" : {
-    "scope" : "g.D00003.C00003.M00004",
-    "symbolId" : "P00008",
-    "text" : "val",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "P00009" : {
-    "scope" : "g.D00003.C00004.M00005",
-    "symbolId" : "P00009",
-    "text" : "numbers",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : true
-    }
-  },
-  "P00006" : {
-    "scope" : "g.D00003.T00001.K00001",
-    "symbolId" : "P00006",
-    "text" : "key",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "K",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "P00007" : {
-    "scope" : "g.D00003.T00001.K00001",
-    "symbolId" : "P00007",
-    "text" : "val",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "V",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "V00008" : {
-    "scope" : "g.D00003.C00004",
-    "symbolId" : "V00008",
-    "text" : "num",
-    "symbolKind" : "INSTANCE_VAR",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PRIVATE", "STATIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "P00004" : {
-    "scope" : "g.D00003.T00001.M00003",
-    "symbolId" : "P00004",
-    "text" : "val",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "V00007" : {
-    "scope" : "g.D00003.C00004",
-    "symbolId" : "V00007",
-    "text" : "test",
-    "symbolKind" : "INSTANCE_VAR",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : true
-    }
-  },
-  "P00005" : {
-    "scope" : "g.D00003.T00001.K00001",
-    "symbolId" : "P00005",
-    "text" : "template",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "T",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "V00006" : {
-    "scope" : "g.D00003.C00003",
-    "symbolId" : "V00006",
-    "text" : "num",
-    "symbolKind" : "INSTANCE_VAR",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PRIVATE", "STATIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "P00002" : {
-    "scope" : "g.D00002.C00002.M00002",
-    "symbolId" : "P00002",
-    "text" : "a",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "I00009" : {
-    "scope" : "g",
-    "symbolId" : "I00009",
-    "text" : "20",
-    "symbolKind" : "INT_LIT",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "P00003" : {
-    "scope" : "g.D00002.C00002.M00002",
-    "symbolId" : "P00003",
-    "text" : "b",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "C00004" : {
-    "scope" : "g.D00003",
-    "symbolId" : "C00004",
-    "text" : "TestClass",
-    "symbolKind" : "CLASS",
-    "data" : {
-      "accessModifiers" : [ "PUBLIC", "STATIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "P00001" : {
-    "scope" : "g.D00001.C00001.N00002",
-    "symbolId" : "P00001",
-    "text" : "value",
-    "symbolKind" : "PARAM",
-    "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "C00003" : {
-    "scope" : "g.D00003",
-    "symbolId" : "C00003",
-    "text" : "YourClass",
-    "symbolKind" : "CLASS",
-    "data" : {
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : false
-    }
-  },
-  "V00001" : {
-    "scope" : "g.D00001.C00001",
-    "symbolId" : "V00001",
-    "text" : "buffer",
-    "symbolKind" : "INSTANCE_VAR",
-    "data" : {
-      "type" : "char",
-      "accessModifiers" : [ "PRIVATE" ],
-      "typeAnArray" : true
-    }
-  },
-  "S00001" : {
-    "scope" : "g",
-    "symbolId" : "S00001",
-    "text" : "John Doe",
-    "symbolKind" : "STR_LIT",
-    "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PUBLIC" ],
-      "typeAnArray" : false
-    }
-  },
-  "V00005" : {
-    "scope" : "g.D00003.C00003",
-    "symbolId" : "V00005",
-    "text" : "name",
-    "symbolKind" : "INSTANCE_VAR",
-    "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PRIVATE", "CONST" ],
-      "typeAnArray" : false
-    }
-  },
-  "I00012" : {
-    "scope" : "g",
-    "symbolId" : "I00012",
     "text" : "4",
     "symbolKind" : "INT_LIT",
     "data" : {
@@ -491,132 +43,213 @@
       "typeAnArray" : false
     }
   },
+  "M00001" : {
+    "scope" : "g.D00001.C00001",
+    "symbolId" : "M00001",
+    "text" : "setType",
+    "symbolKind" : "METHOD",
+    "data" : {
+      "returnType" : "void",
+      "accessModifiers" : [ "PUBLIC" ],
+      "parameters" : [ "P00001" ],
+      "typeAnArray" : false
+    }
+  },
   "V00004" : {
-    "scope" : "g.D00003.T00001",
+    "scope" : "g.D00001.C00002",
     "symbolId" : "V00004",
-    "text" : "num",
+    "text" : "type",
     "symbolKind" : "INSTANCE_VAR",
     "data" : {
       "type" : "int",
-      "accessModifiers" : [ "PRIVATE", "STATIC" ],
+      "accessModifiers" : [ "PRIVATE" ],
+      "typeAnArray" : false
+    }
+  },
+  "M00002" : {
+    "scope" : "g.D00001.C00002",
+    "symbolId" : "M00002",
+    "text" : "setType",
+    "symbolKind" : "METHOD",
+    "data" : {
+      "returnType" : "void",
+      "accessModifiers" : [ "PUBLIC" ],
+      "parameters" : [ "P00002" ],
       "typeAnArray" : false
     }
   },
   "V00003" : {
-    "scope" : "g.D00003.T00001",
+    "scope" : "g.D00001.C00002",
     "symbolId" : "V00003",
-    "text" : "name",
+    "text" : "test",
     "symbolKind" : "INSTANCE_VAR",
     "data" : {
-      "type" : "string",
-      "accessModifiers" : [ "PRIVATE", "CONST" ],
+      "type" : "int",
+      "accessModifiers" : [ "PUBLIC", "STATIC" ],
       "typeAnArray" : false
     }
   },
-  "I00014" : {
-    "scope" : "g",
-    "symbolId" : "I00014",
-    "text" : "7",
-    "symbolKind" : "INT_LIT",
+  "J00001" : {
+    "scope" : "g.D00001.X00001",
+    "symbolId" : "J00001",
+    "text" : "J00001",
+    "symbolKind" : "TEMPORARY",
     "data" : {
-      "type" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
+      "type" : "Animal<int>",
       "typeAnArray" : false
     }
   },
   "V00002" : {
     "scope" : "g.D00001.C00001",
     "symbolId" : "V00002",
-    "text" : "length",
+    "text" : "type",
     "symbolKind" : "INSTANCE_VAR",
     "data" : {
-      "type" : "int",
+      "type" : "T",
       "accessModifiers" : [ "PRIVATE" ],
       "typeAnArray" : false
     }
   },
-  "I00010" : {
-    "scope" : "g",
-    "symbolId" : "I00010",
-    "text" : "34",
-    "symbolKind" : "INT_LIT",
+  "R00002" : {
+    "scope" : "g.D00001.C00002.M00002",
+    "symbolId" : "R00002",
+    "text" : "type",
+    "symbolKind" : "REFERENCE",
     "data" : {
       "type" : "int",
+      "accessModifiers" : [ "PRIVATE" ],
+      "parameters" : [ "C00002", "V00004" ],
+      "typeAnArray" : false
+    }
+  },
+  "D00001" : {
+    "scope" : "g",
+    "symbolId" : "D00001",
+    "text" : "ccl\\test2.ccl",
+    "symbolKind" : "PACKAGE",
+    "data" : {
+      "typeAnArray" : false
+    }
+  },
+  "J00002" : {
+    "scope" : "g.D00001.X00001",
+    "symbolId" : "J00002",
+    "text" : "J00002",
+    "symbolKind" : "TEMPORARY",
+    "data" : {
+      "type" : "Animal<int>",
+      "parameters" : [ "J00001", "N00003" ],
+      "typeAnArray" : false
+    }
+  },
+  "L00001" : {
+    "scope" : "g.D00001.X00001",
+    "symbolId" : "L00001",
+    "text" : "animal",
+    "symbolKind" : "LOCAL_VAR",
+    "data" : {
+      "type" : "Animal<int>",
+      "accessModifiers" : [ "PRIVATE" ],
+      "typeAnArray" : false
+    }
+  },
+  "T00001" : {
+    "scope" : "g.D00001.C00001",
+    "symbolId" : "T00001",
+    "text" : "T",
+    "symbolKind" : "TEMPLATE",
+    "data" : {
       "accessModifiers" : [ "PUBLIC" ],
+      "parameters" : [ "C00001" ],
       "typeAnArray" : false
     }
   },
   "N00002" : {
     "scope" : "g.D00001.C00001",
     "symbolId" : "N00002",
-    "text" : "String",
+    "text" : "_Animal_init",
     "symbolKind" : "CONSTRUCTOR",
     "data" : {
-      "accessModifiers" : [ "PUBLIC" ],
-      "parameters" : [ "P00001" ],
-      "typeAnArray" : false
-    }
-  },
-  "K00001" : {
-    "scope" : "g.D00003.T00001",
-    "symbolId" : "K00001",
-    "text" : "doSomething",
-    "symbolKind" : "TEMPLATE_METHOD",
-    "data" : {
-      "returnType" : "int",
-      "accessModifiers" : [ "PUBLIC" ],
-      "templatePlaceHolders" : [ "T", "K", "V" ],
-      "parameters" : [ "P00005", "P00006", "P00007" ],
-      "typeAnArray" : false
-    }
-  },
-  "N00003" : {
-    "scope" : "g.D00002.C00002",
-    "symbolId" : "N00003",
-    "text" : "Math",
-    "symbolKind" : "CONSTRUCTOR",
-    "data" : {
+      "returnType" : "Animal",
       "accessModifiers" : [ "PRIVATE" ],
       "typeAnArray" : false
     }
   },
-  "N00004" : {
-    "scope" : "g.D00003.T00001",
-    "symbolId" : "N00004",
-    "text" : "MyClass",
+  "N00003" : {
+    "scope" : "g.D00001.C00002",
+    "symbolId" : "N00003",
+    "text" : "Animal<int>",
     "symbolKind" : "CONSTRUCTOR",
     "data" : {
+      "returnType" : "Animal<int>",
       "accessModifiers" : [ "PUBLIC" ],
       "typeAnArray" : false
     }
   },
-  "N00005" : {
-    "scope" : "g.D00003.C00003",
-    "symbolId" : "N00005",
-    "text" : "YourClass",
+  "N00004" : {
+    "scope" : "g.D00001.C00002",
+    "symbolId" : "N00004",
+    "text" : "_Animal<int>_init",
     "symbolKind" : "CONSTRUCTOR",
     "data" : {
-      "accessModifiers" : [ "PUBLIC" ],
+      "returnType" : "Animal<int>",
+      "accessModifiers" : [ "PRIVATE" ],
       "typeAnArray" : false
     }
   },
   "N00001" : {
     "scope" : "g.D00001.C00001",
     "symbolId" : "N00001",
-    "text" : "String",
+    "text" : "Animal",
     "symbolKind" : "CONSTRUCTOR",
     "data" : {
+      "returnType" : "Animal",
       "accessModifiers" : [ "PUBLIC" ],
       "typeAnArray" : false
     }
   },
-  "N00006" : {
-    "scope" : "g.D00003.C00004",
-    "symbolId" : "N00006",
-    "text" : "TestClass",
-    "symbolKind" : "CONSTRUCTOR",
+  "R00001" : {
+    "scope" : "g.D00001.C00001.M00001",
+    "symbolId" : "R00001",
+    "text" : "type",
+    "symbolKind" : "REFERENCE",
     "data" : {
-      "accessModifiers" : [ "PUBLIC" ],
+      "type" : "T",
+      "accessModifiers" : [ "PRIVATE" ],
+      "parameters" : [ "C00001", "V00002" ],
+      "typeAnArray" : false
+    }
+  },
+  "X00001" : {
+    "scope" : "g.D00001",
+    "symbolId" : "X00001",
+    "text" : "main",
+    "symbolKind" : "MAIN",
+    "data" : {
+      "returnType" : "void",
+      "accessModifiers" : [ "PUBLIC", "STATIC" ],
+      "typeAnArray" : false
+    }
+  },
+  "P00002" : {
+    "scope" : "g.D00001.C00002.M00002",
+    "symbolId" : "P00002",
+    "text" : "type",
+    "symbolKind" : "PARAM",
+    "data" : {
+      "type" : "int",
+      "accessModifiers" : [ "PRIVATE" ],
+      "typeAnArray" : false
+    }
+  },
+  "P00001" : {
+    "scope" : "g.D00001.C00001.M00001",
+    "symbolId" : "P00001",
+    "text" : "type",
+    "symbolKind" : "PARAM",
+    "data" : {
+      "type" : "T",
+      "accessModifiers" : [ "PRIVATE" ],
       "typeAnArray" : false
     }
   }

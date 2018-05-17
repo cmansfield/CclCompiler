@@ -380,6 +380,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     semTemplateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
     symbols = semTemplateVisitor.getSymbols();
     iCode.addAllEndOfCodeSegICode(semTemplateVisitor.getICode().getICode());
+    iCode.clearEndOfCodeSegICode();
     
     Symbol filter = new SymbolBuilder()
             .text(templateClass.getText() + ParserUtils.templateTextFormat(templateTypes))

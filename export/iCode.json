@@ -1,0 +1,84 @@
+{
+  "endOfCodeSegICode" : [ ],
+  "isFieldDeclaration" : false,
+  "icode" : [ {
+    "opcode" : "MOV",
+    "operand1" : "I00001",
+    "operand2" : "V00001"
+  }, {
+    "opcode" : "FRAME",
+    "operand1" : "X00001"
+  }, {
+    "opcode" : "CALL",
+    "operand1" : "X00001",
+    "comment" : "Call main method"
+  }, {
+    "opcode" : "HALT",
+    "comment" : "Halt the program"
+  }, {
+    "label" : "N00001",
+    "opcode" : "FUNC",
+    "operand1" : "N00001"
+  }, {
+    "opcode" : "FRAME",
+    "operand1" : "N00002"
+  }, {
+    "opcode" : "PUSH",
+    "operand1" : "this"
+  }, {
+    "opcode" : "CALL",
+    "operand1" : "N00002"
+  }, {
+    "opcode" : "RTN",
+    "operand1" : "this"
+  }, {
+    "label" : "M00001",
+    "opcode" : "FUNC",
+    "operand1" : "M00001"
+  }, {
+    "opcode" : "REF",
+    "operand1" : "this",
+    "operand2" : "V00002",
+    "operand3" : "R00001"
+  }, {
+    "opcode" : "MOV",
+    "operand1" : "P00001",
+    "operand2" : "R00001"
+  }, {
+    "opcode" : "RTN"
+  }, {
+    "label" : "N00002",
+    "opcode" : "FUNC",
+    "operand1" : "N00002"
+  }, {
+    "opcode" : "RTN",
+    "operand1" : "this"
+  }, {
+    "label" : "X00001",
+    "opcode" : "FUNC",
+    "operand1" : "X00001"
+  }, {
+    "opcode" : "NEWI",
+    "operand1" : "C00002",
+    "operand2" : "J00001",
+    "comment" : "tCode: replace 'C00002' with its size in bytes"
+  }, {
+    "opcode" : "FRAME",
+    "operand1" : "N00003"
+  }, {
+    "opcode" : "PUSH",
+    "operand1" : "J00001"
+  }, {
+    "opcode" : "CALL",
+    "operand1" : "N00003"
+  }, {
+    "opcode" : "PEEK",
+    "operand1" : "J00002"
+  }, {
+    "opcode" : "MOV",
+    "operand1" : "J00002",
+    "operand2" : "L00001"
+  }, {
+    "opcode" : "RTN"
+  } ]
+}

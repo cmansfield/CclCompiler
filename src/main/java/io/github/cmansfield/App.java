@@ -36,6 +36,11 @@ public class App {
       return;
     }
     
+//    Compiler compiler = new Compiler(
+//            CompilerOptions.VERBOSE_CHECK, 
+//            CompilerOptions.EXPORT_SYMBOL_TABLE, 
+//            CompilerOptions.EXPORT_ICODE);
+    
     Compiler compiler = new Compiler(CompilerOptions.VERBOSE_CHECK);
     if(!compiler.compile(fileName)) {
       return;

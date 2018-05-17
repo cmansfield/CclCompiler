@@ -54,6 +54,10 @@ public class IntermediateCode {
     iCode.addAll(0, frongICode);
   }
   
+  public void clearEndOfCodeSegICode() {
+    endOfCodeSegICode.clear();
+  }
+  
   /**
    * This method will 'pop' all of the static initialized field declaration iCode and return
    * the list of quads

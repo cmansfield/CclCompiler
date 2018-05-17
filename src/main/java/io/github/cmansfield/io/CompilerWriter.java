@@ -1,10 +1,11 @@
 package io.github.cmansfield.io;
 
+import io.github.cmansfield.secondpass.icode.IntermediateCode;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import io.github.cmansfield.firstpass.symbols.Symbol;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.BidiMap;
-import io.github.cmansfield.firstpass.symbols.Symbol;
 
 import java.nio.charset.StandardCharsets;
 import java.io.OutputStreamWriter;
@@ -13,11 +14,11 @@ import java.io.IOException;
 import java.io.File;
 
 
-public class SymbolTableWriter {
-  private SymbolTableWriter() {}
+public class CompilerWriter {
+  private CompilerWriter() {}
 
   /**
-   * This will export the entire symbol table to a json file in a deserialize friendly format
+   * This will export the entire symbol table to a json file in a deserialized friendly format
    * 
    * @param symbolTable Symbol table to be exported   
    */
@@ -42,6 +43,31 @@ public class SymbolTableWriter {
     }
   }
 
+  /**
+   * This will export all of the generated iCode to a json file in a deserialized friendly format
+   * 
+   * @param iCode
+   * @throws IOException
+   */
+  public static void exportICode(IntermediateCode iCode) throws IOException {
+    final String fileName = "iCode.json";
+    String fileNameFull = createExportDir() + File.separator + fileName;
+    ObjectMapper mapper = new ObjectMapper();
+
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+    try (OutputStreamWriter writer = new OutputStreamWriter(
+            new FileOutputStream(fileNameFull), StandardCharsets.UTF_8)) {
+
+      String jsonSymbols = mapper.writerWithDefaultPrettyPrinter()
+              .writeValueAsString(iCode);
+      writer.write(jsonSymbols);
+    }
+    catch (Exception e) {
+      throw new IOException("Unable to save the itermediate code at this time", e);
+    }
+  }
+  
   /**
    * Creates the predetermined export directory
    *

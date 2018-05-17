@@ -1,6 +1,5 @@
 package io.github.cmansfield.compiler;
 
-import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.secondpass.semantics.SemanticsVisitor;
 import io.github.cmansfield.parser.include.ImportGrammarParser;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -10,8 +9,9 @@ import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.language.CclGrammarLexer;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.secondpass.icode.Quad;
-import io.github.cmansfield.io.SymbolTableWriter;
+import io.github.cmansfield.firstpass.symbols.*;
 import org.apache.commons.collections4.BidiMap;
+import io.github.cmansfield.io.CompilerWriter;
 import org.antlr.v4.runtime.CommonTokenStream;
 import io.github.cmansfield.io.ImportVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -82,7 +82,7 @@ public class Compiler {
       SymbolUtils.checkSymbolTable(symbolTable);
 
       if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
-        SymbolTableWriter.exportSymbolTable(symbolTable);
+        CompilerWriter.exportSymbolTable(symbolTable);
       }
       return true;
     }
@@ -93,9 +93,11 @@ public class Compiler {
       return false;
     }
     if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
-      SymbolTableWriter.exportSymbolTable(symbolTable);
+      CompilerWriter.exportSymbolTable(symbolTable);
     }
-
+    if(options.contains(CompilerOptions.EXPORT_ICODE)) {
+      CompilerWriter.exportICode(iCode);
+    }
     if(options.contains(CompilerOptions.VERBOSE_CHECK)) {
       SymbolUtils.checkSymbolTable(symbolTable);
     }

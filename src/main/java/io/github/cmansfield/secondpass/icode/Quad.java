@@ -10,13 +10,12 @@ public class Quad {
   private String operand3;
   private String comment;
   
-  Quad(String opcode, String operand1) {
-    this.label = "";
+  private Quad(String opcode, String operand1) {
     this.opcode = opcode;
     this.operand1 = operand1;
   }
   
-  Quad(String opcode, String operand1, String operand2) {
+  private Quad(String opcode, String operand1, String operand2) {
     this(opcode, operand1);
     this.operand2 = operand2;
   }
@@ -27,7 +26,7 @@ public class Quad {
   }
 
   void setLabel(String label) {
-    this.label = StringUtils.isBlank(label) ? "" : label;
+    this.label = label;
   }
   
   void setOperand1(String operand1) {
@@ -76,7 +75,7 @@ public class Quad {
             "%-55s%s", 
             String.format(
               "%-20s%-6s%s%s%s", 
-              label,
+              label == null ? "" : label,
               opcode, 
               StringUtils.isBlank(operand1) ? "" : operand1,
               StringUtils.isBlank(operand2) ? "" : ", " + operand2,
