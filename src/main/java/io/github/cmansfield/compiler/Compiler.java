@@ -95,7 +95,7 @@ public class Compiler {
     if(options.contains(CompilerOptions.EXPORT_SYMBOL_TABLE)) {
       CompilerWriter.exportSymbolTable(symbolTable);
     }
-    if(options.contains(CompilerOptions.EXPORT_ICODE)) {
+    if(options.contains(CompilerOptions.EXPORT_I_CODE)) {
       CompilerWriter.exportICode(iCode);
     }
     if(options.contains(CompilerOptions.VERBOSE_CHECK)) {

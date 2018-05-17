@@ -1,6 +1,5 @@
 {
   "endOfCodeSegICode" : [ ],
-  "isFieldDeclaration" : false,
   "icode" : [ {
     "opcode" : "MOV",
     "operand1" : "I00001",
@@ -80,5 +79,6 @@
     "operand2" : "L00001"
   }, {
     "opcode" : "RTN"
-  } ]
+  } ],
+  "isFieldDeclaration" : false
 }

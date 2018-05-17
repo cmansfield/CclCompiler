@@ -11,7 +11,7 @@ public class IntermediateCode {
   private final Map<Label,Deque<String>> labelStackMap;
   private final List<Quad> endOfCodeSegICode;
   private List<Quad> staticInitializedICode;
-  private final List<Quad> iCode;
+  private final List<Quad> icode;
   private List<Quad> staticICode;
   private String nextLabel;
   
@@ -21,13 +21,13 @@ public class IntermediateCode {
     labelStackMap = new EnumMap<>(Label.class);
     staticInitializedICode = new ArrayList<>();
     staticICode = new ArrayList<>();
-    iCode = new ArrayList<>();
+    icode = new ArrayList<>();
     isFieldDeclaration = false;
     endOfCodeSegICode = new ArrayList<>();
   }
 
   public List<Quad> getICode() {
-    return new ArrayList<>(iCode);
+    return new ArrayList<>(icode);
   }
 
   public List<Quad> getEndOfCodeSegICode() {
@@ -51,7 +51,7 @@ public class IntermediateCode {
    * @param frongICode    The new iCode to push to the front of the main body of iCode
    */
   public void addAllFrontICode(List<Quad> frongICode) {
-    iCode.addAll(0, frongICode);
+    icode.addAll(0, frongICode);
   }
   
   public void clearEndOfCodeSegICode() {
@@ -103,7 +103,7 @@ public class IntermediateCode {
       staticInitializedICode.add(quad);
     }
     else {
-      iCode.add(quad);
+      icode.add(quad);
     }
   }
 
@@ -155,7 +155,7 @@ public class IntermediateCode {
    * @param label   The new label to replace the old one
    */
   private void backPropagate(String label) {
-    iCode.forEach(quad -> {
+    icode.forEach(quad -> {
       if(nextLabel.equals(quad.getOperand1())) {
         quad.setOperand1(label);
       }
@@ -211,15 +211,15 @@ public class IntermediateCode {
    * @return        Boolean true if they match
    */
   public boolean isLastOpcode(String opcode) {
-    if(StringUtils.isBlank(opcode) || iCode.isEmpty()) {
+    if(StringUtils.isBlank(opcode) || icode.isEmpty()) {
       return false;
     }
-    return opcode.equals(iCode.get(iCode.size() - 1).getOpcode());
+    return opcode.equals(icode.get(icode.size() - 1).getOpcode());
   }
   
   @Override
   public String toString() {
-    return iCode.stream()
+    return icode.stream()
             .map(Object::toString)
             .collect(Collectors.joining("\n"));
   }

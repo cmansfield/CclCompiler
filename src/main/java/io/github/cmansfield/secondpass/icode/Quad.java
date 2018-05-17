@@ -10,6 +10,8 @@ public class Quad {
   private String operand3;
   private String comment;
   
+  public Quad() {}
+  
   private Quad(String opcode, String operand1) {
     this.opcode = opcode;
     this.operand1 = operand1;
@@ -25,23 +27,23 @@ public class Quad {
     this.operand3 = operand3;
   }
 
-  void setLabel(String label) {
+  public void setLabel(String label) {
     this.label = label;
   }
-  
-  void setOperand1(String operand1) {
+
+  public void setOperand1(String operand1) {
     this.operand1 = operand1;
   }
-  
-  void setOperand2(String operand2) {
+
+  public void setOperand2(String operand2) {
     this.operand2 = operand2;
   }
-  
-  void setOperand3(String operand3) {
+
+  public void setOperand3(String operand3) {
     this.operand3 = operand3;
   }
   
-  void setComment(String comment) {
+  public void setComment(String comment) {
     this.comment = comment;
   }
 

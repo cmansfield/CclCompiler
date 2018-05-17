@@ -23,8 +23,7 @@ public class CompilerWriter {
    * @param symbolTable Symbol table to be exported   
    */
   public static void exportSymbolTable(BidiMap<String, Symbol> symbolTable) throws IOException {
-    final String symbolTableFileName = "symbolTable.json";
-    String fileName = createExportDir() + File.separator + symbolTableFileName;
+    String fileName = createExportDir() + File.separator + IoConstants.SYMBOL_TABLE_FILE_NAME;
     ObjectMapper mapper = new ObjectMapper();
 
     // The Jdk8Module is used to serialize Optional objects and ensure we get the enclosed object
@@ -46,12 +45,10 @@ public class CompilerWriter {
   /**
    * This will export all of the generated iCode to a json file in a deserialized friendly format
    * 
-   * @param iCode
-   * @throws IOException
+   * @param iCode   The IntermediateCode object to write out
    */
   public static void exportICode(IntermediateCode iCode) throws IOException {
-    final String fileName = "iCode.json";
-    String fileNameFull = createExportDir() + File.separator + fileName;
+    String fileNameFull = createExportDir() + File.separator + IoConstants.I_CODE_FILE_NAME;
     ObjectMapper mapper = new ObjectMapper();
 
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -74,15 +71,16 @@ public class CompilerWriter {
    * @return - Returns a File object of the newly created directory
    */
   private static File createExportDir() {
-    final String directory = "export";
-    File saveFolder = new File(directory);
+    File saveFolder = new File(IoConstants.EXPORT_DIR);
 
     try {
       // Try to create the export directory
       saveFolder.mkdir();
     }
     catch (Exception e) {
-      throw new RuntimeException(String.format("Unable to create directory '%s' at this time%n", directory), e);   // NOSONAR
+      throw new RuntimeException(String.format(            // NOSONAR
+              "Unable to create directory '%s' at this time%n", 
+              IoConstants.EXPORT_DIR), e);
     }
 
     return saveFolder;

@@ -7,7 +7,6 @@ TODO List
         Fix spawn's semantics
 
     iCode
-        Deserialize iCode objects
         Add comments to the iCode quads
         Enable and fix spawn
     

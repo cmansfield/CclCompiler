@@ -32,7 +32,7 @@ public class CompilerIntermediateCodeTest {
             IntermediateOpcodes.Other.READ.toString(),
             IntermediateOpcodes.Flow.JMP.toString(),
             IntermediateOpcodes.Method.RTN.toString());
-    Compiler compiler = CompilerTestUtils.compileNoThrow("test101.ccl", CompilerOptions.GENERATE_ICODE_ONLY);
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test101.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
     List<String> exceptions = compiler.getExceptions();
@@ -62,7 +62,7 @@ public class CompilerIntermediateCodeTest {
             IntermediateOpcodes.Flow.JMP.toString(),
             IntermediateOpcodes.Other.PRINT.toString(),
             IntermediateOpcodes.Method.RTN.toString());
-    Compiler compiler = CompilerTestUtils.compileNoThrow("test102.ccl", CompilerOptions.GENERATE_ICODE_ONLY);
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test102.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
     List<String> exceptions = compiler.getExceptions();
@@ -91,7 +91,7 @@ public class CompilerIntermediateCodeTest {
             IntermediateOpcodes.Flow.BF.toString(),
             IntermediateOpcodes.Other.PRINT.toString(),
             IntermediateOpcodes.Method.RTN.toString());
-    Compiler compiler = CompilerTestUtils.compileNoThrow("test103.ccl", CompilerOptions.GENERATE_ICODE_ONLY);
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test103.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
     List<String> exceptions = compiler.getExceptions();
@@ -126,7 +126,7 @@ public class CompilerIntermediateCodeTest {
             IntermediateOpcodes.Flow.JMP.toString(),
             IntermediateOpcodes.Other.PRINT.toString(),
             IntermediateOpcodes.Method.RTN.toString());
-    Compiler compiler = CompilerTestUtils.compileNoThrow("test104.ccl", CompilerOptions.GENERATE_ICODE_ONLY);
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test104.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
     List<String> exceptions = compiler.getExceptions();
