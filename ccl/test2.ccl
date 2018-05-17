@@ -1,15 +1,13 @@
 
 
-public class Cat {
-    public static int value = 10;
-
-    public Cat() {}
-    public void method() {
-        print(this.getOnomatopoeia());
-    }
-    public string getOnomatopoeia() {
-        return "meow";
+public class Animal(T) {
+    private T type;
+    public Animal() {}
+    public void setType(T type) {
+        this.type = type;
     }
 }
 
-public static void main() {}
+public static void main() {
+    Animal<int> animal = new Animal<int>();
+}

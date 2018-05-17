@@ -1,14 +1,18 @@
 package io.github.cmansfield.secondpass.semantics;
 
-import io.github.cmansfield.compiler.Compiler;
+import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
 import io.github.cmansfield.parser.language.CclGrammarParser;
+import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
+import io.github.cmansfield.secondpass.icode.QuadBuilder;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.apache.commons.collections4.map.LinkedMap;
 import io.github.cmansfield.parser.TemplateVisitor;
 import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
+import io.github.cmansfield.compiler.Compiler;
 import org.apache.commons.lang3.StringUtils;
+import io.github.cmansfield.parser.Keyword;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -119,6 +123,12 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
     String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
     checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());     // NOSONAR
 
+    iCode.setNextLabel(symbolId);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FUNC.toString())
+            .operand1(symbolId)
+            .build());
+    
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 
@@ -126,6 +136,27 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
     constructorCheck(name);
     // Semantic #paramExist
     paramExist(ctx);
+
+    // Each class constructor must call the class' init constructor
+    String initSymbolId = findSymbolId(new SymbolBuilder()
+                    .text("_" + name + "_init")
+                    .symbolKind(SymbolKind.CONSTRUCTOR)
+                    .build(),
+            false);
+
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FRAME.toString())
+            .operand1(initSymbolId)
+            .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Stack.PUSH.toString())
+            .operand1(Keyword.THIS.toString())
+            .build());
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.CALL.toString())
+            .operand1(initSymbolId)
+            .build());
+    
     traverseMethodBody(ctx);
     scope = scopeOrig;
 
@@ -152,9 +183,14 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
                       return param;
                     })
                     .collect(Collectors.toList()));
-
     checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
 
+    iCode.setNextLabel(symbolId);
+    iCode.add(new QuadBuilder()
+            .opcode(IntermediateOpcodes.Method.FUNC.toString())
+            .operand1(symbolId)
+            .build());
+    
     String scopeOrig = scope;
     scope = scope + "." + symbolId;
 

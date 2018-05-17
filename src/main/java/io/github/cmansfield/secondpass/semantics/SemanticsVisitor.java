@@ -4,7 +4,6 @@ import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
 import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
-import io.github.cmansfield.secondpass.icode.Quad;
 import io.github.cmansfield.secondpass.semantics.sar.SarType;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.secondpass.icode.QuadBuilder;
@@ -13,6 +12,7 @@ import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.parser.TemplateVisitor;
+import io.github.cmansfield.secondpass.icode.Quad;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import io.github.cmansfield.firstpass.symbols.*;
 import io.github.cmansfield.parser.ParserUtils;
@@ -35,9 +35,7 @@ import java.util.*;
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
   private final Deque<ParserRuleContext> operatorStack;
-  // TODO - Include this in the TemplateSemanticVisitor class
-  // Templates will likely need their own IntermediateCode object
-  private final IntermediateCode iCode;
+  final IntermediateCode iCode;
   final Deque<SAR> sas;
   
   private static final int DEFAULT_LINE_NUMBER = -1;
@@ -60,7 +58,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     return sas == null ? new LinkedList<>() : sas;
   }
 
-  public IntermediateCode getiCode() {
+  public IntermediateCode getICode() {
     return iCode;
   }
   
@@ -377,10 +375,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     templateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
     symbols = templateVisitor.getSymbols();
     // Second pass
-    templateVisitor = new TemplateSemanticsVisitor(compiler, symbols, templateClassContexts, templateClass.getScope());
-    templateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
-    symbols = templateVisitor.getSymbols();
-
+    TemplateSemanticsVisitor semTemplateVisitor = new TemplateSemanticsVisitor(compiler, symbols, templateClassContexts, templateClass.getScope());
+    semTemplateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
+    symbols = semTemplateVisitor.getSymbols();
+    iCode.addAllEndOfCodeSegICode(semTemplateVisitor.getICode().getICode());
+    
     Symbol filter = new SymbolBuilder()
             .text(templateClass.getText() + ParserUtils.templateTextFormat(templateTypes))
             .symbolKind(SymbolKind.CLASS)
@@ -716,7 +715,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Other.REF.toString())
-            .operand1(parentSar.getSymbolId())
+            .operand1(Keyword.THIS.toString().equals(parentSar.getText()) 
+                    ? Keyword.THIS.toString() 
+                    : parentSar.getSymbolId())
             .operand2(fieldSar.getSymbolId())
             .operand3(referenceSymbol.getSymbolId())
             .build());
@@ -2331,10 +2332,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
    * #iCode
    * This method will place the iCode for static initializers in the correct location
    * 
-   * @param classSymbol       The Symbol of the class that houses these field declarations 
    * @param initSymbol        The Symbol of the hidden class init method
    */
-  private void processClassStaticInitializers(Symbol classSymbol, Symbol initSymbol) {
+  private void processClassStaticInitializers(Symbol initSymbol) {
     iCode.setNextLabel(initSymbol.getSymbolId());
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FUNC.toString())
@@ -2512,7 +2512,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .map(context -> (CclGrammarParser.ClassMemberDeclarationContext)context)
             .forEach(this::visitClassMemberDeclaration);
 
-    processClassStaticInitializers(symbol, initSymbol);
+    processClassStaticInitializers(initSymbol);
     
     scope = scopeOrig;
 
@@ -2571,11 +2571,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitMethodDeclaration(CclGrammarParser.MethodDeclarationContext ctx) {     // NOSONAR
     getType(ctx);
     String name = getNameWithoutVisiting(ctx);
-    List<String> paramTypes = traverseParameterList(ctx);
     if(StringUtils.isBlank(name)) {
       throw new IllegalStateException("[Compiler Bug] Method name came back blank, should not be blank after the first pass");
     }
-    
+
+    List<String> paramTypes = traverseParameterList(ctx);
     String symbolId = findMethodSymbolId(name, SymbolKind.METHOD, paramTypes);
     checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
 
@@ -3097,6 +3097,16 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitListSeparatorOperator(CclGrammarParser.ListSeparatorOperatorContext ctx) {
     operatorStack.push(ctx);
+    return null;
+  }
+
+  @Override
+  public Object visitCompilationUnit(CclGrammarParser.CompilationUnitContext ctx) {
+    super.visitCompilationUnit(ctx);
+
+    // End of compile. Insert each end of segment iCode to the main list of iCode
+    iCode.getEndOfCodeSegICode().forEach(iCode::add);
+    
     return null;
   }
 }
