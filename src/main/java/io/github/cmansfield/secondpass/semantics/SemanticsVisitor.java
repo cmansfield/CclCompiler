@@ -1,12 +1,13 @@
 package io.github.cmansfield.secondpass.semantics;
 
+import io.github.cmansfield.firstpass.symbols.data.Data.DataBuilder;
+import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
-import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
+import io.github.cmansfield.secondpass.icode.Quad.QuadBuilder;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
 import io.github.cmansfield.secondpass.semantics.sar.SarType;
 import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.secondpass.icode.QuadBuilder;
 import io.github.cmansfield.secondpass.semantics.sar.SAR;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;

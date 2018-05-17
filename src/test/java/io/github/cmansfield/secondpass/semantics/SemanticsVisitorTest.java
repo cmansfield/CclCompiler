@@ -1,12 +1,11 @@
 package io.github.cmansfield.secondpass.semantics;
 
-import io.github.cmansfield.compiler.Compiler;
+import io.github.cmansfield.firstpass.symbols.data.Data.DataBuilder;
+import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
-import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.secondpass.semantics.sar.SarType;
 import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.SymbolFilter;
 import io.github.cmansfield.secondpass.semantics.sar.SAR;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
@@ -17,6 +16,7 @@ import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.apache.commons.collections4.BidiMap;
+import io.github.cmansfield.compiler.Compiler;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.parser.Keyword;

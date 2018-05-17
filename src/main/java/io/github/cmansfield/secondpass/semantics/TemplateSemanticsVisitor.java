@@ -1,10 +1,10 @@
 package io.github.cmansfield.secondpass.semantics;
 
+import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
 import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
+import io.github.cmansfield.secondpass.icode.Quad.QuadBuilder;
 import io.github.cmansfield.parser.language.CclGrammarParser;
-import io.github.cmansfield.firstpass.symbols.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
-import io.github.cmansfield.secondpass.icode.QuadBuilder;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.apache.commons.collections4.map.LinkedMap;
 import io.github.cmansfield.parser.TemplateVisitor;

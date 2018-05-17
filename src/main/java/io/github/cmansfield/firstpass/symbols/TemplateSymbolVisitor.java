@@ -1,14 +1,14 @@
 package io.github.cmansfield.firstpass.symbols;
 
-import io.github.cmansfield.compiler.Compiler;
+import io.github.cmansfield.firstpass.symbols.data.Data.DataBuilder;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
-import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.map.LinkedMap;
 import io.github.cmansfield.parser.TemplateVisitor;
 import io.github.cmansfield.parser.ParserUtils;
 import org.apache.commons.collections4.BidiMap;
+import io.github.cmansfield.compiler.Compiler;
 
 import java.util.stream.Collectors;
 import java.util.List;

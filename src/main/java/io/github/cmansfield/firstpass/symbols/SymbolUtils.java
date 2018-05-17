@@ -1,5 +1,6 @@
 package io.github.cmansfield.firstpass.symbols;
 
+import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.lang3.StringUtils;

@@ -1,7 +1,7 @@
 package io.github.cmansfield.firstpass.symbols;
 
+import io.github.cmansfield.firstpass.symbols.data.Data.DataBuilder;
 import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
-import io.github.cmansfield.firstpass.symbols.data.DataBuilder;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.CollectionUtils;

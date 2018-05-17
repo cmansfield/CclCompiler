@@ -1,5 +1,6 @@
 package io.github.cmansfield.compiler.syntax;
 
+import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
 import io.github.cmansfield.compiler.CompilerTestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.compiler.CompilerOptions;

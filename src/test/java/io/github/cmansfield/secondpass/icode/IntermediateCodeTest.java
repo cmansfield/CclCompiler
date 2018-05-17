@@ -1,8 +1,9 @@
 package io.github.cmansfield.secondpass.icode;
 
-import io.github.cmansfield.compiler.Label;
+import io.github.cmansfield.secondpass.icode.Quad.QuadBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import io.github.cmansfield.compiler.Label;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

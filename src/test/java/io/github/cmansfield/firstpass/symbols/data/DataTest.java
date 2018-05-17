@@ -1,7 +1,8 @@
 package io.github.cmansfield.firstpass.symbols.data;
 
-import io.github.cmansfield.parser.Keyword;
+import io.github.cmansfield.firstpass.symbols.data.Data.DataBuilder;
 import org.apache.commons.collections4.CollectionUtils;
+import io.github.cmansfield.parser.Keyword;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

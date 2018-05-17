@@ -1,5 +1,6 @@
 package io.github.cmansfield.parser;
 
+import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
 import io.github.cmansfield.parser.language.CclGrammarBaseVisitor;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.parser.language.CclGrammarParser;
