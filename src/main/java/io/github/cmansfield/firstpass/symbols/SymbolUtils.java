@@ -1,6 +1,7 @@
 package io.github.cmansfield.firstpass.symbols;
 
 import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
+import io.github.cmansfield.firstpass.symbols.data.AccessModifier;
 import io.github.cmansfield.firstpass.symbols.data.Data;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.lang3.StringUtils;
@@ -209,7 +210,10 @@ public class SymbolUtils {
    * @return                The method in string format
    */
   public static String formatMethodText(BidiMap<String, Symbol> symbolTable, Symbol methodSymbol) {
-    return String.format("%s %s(%s)",
+    return String.format("%s %s %s(%s)",
+            methodSymbol.getData().getAccessModifiers().stream()
+                    .map(AccessModifier::toString)
+                    .collect(Collectors.joining(" ")),
             methodSymbol.getData().getReturnType().orElse(Keyword.VOID.toString()),
             methodSymbol.getText(),
             methodSymbol.getData().getParameters().stream()

@@ -11,4 +11,5 @@ public class Animal(T) {
 
 public static void main() {
     Animal<int> animal = new Animal<int>();
+    animal.setType(10);
 }

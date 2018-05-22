@@ -13,6 +13,7 @@ public class IntermediateCode {
   private List<Quad> staticInitializedICode;
   private final List<Quad> icode;
   private List<Quad> staticICode;
+  private String nextComment;
   private String nextLabel;
   
   public boolean isFieldDeclaration;        // NOSONAR
@@ -99,6 +100,11 @@ public class IntermediateCode {
       nextLabel = null;
     }
 
+    if(StringUtils.isNotEmpty(nextComment) && StringUtils.isBlank(quad.getComment())) {
+      quad.setComment(nextComment);
+      nextComment = null;
+    }
+    
     if(isFieldDeclaration) {
       staticInitializedICode.add(quad);
     }
@@ -124,6 +130,10 @@ public class IntermediateCode {
     if(quad == null) {
       throw new IllegalArgumentException("Quads cannot be null");
     }
+    if(StringUtils.isNotEmpty(nextComment) && StringUtils.isBlank(quad.getComment())) {
+      quad.setComment(nextComment);
+      nextComment = null;
+    }
     staticICode.add(quad);
   }
   
@@ -147,6 +157,10 @@ public class IntermediateCode {
     return nextLabel;
   }
 
+  public void setNextComment(String comment) {
+    nextComment = comment;
+  }
+  
   /**
    * If there is already a label on standby for the next quad and another label needs to 
    * take its place then we'll need to back propagate. Where all of the instances of the 

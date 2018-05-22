@@ -55,6 +55,17 @@
       "typeAnArray" : false
     }
   },
+  "I00002" : {
+    "scope" : "g",
+    "symbolId" : "I00002",
+    "text" : "10",
+    "symbolKind" : "INT_LIT",
+    "data" : {
+      "type" : "int",
+      "accessModifiers" : [ "PUBLIC" ],
+      "typeAnArray" : false
+    }
+  },
   "V00004" : {
     "scope" : "g.D00001.C00002",
     "symbolId" : "V00004",

@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import io.github.cmansfield.compiler.Label;
 import io.github.cmansfield.parser.Keyword;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.CommonToken;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -380,7 +381,6 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     semTemplateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
     symbols = semTemplateVisitor.getSymbols();
     iCode.addAllEndOfCodeSegICode(semTemplateVisitor.getICode().getICode());
-    iCode.clearEndOfCodeSegICode();
     
     Symbol filter = new SymbolBuilder()
             .text(templateClass.getText() + ParserUtils.templateTextFormat(templateTypes))
@@ -421,6 +421,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .filter(Objects::nonNull)
             .map(symbols::get)
             .anyMatch(symbol -> symbol.getSymbolKind() == SymbolKind.TEMPLATE);
+  }
+
+  /**
+   * 
+   * 
+   * @param ctx
+   */
+  private void setNextICodeComment(ParserRuleContext ctx) {
+    Interval interval = new Interval(
+            ctx.start.getStartIndex(), 
+            ctx.stop.getStopIndex());
+    String comment = ctx.start.getInputStream().getText(interval);
+    iCode.setNextComment(StringUtils.replace(comment, "\n", ""));
   }
   
   /*
@@ -996,12 +1009,22 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .operand1(Keyword.THIS.toString().equals(instanceSar.getText()) 
                     ? Keyword.THIS.toString() 
                     : instanceSar.getSymbolId())
+            .comment(Keyword.THIS.toString().equals(instanceSar.getText()) 
+                    ? "" 
+                    : String.format(
+                            "\tPush '%s' onto the stack", 
+                            symbols.get(instanceSar.getSymbolId()).getText()))
             .build());
     if(argListSar != null) {
       argListSar.getSymbolIds()
               .forEach(id -> iCode.add(new QuadBuilder()
                       .opcode(IntermediateOpcodes.Stack.PUSH.toString())
                       .operand1(id)
+                      .comment(Keyword.THIS.toString().equals(instanceSar.getText())
+                              ? ""
+                              : String.format(
+                                      "\tPush '%s' onto the stack",
+                                      symbols.get(id).getText()))
                       .build()));
     }
     iCode.add(new QuadBuilder()
@@ -1951,7 +1974,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .opcode(IntermediateOpcodes.Allowcate.NEWI.toString())
             .operand1(classSymbol.getSymbolId())
             .operand2(tempSymbolId)
-            .comment(String.format("tCode: replace \'%s\' with its size in bytes", classSymbol.getSymbolId()))
+            .comment(String.format("\ttCode: replace \'%s\' with its size in bytes", classSymbol.getSymbolId()))
             .build());
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FRAME.toString())
@@ -2120,7 +2143,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
             .operand2(quantitySymbol.getSymbolId())
             .operand3(tempQuantitySymbol.getSymbolId())
             .comment(String.format(
-                    "tCode: replace \'%s\' with its size in bytes", 
+                    "\ttCode: replace \'%s\' with its size in bytes", 
                     typeSymbol == null
                             ? type
                             : typeSymbol.getSymbolId()))
@@ -2347,6 +2370,9 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FUNC.toString())
             .operand1(initSymbol.getSymbolId())
+            .comment(String.format(
+                    "\tInit Constructor for class '%s'", 
+                    SymbolUtils.getSymbolType(initSymbol)))
             .build());
     iCode.popAllStaticInitializerICode().forEach(iCode::add);
     iCode.add(new QuadBuilder()
@@ -2531,7 +2557,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   public Object visitConstructorDeclaration(CclGrammarParser.ConstructorDeclarationContext ctx) {   // NOSONAR
     String name = getNameWithoutVisiting(ctx);
     List<String> paramTypes = traverseParameterList(ctx);
-
+    
     String symbolId = findMethodSymbolId(name, SymbolKind.CONSTRUCTOR, paramTypes);
     checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());     // NOSONAR
 
@@ -2539,6 +2565,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FUNC.toString())
             .operand1(symbolId)
+            .comment(SymbolUtils.formatMethodText(symbols, symbols.get(symbolId)))
             .build());
     
     String scopeOrig = scope;
@@ -2582,7 +2609,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     if(StringUtils.isBlank(name)) {
       throw new IllegalStateException("[Compiler Bug] Method name came back blank, should not be blank after the first pass");
     }
-
+    
     List<String> paramTypes = traverseParameterList(ctx);
     String symbolId = findMethodSymbolId(name, SymbolKind.METHOD, paramTypes);
     checkForInvalidAccessModifiers(symbols.get(symbolId), ctx.start.getLine());
@@ -2591,6 +2618,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FUNC.toString())
             .operand1(symbolId)
+            .comment(SymbolUtils.formatMethodText(symbols, symbols.get(symbolId)))
             .build());
     
     String scopeOrig = scope;
@@ -2613,6 +2641,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FUNC.toString())
             .operand1(symbolId)
+            .comment(SymbolUtils.formatMethodText(symbols, symbols.get(symbolId)))
             .build());
     
     String scopeOrig = scope;
@@ -2896,6 +2925,8 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   @Override
   public Object visitStatement(CclGrammarParser.StatementContext ctx) {
     String text = getChildText(ctx);
+
+    setNextICodeComment(ctx);
     
     if(Keyword.PRINT.toString().equals(text)) {
       super.visitStatement(ctx);
@@ -3114,6 +3145,7 @@ public class SemanticsVisitor extends CclCompilerVisitor {
 
     // End of compile. Insert each end of segment iCode to the main list of iCode
     iCode.getEndOfCodeSegICode().forEach(iCode::add);
+    iCode.clearEndOfCodeSegICode();
     
     Symbol mainSymbol = symbols.get(
             findSymbolId(
@@ -3132,16 +3164,15 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       firstICode.add(new QuadBuilder()
               .opcode(IntermediateOpcodes.Method.CALL.toString())
               .operand1(mainSymbol.getSymbolId())
-              .comment("Call main method")
+              .comment("\tCall main method")
               .build());
       firstICode.add(new QuadBuilder()
               .opcode(IntermediateOpcodes.Flow.HALT.toString())
-              .comment("Halt the program")
+              .comment("\tHalt the program")
               .build());
 
       iCode.addAllFrontICode(firstICode);
     }
-    
     
     return null;
   }

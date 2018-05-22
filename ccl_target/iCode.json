@@ -10,14 +10,15 @@
   }, {
     "opcode" : "CALL",
     "operand1" : "X00001",
-    "comment" : "Call main method"
+    "comment" : "\tCall main method"
   }, {
     "opcode" : "HALT",
-    "comment" : "Halt the program"
+    "comment" : "\tHalt the program"
   }, {
     "label" : "N00001",
     "opcode" : "FUNC",
-    "operand1" : "N00001"
+    "operand1" : "N00001",
+    "comment" : "public Animal Animal()"
   }, {
     "opcode" : "FRAME",
     "operand1" : "N00002"
@@ -33,12 +34,14 @@
   }, {
     "label" : "M00001",
     "opcode" : "FUNC",
-    "operand1" : "M00001"
+    "operand1" : "M00001",
+    "comment" : "public void setType(T)"
   }, {
     "opcode" : "REF",
     "operand1" : "this",
     "operand2" : "V00002",
-    "operand3" : "R00001"
+    "operand3" : "R00001",
+    "comment" : "this.type = type;"
   }, {
     "opcode" : "MOV",
     "operand1" : "P00001",
@@ -48,19 +51,21 @@
   }, {
     "label" : "N00002",
     "opcode" : "FUNC",
-    "operand1" : "N00002"
+    "operand1" : "N00002",
+    "comment" : "\tInit Constructor for class 'Animal'"
   }, {
     "opcode" : "RTN",
     "operand1" : "this"
   }, {
     "label" : "X00001",
     "opcode" : "FUNC",
-    "operand1" : "X00001"
+    "operand1" : "X00001",
+    "comment" : "public static void main()"
   }, {
     "opcode" : "NEWI",
     "operand1" : "C00002",
     "operand2" : "J00001",
-    "comment" : "tCode: replace 'C00002' with its size in bytes"
+    "comment" : "\ttCode: replace 'C00002' with its size in bytes"
   }, {
     "opcode" : "FRAME",
     "operand1" : "N00003"
@@ -78,7 +83,64 @@
     "operand1" : "J00002",
     "operand2" : "L00001"
   }, {
+    "opcode" : "FRAME",
+    "operand1" : "M00002",
+    "comment" : "animal.setType(10);"
+  }, {
+    "opcode" : "PUSH",
+    "operand1" : "L00001",
+    "comment" : "\tPush 'animal' onto the stack"
+  }, {
+    "opcode" : "PUSH",
+    "operand1" : "I00002",
+    "comment" : "\tPush '10' onto the stack"
+  }, {
+    "opcode" : "CALL",
+    "operand1" : "M00002"
+  }, {
     "opcode" : "RTN"
+  }, {
+    "label" : "N00003",
+    "opcode" : "FUNC",
+    "operand1" : "N00003",
+    "comment" : "public Animal<int> Animal<int>()"
+  }, {
+    "opcode" : "FRAME",
+    "operand1" : "N00004"
+  }, {
+    "opcode" : "PUSH",
+    "operand1" : "this"
+  }, {
+    "opcode" : "CALL",
+    "operand1" : "N00004"
+  }, {
+    "opcode" : "RTN",
+    "operand1" : "this"
+  }, {
+    "label" : "M00002",
+    "opcode" : "FUNC",
+    "operand1" : "M00002",
+    "comment" : "public void setType(int)"
+  }, {
+    "opcode" : "REF",
+    "operand1" : "this",
+    "operand2" : "V00004",
+    "operand3" : "R00002",
+    "comment" : "this.type = type;"
+  }, {
+    "opcode" : "MOV",
+    "operand1" : "P00002",
+    "operand2" : "R00002"
+  }, {
+    "opcode" : "RTN"
+  }, {
+    "label" : "N00004",
+    "opcode" : "FUNC",
+    "operand1" : "N00004",
+    "comment" : "\tInit Constructor for class 'Animal<int>'"
+  }, {
+    "opcode" : "RTN",
+    "operand1" : "this"
   } ],
   "isFieldDeclaration" : false
 }

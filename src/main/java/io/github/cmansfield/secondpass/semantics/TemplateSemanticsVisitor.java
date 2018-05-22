@@ -1,6 +1,7 @@
 package io.github.cmansfield.secondpass.semantics;
 
 import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
+import io.github.cmansfield.firstpass.symbols.SymbolUtils;
 import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
 import io.github.cmansfield.secondpass.icode.Quad.QuadBuilder;
 import io.github.cmansfield.parser.language.CclGrammarParser;
@@ -127,6 +128,7 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FUNC.toString())
             .operand1(symbolId)
+            .comment(SymbolUtils.formatMethodText(symbols, symbols.get(symbolId)))
             .build());
     
     String scopeOrig = scope;
@@ -189,6 +191,7 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
     iCode.add(new QuadBuilder()
             .opcode(IntermediateOpcodes.Method.FUNC.toString())
             .operand1(symbolId)
+            .comment(SymbolUtils.formatMethodText(symbols, symbols.get(symbolId)))
             .build());
     
     String scopeOrig = scope;

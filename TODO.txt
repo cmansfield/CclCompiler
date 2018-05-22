@@ -4,7 +4,6 @@ TODO List
         Fix spawn's semantics
 
     iCode
-        Add comments to the iCode quads
         Enable and fix spawn
     
     tCode    
