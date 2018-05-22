@@ -71,7 +71,7 @@ public class CompilerWriter {
    * @return - Returns a File object of the newly created directory
    */
   private static File createExportDir() {
-    File saveFolder = new File(IoConstants.EXPORT_DIR);
+    File saveFolder = new File(IoConstants.TARGET_DIR);
 
     try {
       // Try to create the export directory
@@ -80,7 +80,7 @@ public class CompilerWriter {
     catch (Exception e) {
       throw new RuntimeException(String.format(            // NOSONAR
               "Unable to create directory '%s' at this time%n", 
-              IoConstants.EXPORT_DIR), e);
+              IoConstants.TARGET_DIR), e);
     }
 
     return saveFolder;

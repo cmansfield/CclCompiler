@@ -1,15 +1,19 @@
 package io.github.cmansfield.io;
 
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.BidiMap;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
-import static io.github.cmansfield.io.IoConstants.EXPORT_DIR;
+import static io.github.cmansfield.io.IoConstants.TARGET_DIR;
 
 
 public class CompilerReader {
@@ -21,7 +25,7 @@ public class CompilerReader {
    * @return            An IntermediateCode pojo
    */
   public static IntermediateCode importICode() throws IOException {
-    return importICode(EXPORT_DIR + IoConstants.I_CODE_FILE_NAME);    
+    return importICode(TARGET_DIR + IoConstants.I_CODE_FILE_NAME);    
   }
 
   /**
@@ -47,7 +51,7 @@ public class CompilerReader {
    * @return            A Map containing all of the imported Symbols
    */
   public static Map<String, Symbol> importSymbolTable() throws IOException {
-    return importSymbolTable(EXPORT_DIR + IoConstants.SYMBOL_TABLE_FILE_NAME);
+    return importSymbolTable(TARGET_DIR + IoConstants.SYMBOL_TABLE_FILE_NAME);
   }
   
   /**
@@ -56,16 +60,15 @@ public class CompilerReader {
    * @param fileName    A file containing the symbol table in json format
    * @return            A Map containing all of the imported Symbols
    */
-  public static Map<String, Symbol> importSymbolTable(String fileName) throws IOException {
-    throw new UnsupportedOperationException("Need to implement a deserializer for the Symbol and Data classes first");
-    
-//    ObjectMapper mapper = new ObjectMapper();
-//
-//    try(InputStream inputstream = new FileInputStream(fileName)) {
-//      return mapper.readValue(inputstream, new TypeReference<Map<String, Symbol>>(){});
-//    }
-//    catch (Exception e) {
-//      throw new IOException("Unable to load file " + fileName, e);
-//    }
+  public static BidiMap<String,Symbol> importSymbolTable(String fileName) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+
+    try(InputStream inputstream = new FileInputStream(fileName)) {
+      return new DualHashBidiMap<>(
+              mapper.readValue(inputstream, new TypeReference<HashMap<String, Symbol>>(){}));
+    }
+    catch (Exception e) {
+      throw new IOException("Unable to load file " + fileName, e);
+    }
   }
 }

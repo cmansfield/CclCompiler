@@ -1,8 +1,5 @@
 
 TODO List
-    Symbol
-        Add jackson deserialization
-
     Semantics
         Fix spawn's semantics
 

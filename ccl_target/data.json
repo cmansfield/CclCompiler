@@ -1,0 +1,8 @@
+{
+  "type" : "int",
+  "returnType" : "void",
+  "accessModifiers" : [ "PUBLIC", "STATIC" ],
+  "parameters" : [ "P00001" ],
+  "templatePlaceHolders" : [ "int" ],
+  "typeAnArray" : true
+}

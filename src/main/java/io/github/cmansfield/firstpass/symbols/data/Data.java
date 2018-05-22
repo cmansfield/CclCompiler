@@ -1,5 +1,6 @@
 package io.github.cmansfield.firstpass.symbols.data;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,6 +11,7 @@ import java.util.*;
 
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonDeserialize(using = DataDeserializer.class)
 public class Data {
   private String type;
   private String returnType;
