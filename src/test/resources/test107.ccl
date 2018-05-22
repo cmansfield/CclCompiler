@@ -1,0 +1,10 @@
+
+public class Test {
+    public static int b;
+}
+
+public static void main() {
+    Test a;
+    int x;
+    a.b = x;
+}

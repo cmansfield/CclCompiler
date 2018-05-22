@@ -18,6 +18,7 @@ import static org.testng.Assert.assertTrue;
 
 
 public class CompilerIntermediateCodeTest {
+  private static final int MAIN_CALL_OFFSET = 3; 
   
   @Test
   public void test_while() throws IOException {
@@ -142,6 +143,81 @@ public class CompilerIntermediateCodeTest {
 
     for (int i = 0; i < iCode.size(); ++i) {
       assertEquals(iCode.get(i).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+  
+  @Test
+  public void test_assignment() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FRAME.toString(),
+            IntermediateOpcodes.Method.CALL.toString(),
+            IntermediateOpcodes.Flow.HALT.toString(),
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Other.MOV.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test105.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size());
+
+    for (int i = 0; i < iCode.size(); ++i) {
+      assertEquals(iCode.get(i).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  @Test
+  public void test_assignment_fromReference() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Method.RTN.toString(),
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Other.REF.toString(),
+            IntermediateOpcodes.Other.MOV.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test106.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
+    assertEquals(iCode.get(6).getOperand3(), iCode.get(7).getOperand1());
+
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  // TODO - Fix the bug this test addresses
+  @Test (enabled = false)
+  public void test_assignment_toReference() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Method.RTN.toString(),
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Other.REF.toString(),
+            IntermediateOpcodes.Other.MOV.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test107.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
+//    assertEquals(iCode.get(6).getOperand3(), iCode.get(7).getOperand1());
+
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
     }
   }
 }

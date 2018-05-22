@@ -1,0 +1,7 @@
+
+
+public static void main() {
+    int x;
+    int y;
+    x = y;
+}

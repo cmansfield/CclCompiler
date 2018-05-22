@@ -1,10 +1,8 @@
 
 TODO List
-    Semantics
-        Fix spawn's semantics
-
     iCode
         Enable and fix spawn
+        Add unit tests
     
     tCode    
         Use an interface with tCode manager to allow different types of tCode generation 

@@ -424,9 +424,10 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   }
 
   /**
+   * This method will the full text for the supplied context and then apply that to 
+   * be the comment for the next iCode quad added
    * 
-   * 
-   * @param ctx
+   * @param ctx   The current tree context
    */
   private void setNextICodeComment(ParserRuleContext ctx) {
     Interval interval = new Interval(
