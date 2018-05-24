@@ -1233,9 +1233,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
               .operand2(op2Symbol.getSymbolId())
               .build();
       
-      // If the variable being assigned to is a static variable then stored this quad into
-      // the list of static quads to be added to the code segment before main
-      if(op2Symbol.getData().getAccessModifiers().contains(AccessModifier.STATIC)) {
+      // If the variable being assigned to is a static variable not within a method
+      // then stored this quad into the list of static quads to be added to the code 
+      // segment before main
+      if(op2Symbol.getData().getAccessModifiers().contains(AccessModifier.STATIC) 
+              && symbols.get(SymbolUtils.getParentSymbolId(scope)).getSymbolKind() == SymbolKind.CLASS) {
         iCode.addStatic(quad);
       }
       else {

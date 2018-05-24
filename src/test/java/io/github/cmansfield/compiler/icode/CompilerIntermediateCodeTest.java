@@ -195,8 +195,7 @@ public class CompilerIntermediateCodeTest {
     }
   }
 
-  // TODO - Fix the bug this test addresses
-  @Test (enabled = false)
+  @Test
   public void test_assignment_toReference() throws IOException {
     List<String> expectedOpcodes = Arrays.asList(
             IntermediateOpcodes.Method.FUNC.toString(),
@@ -214,7 +213,7 @@ public class CompilerIntermediateCodeTest {
     List<Quad> iCode = compiler.getICode();
     assertTrue(CollectionUtils.isNotEmpty(iCode));
     assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
-//    assertEquals(iCode.get(6).getOperand3(), iCode.get(7).getOperand1());
+    assertEquals(iCode.get(6).getOperand3(), iCode.get(7).getOperand2());
 
     for (int i = 0; i < expectedOpcodes.size(); ++i) {
       assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
