@@ -219,4 +219,121 @@ public class CompilerIntermediateCodeTest {
       assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
     }
   }
+
+  @Test
+  public void test_expression_addition() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Math.ADD.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test108.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
+
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  @Test
+  public void test_expression_multi_additionMultiplication() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Math.MUL.toString(),
+            IntermediateOpcodes.Math.ADD.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test109.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
+    assertEquals(iCode.get(4).getOperand3(), iCode.get(5).getOperand2());
+
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  @Test
+  public void test_expression_boolean() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Bool.LT.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test110.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
+
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  @Test
+  public void test_expression_boolean_complex() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Bool.LT.toString(),
+            IntermediateOpcodes.Bool.NE.toString(),
+            IntermediateOpcodes.Logic.AND.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test111.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
+    assertEquals(iCode.get(4).getOperand3(), iCode.get(6).getOperand1());
+    assertEquals(iCode.get(5).getOperand3(), iCode.get(6).getOperand2());
+
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  @Test
+  public void test_assignment_fromExpression() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Math.MUL.toString(),
+            IntermediateOpcodes.Math.DIV.toString(),
+            IntermediateOpcodes.Math.ADD.toString(),
+            IntermediateOpcodes.Other.MOV.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test112.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
+    assertEquals(iCode.get(4).getOperand3(), iCode.get(6).getOperand1());
+    assertEquals(iCode.get(5).getOperand3(), iCode.get(6).getOperand2());
+    assertEquals(iCode.get(6).getOperand3(), iCode.get(7).getOperand1());
+
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
 }
