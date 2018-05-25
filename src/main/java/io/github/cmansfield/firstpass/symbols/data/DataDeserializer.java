@@ -17,7 +17,7 @@ public class DataDeserializer extends JsonDeserializer<Data> {
 
 
   @Override
-  public Data deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+  public Data deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
     ObjectMapper objectMapper = new ObjectMapper();
     Data.DataBuilder dataBuilder = new Data.DataBuilder();
     JsonNode node = jsonParser.getCodec().readTree(jsonParser);
