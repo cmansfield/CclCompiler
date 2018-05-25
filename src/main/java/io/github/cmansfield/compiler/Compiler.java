@@ -7,6 +7,7 @@ import io.github.cmansfield.secondpass.icode.IntermediateCode;
 import io.github.cmansfield.parser.include.ImportGrammarLexer;
 import io.github.cmansfield.parser.language.CclGrammarParser;
 import io.github.cmansfield.parser.language.CclGrammarLexer;
+import io.github.cmansfield.tcode.TargetCodeGenerator;
 import io.github.cmansfield.parser.CclCompilerVisitor;
 import io.github.cmansfield.secondpass.icode.Quad;
 import io.github.cmansfield.firstpass.symbols.*;
@@ -27,8 +28,9 @@ import java.io.*;
 
 public class Compiler {
   private final Logger logger = LoggerFactory.getLogger(Compiler.class);
-  private final List<String> exceptions;
+  private final List<TargetCodeGenerator> tCodeGenerators;
   private final Set<CompilerOptions> options;
+  private final List<String> exceptions;
   private List<CclGrammarParser.ClassDeclarationContext> templateClassContexts;
   private LabelAndIdGenerator labelAndIdGenerator;
   private BidiMap<String, Symbol> symbolTable;
@@ -42,6 +44,7 @@ public class Compiler {
       this.options = Collections.emptySet();
     }
     labelAndIdGenerator = new LabelAndIdGenerator();
+    tCodeGenerators = new ArrayList<>();
     exceptions = new LinkedList<>();
   }
   
@@ -65,6 +68,13 @@ public class Compiler {
     return labelAndIdGenerator == null ? "" : labelAndIdGenerator.generateLabel(label);
   }
 
+  public void addTCodeGenerator(TargetCodeGenerator tCodeGenerator) {
+    if(tCodeGenerator == null) {
+      return;
+    }
+    tCodeGenerators.add(tCodeGenerator);
+  }
+  
   /**
    * This will compile the file supplied
    * 
@@ -101,8 +111,23 @@ public class Compiler {
     if(options.contains(CompilerOptions.VERBOSE_CHECK)) {
       SymbolUtils.checkSymbolTable(symbolTable);
     }
+    if(options.contains(CompilerOptions.GENERATE_I_CODE_ONLY)) {
+      return true;
+    }
 
-    return true;
+    boolean success = true;
+    for(TargetCodeGenerator tCode : tCodeGenerators) {
+      success = tCode.generate(symbolTable, iCode);
+      
+      if(success) {
+        // Export the tCode here
+      }
+      else {
+        break;
+      }
+    }
+    
+    return success;
   }
 
   /**

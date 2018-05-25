@@ -1,7 +1,7 @@
 package io.github.cmansfield.compiler;
 
 public enum CompilerOptions {
-  GENERATE_I_CODE_ONLY,     // Not implemented yet
+  GENERATE_I_CODE_ONLY,
   EXPORT_SYMBOL_TABLE,
   GENERATE_COMMENTS,
   FIRST_PASS_ONLY,
