@@ -11,6 +11,7 @@ public class IntermediateCode {
   private final Map<Label,Deque<String>> labelStackMap;
   private final List<Quad> endOfCodeSegICode;
   private List<Quad> staticInitializedICode;
+  private boolean generateComments;
   private final List<Quad> icode;
   private List<Quad> staticICode;
   private String nextComment;
@@ -18,13 +19,14 @@ public class IntermediateCode {
   
   public boolean isFieldDeclaration;        // NOSONAR
   
-  public IntermediateCode() {
+  public IntermediateCode(boolean generateComments) {
     labelStackMap = new EnumMap<>(Label.class);
     staticInitializedICode = new ArrayList<>();
     staticICode = new ArrayList<>();
     icode = new ArrayList<>();
     isFieldDeclaration = false;
     endOfCodeSegICode = new ArrayList<>();
+    this.generateComments = generateComments;
   }
 
   public List<Quad> getICode() {
@@ -104,6 +106,9 @@ public class IntermediateCode {
       quad.setComment(nextComment);
       nextComment = null;
     }
+    if(!generateComments) {
+      quad.setComment(null);
+    }
     
     if(isFieldDeclaration) {
       staticInitializedICode.add(quad);
@@ -134,6 +139,10 @@ public class IntermediateCode {
       quad.setComment(nextComment);
       nextComment = null;
     }
+    if(!generateComments) {
+      quad.setComment(null);
+    }
+
     staticICode.add(quad);
   }
   

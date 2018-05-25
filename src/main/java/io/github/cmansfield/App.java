@@ -37,7 +37,8 @@ public class App {
     }
 
     Compiler compiler = new Compiler(
-            CompilerOptions.VERBOSE_CHECK, 
+            CompilerOptions.VERBOSE_CHECK,
+            CompilerOptions.GENERATE_COMMENTS,
             CompilerOptions.EXPORT_SYMBOL_TABLE, 
             CompilerOptions.EXPORT_I_CODE);
 

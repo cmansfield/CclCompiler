@@ -6,9 +6,11 @@ import io.github.cmansfield.compiler.CompilerTestUtils;
 import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.secondpass.icode.Quad;
 import io.github.cmansfield.compiler.Compiler;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Arrays;
 import java.util.List;
 
@@ -80,6 +82,40 @@ public class CompilerIntermediateCodeTest {
     }
   }
 
+  @Test
+  public void test_if_elseIf() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Bool.LT.toString(),
+            IntermediateOpcodes.Flow.BF.toString(),
+            IntermediateOpcodes.Other.PRINT.toString(),
+            IntermediateOpcodes.Flow.JMP.toString(),
+            IntermediateOpcodes.Bool.NE.toString(),
+            IntermediateOpcodes.Flow.BF.toString(),
+            IntermediateOpcodes.Other.PRINT.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test113.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertEquals(iCode.size(), expectedOpcodes.size() + MAIN_CALL_OFFSET);
+    // Check labels
+    assertEquals(iCode.get(5).getOperand2(), iCode.get(8).getLabel());
+    assertEquals(iCode.get(7).getOperand1(), iCode.get(11).getLabel());
+    assertEquals(iCode.get(9).getOperand2(), iCode.get(11).getLabel());
+    // Check operands
+    assertEquals(iCode.get(4).getOperand3(), iCode.get(5).getOperand1());
+    assertEquals(iCode.get(8).getOperand3(), iCode.get(9).getOperand1());
+    
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+  
   @Test
   public void test_nestedIf() throws IOException {
     List<String> expectedOpcodes = Arrays.asList(
@@ -334,6 +370,101 @@ public class CompilerIntermediateCodeTest {
 
     for (int i = 0; i < expectedOpcodes.size(); ++i) {
       assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  @Test
+  public void test_readAndPrint() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Other.PRINT.toString(),
+            IntermediateOpcodes.Other.READ.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test114.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    assertTrue(StringUtils.isNotBlank(iCode.get(4).getOperand1()));
+    assertTrue(StringUtils.isNotBlank(iCode.get(5).getOperand1()));
+
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  @Test
+  public void test_forLoop() throws IOException {
+    List<String> expectedOpcodes = Arrays.asList(
+            IntermediateOpcodes.Method.FUNC.toString(),
+            IntermediateOpcodes.Other.MOV.toString(),
+            IntermediateOpcodes.Bool.LT.toString(),
+            IntermediateOpcodes.Flow.BF.toString(),
+            IntermediateOpcodes.Math.ADD.toString(),
+            IntermediateOpcodes.Other.MOV.toString(),
+            IntermediateOpcodes.Other.PRINT.toString(),
+            IntermediateOpcodes.Other.PRINT.toString(),
+            IntermediateOpcodes.Other.PRINT.toString(),
+            IntermediateOpcodes.Flow.JMP.toString(),
+            IntermediateOpcodes.Method.RTN.toString());
+    Compiler compiler = CompilerTestUtils.compileNoThrow("test115.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+
+    assertNotNull(compiler);
+    List<String> exceptions = compiler.getExceptions();
+    assertTrue(CollectionUtils.isEmpty(exceptions));
+
+    List<Quad> iCode = compiler.getICode();
+    assertTrue(CollectionUtils.isNotEmpty(iCode));
+    // Check labels
+    assertEquals(iCode.get(5).getLabel(), iCode.get(12).getOperand1());
+    assertEquals(iCode.get(6).getOperand2(), iCode.get(13).getLabel());
+    // Check operands
+    assertEquals(iCode.get(5).getOperand3(), iCode.get(6).getOperand1());
+    assertEquals(iCode.get(7).getOperand3(), iCode.get(8).getOperand1());
+    
+    for (int i = 0; i < expectedOpcodes.size(); ++i) {
+      assertEquals(iCode.get(i + MAIN_CALL_OFFSET).getOpcode(), expectedOpcodes.get(i));
+    }
+  }
+
+  @Test
+  public void test_forLoop_equivalent() throws IOException {
+    Compiler compiler1 = CompilerTestUtils.compileNoThrow("test115.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+    Compiler compiler2 = CompilerTestUtils.compileNoThrow("test116.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+    Compiler compiler3 = CompilerTestUtils.compileNoThrow("test117.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+    Compiler compiler4 = CompilerTestUtils.compileNoThrow("test118.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
+    List<Compiler> compilers = Arrays.asList(compiler1, compiler2, compiler3, compiler4);
+    
+    for(Compiler compiler : compilers) {
+      assertNotNull(compiler);
+      List<String> exceptions = compiler.getExceptions();
+      assertTrue(CollectionUtils.isEmpty(exceptions));  
+    }
+    
+    List<Quad> iCode = compiler1.getICode();
+    Iterator<Compiler> compilerIterator = compilers.iterator();
+    compilerIterator.next();
+    
+    while(compilerIterator.hasNext()) {
+      Compiler compiler = compilerIterator.next();
+      List<Quad> compICode = compiler.getICode();
+
+      assertTrue(CollectionUtils.isNotEmpty(iCode));
+      assertEquals(iCode.size(), compICode.size());
+      
+      for(int i = 0; i < iCode.size(); ++i) {
+        Quad quad1 = iCode.get(i);
+        Quad quad2 = compICode.get(i);
+        
+        assertEquals(quad1.getLabel(), quad2.getLabel());
+        assertEquals(quad1.getOpcode(), quad2.getOpcode());
+        assertEquals(quad1.getOperand1(), quad2.getOperand1());
+        assertEquals(quad1.getOperand2(), quad2.getOperand2());
+        assertEquals(quad1.getOperand3(), quad2.getOperand3());
+      }
     }
   }
 }

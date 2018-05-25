@@ -17,7 +17,7 @@ public class IntermediateCodeTest {
   
   @BeforeMethod
   public void setUp() {
-    iCode = new IntermediateCode();
+    iCode = new IntermediateCode(false);
   }
   
   @Test

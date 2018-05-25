@@ -25,8 +25,8 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
   private final Map<String,String> templateTypeMap;
   private List<String> templateTypes;
 
-  TemplateSemanticsVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope) {
-    super(compiler, symbols, templateClassContexts);
+  TemplateSemanticsVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, String scope, boolean generateComments) {
+    super(compiler, symbols, templateClassContexts, generateComments);
     this.templateTypeMap = new LinkedMap<>();
     this.scope = scope;
   }

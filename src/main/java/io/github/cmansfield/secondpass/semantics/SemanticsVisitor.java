@@ -37,6 +37,7 @@ import java.util.*;
 public class SemanticsVisitor extends CclCompilerVisitor {
   private final Logger logger = LoggerFactory.getLogger(SemanticsVisitor.class);
   private final Deque<ParserRuleContext> operatorStack;
+  private final boolean generateComments;
   final IntermediateCode iCode;
   final Deque<SAR> sas;
   
@@ -45,17 +46,19 @@ public class SemanticsVisitor extends CclCompilerVisitor {
   SemanticsVisitor(Compiler compiler, BidiMap<String, Symbol> symbols) {
     super(compiler, symbols);
     sas = new LinkedList<>();
-    iCode = new IntermediateCode();
+    iCode = new IntermediateCode(false);
     operatorStack = new LinkedList<>();
+    generateComments = false;
   }
 
-  public SemanticsVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts) {
+  public SemanticsVisitor(Compiler compiler, BidiMap<String, Symbol> symbols, List<CclGrammarParser.ClassDeclarationContext> templateClassContexts, boolean generateComments) {
     super(compiler, symbols, templateClassContexts);
     sas = new LinkedList<>();
-    iCode = new IntermediateCode();
+    this.generateComments = generateComments;
+    iCode = new IntermediateCode(generateComments);
     operatorStack = new LinkedList<>();
   }
-
+  
   Deque<SAR> getSemanticActionStack() {
     return sas == null ? new LinkedList<>() : sas;
   }
@@ -377,7 +380,12 @@ public class SemanticsVisitor extends CclCompilerVisitor {
     templateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
     symbols = templateVisitor.getSymbols();
     // Second pass
-    TemplateSemanticsVisitor semTemplateVisitor = new TemplateSemanticsVisitor(compiler, symbols, templateClassContexts, templateClass.getScope());
+    TemplateSemanticsVisitor semTemplateVisitor = new TemplateSemanticsVisitor(
+            compiler, 
+            symbols, 
+            templateClassContexts, 
+            templateClass.getScope(), 
+            generateComments);
     semTemplateVisitor.compileTemplateClass(templateClass, templateTypes, lineNumber);
     symbols = semTemplateVisitor.getSymbols();
     iCode.addAllEndOfCodeSegICode(semTemplateVisitor.getICode().getICode());
@@ -3167,11 +3175,11 @@ public class SemanticsVisitor extends CclCompilerVisitor {
       firstICode.add(new QuadBuilder()
               .opcode(IntermediateOpcodes.Method.CALL.toString())
               .operand1(mainSymbol.getSymbolId())
-              .comment("\tCall main method")
+              .comment(generateComments ? "\tCall main method" : null)
               .build());
       firstICode.add(new QuadBuilder()
               .opcode(IntermediateOpcodes.Flow.HALT.toString())
-              .comment("\tHalt the program")
+              .comment(generateComments ? "\tHalt the program" : null)
               .build());
 
       iCode.addAllFrontICode(firstICode);

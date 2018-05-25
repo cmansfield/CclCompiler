@@ -127,7 +127,11 @@ public class Compiler {
    * @return          A boolean true if everything ran correctly
    */
   private boolean runSecondPass(final String fileName) throws IOException {
-    SemanticsVisitor visitor = new SemanticsVisitor(this, symbolTable, templateClassContexts);
+    SemanticsVisitor visitor = new SemanticsVisitor(
+            this, 
+            symbolTable, 
+            templateClassContexts, 
+            options.contains(CompilerOptions.GENERATE_COMMENTS));
     boolean success = runPass(fileName, visitor);
     iCode = visitor.getICode();
     return success;
