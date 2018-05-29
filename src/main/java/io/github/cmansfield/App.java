@@ -2,6 +2,7 @@ package io.github.cmansfield;
 
 import io.github.cmansfield.compiler.CompilerOptions;
 import io.github.cmansfield.compiler.Compiler;
+import io.github.cmansfield.tcode.ccl.two.operand.CclTargetCodeGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.apache.log4j.Level;
@@ -38,9 +39,8 @@ public class App {
 
     Compiler compiler = new Compiler(
             CompilerOptions.VERBOSE_CHECK,
-            CompilerOptions.GENERATE_COMMENTS,
-            CompilerOptions.EXPORT_SYMBOL_TABLE, 
-            CompilerOptions.EXPORT_I_CODE);
+            CompilerOptions.GENERATE_COMMENTS);
+    compiler.addTCodeGenerator(new CclTargetCodeGenerator());
 
     if(!compiler.compile(fileName)) {
       return;

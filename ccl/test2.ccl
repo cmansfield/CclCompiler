@@ -1,5 +1,5 @@
 
-
+/*
 public class Animal(T) {
     public static int test = 4;
     private T type;
@@ -12,4 +12,9 @@ public class Animal(T) {
 public static void main() {
     Animal<int> animal = new Animal<int>();
     animal.setType(10);
+}
+*/
+
+public static void main() {
+    2 + 3;
 }
