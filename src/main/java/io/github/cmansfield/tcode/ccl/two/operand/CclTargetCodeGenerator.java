@@ -1,8 +1,8 @@
 package io.github.cmansfield.tcode.ccl.two.operand;
 
-import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
+import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.tcode.TargetCodeGenerator;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import io.github.cmansfield.secondpass.icode.Quad;
@@ -16,6 +16,7 @@ import java.util.Map;
 
 
 public class CclTargetCodeGenerator implements TargetCodeGenerator {
+  private static final String T_CODE_COMMENT_INDENT = "\t\t\t";
   private final Map<Register, Boolean> registers;
   private final List<Asm> assembly;
   
@@ -55,6 +56,19 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
   }
 
   /**
+   * This method will clear the value stored in the supplied register
+   * 
+   * @param register  Register to clear
+   */
+  private void clearRegister(Register register) {
+    assembly.add(new Asm.AsmBuilder()
+            .opcode(Opcodes.AND)
+            .operand1(register.toString())
+            .operand2(register.toString())
+            .comment(T_CODE_COMMENT_INDENT + "Clear register " + register.toString()).build());
+  }
+  
+  /**
    * This method will generate the assembly for loading a value or address of the supplied 
    * operand into the supplied register
    * 
@@ -70,92 +84,124 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
     if(operandSymbol == null) {
       throw new IllegalArgumentException("Should have found a symbol for the supplyed operand '" + operand + "'");
     }
-
-    assembly.add(new Asm.AsmBuilder()
-            .opcode("AND")
-            .operand1(register.toString())
-            .operand2(register.toString()).build());
     
     switch (operandSymbol.getSymbolKind()) {
-      case MAIN:
-        break;
-      case CLASS:
-        break;
-      case METHOD:
-        break;
-      case CONSTRUCTOR:
-        break;
-      case PARAM:
-        break;
-      case INSTANCE_VAR:
-        break;
-      case LOCAL_VAR:
-        break;
       case INT_LIT:
+        clearRegister(register);
         assembly.add(new Asm.AsmBuilder()
-                .opcode("ADI")
+                .opcode(Opcodes.ADI)
                 .operand1(register.toString())
                 .operand2(operandSymbol.getText()).build());
         break;
+      case CLASS:
+      case PARAM:
+      case INSTANCE_VAR:
+      case LOCAL_VAR:
       case CHAR_LIT:
-        break;
       case STR_LIT:
-        break;
       case BOOL_LIT:
-        break;
       case SPECIAL_LIT:
-        break;
-      case FOR:
-        break;
-      case BLOCK:
-        break;
       case PACKAGE:
-        break;
       case REFERENCE:
-        break;
       case TEMPORARY:
-        break;
       case TEMPLATE:
+        assembly.add(new Asm.AsmBuilder()
+                .opcode("Load")
+                .operand1(register.toString())
+                .operand2(operandSymbol.getText())
+                .comment("Replace this when load logic is complete").build());
         break;
       case UNKNOWN:
-        break;
+      default:
+        throw new IllegalStateException(String.format(
+                "Cannot load an '%s' Symbol '%s' into Register '%s'",
+                SymbolKind.UNKNOWN,
+                operandSymbol.getSymbolId(),
+                register));
     }
   }
-  
+
   /**
-   * This method will generate the assembly for an 'ADD' quad
-   * 
+   * This method will generate asm for all math statements
+   *
    * @param symbolTable   The symbol table with all of the Symbol information
-   * @param quad          The 'ADD' quad used to generate the ASM
+   * @param quad          The quad used to generate the ASM
    */
-  private void add(BidiMap<String, Symbol> symbolTable, Quad quad) {
+  private void math(BidiMap<String, Symbol> symbolTable, Quad quad) {
     // Load operand1 into a DestinationRegister
     // Load operand2 into a SourceRegister
-    // ASM: ADD DestinationRegister, SourceRegister
-    // Load the address of operand3 into a register3
+    // ASM: opcode DestinationRegister, SourceRegister
+    // Load the address of operand3 into register3
     // Move the value in the DestinationRegister into location stored in register3
 
     Register destReg = getNextFreeRegister();
     Register sourceReg = getNextFreeRegister();
     Register memReg = getNextFreeRegister();
-    
+
     loadIntoRegister(destReg, quad.getOperand1(), symbolTable);
     loadIntoRegister(sourceReg, quad.getOperand2(), symbolTable);
     assembly.add(new Asm.AsmBuilder()
-            .opcode("ADD")        // TODO - Replace tCode magic strings with a constant
+            .opcode(quad.getOpcode())
             .operand1(destReg.toString())
             .operand2(sourceReg.toString()).build());
     loadIntoRegister(memReg, quad.getOperand3(), symbolTable);
     assembly.add(new Asm.AsmBuilder()
-            .opcode("MOV")
+            .opcode(Opcodes.MOV)
             .operand1(memReg.toString())
             .operand2(destReg.toString()).build());
-    
-    freeUpAllRegisters();
   }
 
   /**
-   * This method will generate the assembly for an 'MOV' quad
+   * This method will generate the assembly for an iCode 'EQ' quad
+   * 
+   * @param symbolTable   The symbol table with all of the Symbol information
+   * @param quad          The iCode quad used to generate the ASM
+   */
+  private void equals(BidiMap<String, Symbol> symbolTable, Quad quad) {
+    // Load operand1 into a register1
+    // Load operand2 into a register2
+    // Load operand3 into a register3
+    // ASM: CMP register1, register2                ; Compare  
+    // Clear register2                              ; Set False
+    // ASM: BRZ register1, LABEL_TRUE
+    // ASM: JMP LABEL_FALSE                         ; Jump
+    // ASM: LABEL_TRUE  ADI register2, 1            ; Set True
+    // LABEL_FALSE - Move the value in register2 into location stored in register3
+
+    Register r1 = getNextFreeRegister();
+    Register r2 = getNextFreeRegister();
+    Register r3 = getNextFreeRegister();
+  
+    loadIntoRegister(r1, quad.getOperand1(), symbolTable);
+    loadIntoRegister(r2, quad.getOperand2(), symbolTable);
+    loadIntoRegister(r3, quad.getOperand3(), symbolTable);
+    
+    assembly.add(new Asm.AsmBuilder()
+            .opcode(Opcodes.CMP)
+            .operand1(r1.toString())
+            .operand2(r2.toString()).build());
+    clearRegister(r2);
+    assembly.add(new Asm.AsmBuilder()
+            .opcode(Opcodes.BRZ)
+            .operand1(r1.toString())
+            .operand2("LABEL_TRUE").build());         // TODO - Replace these labels with generated labels
+    assembly.add(new Asm.AsmBuilder()
+            .opcode(Opcodes.JMP)
+            .operand1("LABEL_FALSE").build());
+    assembly.add(new Asm.AsmBuilder()
+            .label("LABEL_TRUE")
+            .opcode(Opcodes.ADI)
+            .operand1(r2.toString())
+            .operand2("1").build());
+    assembly.add(new Asm.AsmBuilder()
+            .label("LABEL_FALSE")
+            .opcode(Opcodes.MOV)
+            .operand1(r3.toString())
+            .operand2(r2.toString()).build());
+  }
+  
+  /**
+   * This method will generate the assembly for an iCode 'MOV' quad
    * 
    * @param symbolTable   The symbol table with all of the Symbol information
    * @param quad          The 'MOV' quad used to generate the ASM
@@ -167,6 +213,16 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
     // ASM: MOV DestinationRegister, SourceRegister
     
     freeUpAllRegisters();
+  }
+
+  /**
+   * This method will generate the assembly for an iCode 'HALT' quad
+   */
+  private void halt() {
+    // ASM: TRP 0
+    assembly.add(new Asm.AsmBuilder()
+            .opcode(Opcodes.TRP)
+            .operand1(TrapCodes.STOP).build());
   }
   
   @Override
@@ -190,13 +246,29 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
       if(IntermediateOpcodes.Other.MOV.toString().equals(opcode)) {
         mov(symbolTable, quad);
       }
-      else if(IntermediateOpcodes.Math.ADD.toString().equals(opcode)) {
-        add(symbolTable, quad);
+      else if(IntermediateOpcodes.Math.ADD.toString().equals(opcode)
+              || IntermediateOpcodes.Math.SUB.toString().equals(opcode)
+              || IntermediateOpcodes.Math.MUL.toString().equals(opcode)
+              || IntermediateOpcodes.Math.DIV.toString().equals(opcode)) {
+        math(symbolTable, quad);
+      }
+      else if(IntermediateOpcodes.Bool.EQ.toString().equals(opcode)) {
+        equals(symbolTable, quad);
+      }
+      else if(IntermediateOpcodes.Flow.HALT.toString().equals(opcode)) {
+        halt();
       }
       
       // TODO - Continue to add the rest of the Quad opcodes here
     }
     
     return true;
+  }
+
+  @Override
+  public String toString() {
+    return assembly.stream()
+            .map(Object::toString)
+            .collect(Collectors.joining("\n"));
   }
 }

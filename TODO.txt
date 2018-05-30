@@ -2,13 +2,11 @@
 TODO List
     iCode
         Enable and fix spawn
-    
-    tCode    
-        Use an interface with tCode manager to allow different types of tCode generation 
 
     Compiler
         Create a new error listener for the SymbolTableVisitor to store syntax errors into 
             compiler's exception list
+        Add a modulo operator to the compiler
 
     CompilerOptions.VERBOSE_CHECK
         Add more checks to the verbose check
