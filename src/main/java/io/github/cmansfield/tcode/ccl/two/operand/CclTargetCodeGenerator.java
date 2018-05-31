@@ -62,7 +62,7 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
    */
   private void clearRegister(Register register) {
     assembly.add(new Asm.AsmBuilder()
-            .opcode(Opcodes.AND)
+            .opcode(Opcodes.SUB)
             .operand1(register.toString())
             .operand2(register.toString())
             .comment(T_CODE_COMMENT_INDENT + "Clear register " + register.toString()).build());
@@ -216,6 +216,47 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
   }
 
   /**
+   * This method will generate the assembly for an iCode 'FUNC' quad
+   *
+   * @param symbolTable   The symbol table with all of the Symbol information
+   * @param quad          The 'FUNC' quad used to generate the ASM
+   */
+  private void method(BidiMap<String, Symbol> symbolTable, Quad quad) {
+    // ASM: METHOD_LABEL SUB R0, R0     ; Just a placeholder for the method label
+    // ASM: ADI SP, -number of bytes for local and temp var
+
+    assembly.add(new Asm.AsmBuilder()
+            .label(quad.getLabel())
+            .opcode(Opcodes.SUB)
+            .operand1(Register.R0.toString())
+            .operand2(Register.R0.toString()).build());
+
+    // TODO - this next statement is optional if there are no local or temp var
+    assembly.add(new Asm.AsmBuilder()
+            .opcode(Opcodes.ADI)
+            .operand1(Register.SP.toString())
+            .operand2("Calculate size in bytes").build());
+
+    freeUpAllRegisters();
+  }
+
+  /**
+   * This method will generate the assembly for an iCode 'RTN' quad
+   *
+   * @param symbolTable   The symbol table with all of the Symbol information
+   * @param quad          The 'RTN' quad used to generate the ASM
+   */
+  private void rtn(BidiMap<String, Symbol> symbolTable, Quad quad) {
+    // ASM: LDR R0, FP       ; De-allocation
+    // ASM: MOV SP, FP
+    // ASM: ADI FP, -8      ; Point to the PFP that points to the last frame
+    // ASM: LDR FP, FP      ; FP points to the beginning of the last frame
+    // ASM: JMR R0
+
+    throw new UnsupportedOperationException("Not implemented yet");
+  }
+
+  /**
    * This method will generate the assembly for an iCode 'HALT' quad
    */
   private void halt() {
@@ -291,8 +332,10 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
         case CALL:
           break;
         case RTN:
+          rtn(symbolTable, quad);
           break;
         case FUNC:
+          method(symbolTable, quad);
           break;
         case NEWI:
           break;
