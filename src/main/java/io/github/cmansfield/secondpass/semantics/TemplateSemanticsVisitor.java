@@ -1,10 +1,10 @@
 package io.github.cmansfield.secondpass.semantics;
 
 import io.github.cmansfield.firstpass.symbols.Symbol.SymbolBuilder;
-import io.github.cmansfield.firstpass.symbols.SymbolUtils;
-import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
+import io.github.cmansfield.secondpass.icode.IntermediateOpcode;
 import io.github.cmansfield.secondpass.icode.Quad.QuadBuilder;
 import io.github.cmansfield.parser.language.CclGrammarParser;
+import io.github.cmansfield.firstpass.symbols.SymbolUtils;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.firstpass.symbols.Symbol;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -126,7 +126,7 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
 
     iCode.setNextLabel(symbolId);
     iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Method.FUNC.toString())
+            .opcode(IntermediateOpcode.FUNC)
             .operand1(symbolId)
             .comment(SymbolUtils.formatMethodText(symbols, symbols.get(symbolId)))
             .build());
@@ -147,15 +147,15 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
             false);
 
     iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Method.FRAME.toString())
+            .opcode(IntermediateOpcode.FRAME)
             .operand1(initSymbolId)
             .build());
     iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Stack.PUSH.toString())
+            .opcode(IntermediateOpcode.PUSH)
             .operand1(Keyword.THIS.toString())
             .build());
     iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Method.CALL.toString())
+            .opcode(IntermediateOpcode.CALL)
             .operand1(initSymbolId)
             .build());
     
@@ -189,7 +189,7 @@ final class TemplateSemanticsVisitor extends SemanticsVisitor implements Templat
 
     iCode.setNextLabel(symbolId);
     iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Method.FUNC.toString())
+            .opcode(IntermediateOpcode.FUNC)
             .operand1(symbolId)
             .comment(SymbolUtils.formatMethodText(symbols, symbols.get(symbolId)))
             .build());

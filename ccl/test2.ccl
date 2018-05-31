@@ -16,5 +16,5 @@ public static void main() {
 */
 
 public static void main() {
-    2 == 3;
+    2 + 3;
 }

@@ -23,7 +23,7 @@ public class IntermediateCodeTest {
   @Test
   public void test_add() {
     iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Flow.JMP.toString())
+            .opcode(IntermediateOpcode.JMP)
             .operand1("00001_Label")
             .build());
 
@@ -32,7 +32,7 @@ public class IntermediateCodeTest {
     assertEquals(listICode.size(), 1);
     Quad quad = listICode.get(0);
     assertNotNull(quad);
-    assertEquals(quad.getOpcode(), IntermediateOpcodes.Flow.JMP.toString());
+    assertEquals(quad.getOpcode(), IntermediateOpcode.JMP);
     assertEquals(quad.getOperand1(), "00001_Label");
     assertNull(quad.getOperand2());
     assertNull(quad.getOperand3());
@@ -46,7 +46,7 @@ public class IntermediateCodeTest {
     iCode.setNextLabel(iCodeLabel);
     
     iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Flow.JMP.toString())
+            .opcode(IntermediateOpcode.JMP)
             .operand1("00002_Label")
             .build());
 
@@ -61,7 +61,7 @@ public class IntermediateCodeTest {
 
     iCode.add(new QuadBuilder()
             .label("00001_Label")
-            .opcode(IntermediateOpcodes.Flow.JMP.toString())
+            .opcode(IntermediateOpcode.JMP)
             .operand1("00002_Label")
             .build());
   }
@@ -71,7 +71,7 @@ public class IntermediateCodeTest {
     String origLabel = "00001_Label";
     String newLabel = "00002_Label";
     iCode.add(new QuadBuilder()
-            .opcode(IntermediateOpcodes.Flow.JMP.toString())
+            .opcode(IntermediateOpcode.JMP)
             .operand1(origLabel)
             .operand2(origLabel)
             .operand3(origLabel)

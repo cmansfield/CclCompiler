@@ -1,6 +1,6 @@
 package io.github.cmansfield.tcode.ccl.two.operand;
 
-import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
+import io.github.cmansfield.secondpass.icode.IntermediateOpcode;
 import io.github.cmansfield.secondpass.icode.IntermediateCode;
 import io.github.cmansfield.firstpass.symbols.SymbolKind;
 import io.github.cmansfield.tcode.TargetCodeGenerator;
@@ -141,7 +141,7 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
     loadIntoRegister(destReg, quad.getOperand1(), symbolTable);
     loadIntoRegister(sourceReg, quad.getOperand2(), symbolTable);
     assembly.add(new Asm.AsmBuilder()
-            .opcode(quad.getOpcode())
+            .opcode(quad.getOpcode().toString())
             .operand1(destReg.toString())
             .operand2(sourceReg.toString()).build());
     loadIntoRegister(memReg, quad.getOperand3(), symbolTable);
@@ -241,25 +241,85 @@ public class CclTargetCodeGenerator implements TargetCodeGenerator {
   public boolean generate(BidiMap<String, Symbol> symbolTable, IntermediateCode iCode) {
 
     for (Quad quad : iCode.getICode()) {
-      String opcode = quad.getOpcode();
-      
-      if(IntermediateOpcodes.Other.MOV.toString().equals(opcode)) {
-        mov(symbolTable, quad);
+      IntermediateOpcode opcode = quad.getOpcode();
+
+      switch (opcode) {
+        case ADI:
+          break;
+        case ADD:
+        case SUB:
+        case MUL:
+        case DIV:
+          math(symbolTable, quad);
+          break;
+        case LT:
+          break;
+        case GT:
+          break;
+        case NE:
+          break;
+        case EQ:
+          equals(symbolTable, quad);
+          break;
+        case LE:
+          break;
+        case GE:
+          break;
+        case AND:
+          break;
+        case OR:
+          break;
+        case NOT:
+          break;
+        case BF:
+          break;
+        case BT:
+          break;
+        case JMP:
+          break;
+        case HALT:
+          halt();
+          break;
+        case PUSH:
+          break;
+        case POP:
+          break;
+        case PEEK:
+          break;
+        case FRAME:
+          break;
+        case CALL:
+          break;
+        case RTN:
+          break;
+        case FUNC:
+          break;
+        case NEWI:
+          break;
+        case NEW:
+          break;
+        case BLCK:
+          break;
+        case LOCK:
+          break;
+        case SPWN:
+          break;
+        case UNLCK:
+          break;
+        case MOV:
+          mov(symbolTable, quad);
+          break;
+        case MOVI:
+          break;
+        case PRINT:
+          break;
+        case READ:
+          break;
+        case REF:
+          break;
+        case AREF:
+          break;
       }
-      else if(IntermediateOpcodes.Math.ADD.toString().equals(opcode)
-              || IntermediateOpcodes.Math.SUB.toString().equals(opcode)
-              || IntermediateOpcodes.Math.MUL.toString().equals(opcode)
-              || IntermediateOpcodes.Math.DIV.toString().equals(opcode)) {
-        math(symbolTable, quad);
-      }
-      else if(IntermediateOpcodes.Bool.EQ.toString().equals(opcode)) {
-        equals(symbolTable, quad);
-      }
-      else if(IntermediateOpcodes.Flow.HALT.toString().equals(opcode)) {
-        halt();
-      }
-      
-      // TODO - Continue to add the rest of the Quad opcodes here
     }
     
     return true;

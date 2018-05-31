@@ -7,6 +7,7 @@ TODO List
         Create a new error listener for the SymbolTableVisitor to store syntax errors into 
             compiler's exception list
         Add a modulo operator to the compiler
+        Check to make sure '||' (or) is working correctly
 
     CompilerOptions.VERBOSE_CHECK
         Add more checks to the verbose check

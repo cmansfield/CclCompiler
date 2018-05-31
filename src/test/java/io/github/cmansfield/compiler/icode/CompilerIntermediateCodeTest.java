@@ -1,6 +1,6 @@
 package io.github.cmansfield.compiler.icode;
 
-import io.github.cmansfield.secondpass.icode.IntermediateOpcodes;
+import io.github.cmansfield.secondpass.icode.IntermediateOpcode;
 import org.apache.commons.collections4.CollectionUtils;
 import io.github.cmansfield.compiler.CompilerTestUtils;
 import io.github.cmansfield.compiler.CompilerOptions;
@@ -24,17 +24,17 @@ public class CompilerIntermediateCodeTest {
   
   @Test
   public void test_while() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FRAME.toString(),
-            IntermediateOpcodes.Method.CALL.toString(),
-            IntermediateOpcodes.Flow.HALT.toString(),
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Bool.LT.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Other.READ.toString(),
-            IntermediateOpcodes.Flow.JMP.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FRAME,
+            IntermediateOpcode.CALL,
+            IntermediateOpcode.HALT,
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.LT,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.READ,
+            IntermediateOpcode.JMP,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test101.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -54,17 +54,17 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_if_else() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FRAME.toString(),
-            IntermediateOpcodes.Method.CALL.toString(),
-            IntermediateOpcodes.Flow.HALT.toString(),
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Bool.LT.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Flow.JMP.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FRAME,
+            IntermediateOpcode.CALL,
+            IntermediateOpcode.HALT,
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.LT,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.JMP,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test102.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -84,16 +84,16 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_if_elseIf() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Bool.LT.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Flow.JMP.toString(),
-            IntermediateOpcodes.Bool.NE.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.LT,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.JMP,
+            IntermediateOpcode.NE,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test113.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -118,16 +118,16 @@ public class CompilerIntermediateCodeTest {
   
   @Test
   public void test_nestedIf() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FRAME.toString(),
-            IntermediateOpcodes.Method.CALL.toString(),
-            IntermediateOpcodes.Flow.HALT.toString(),
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Bool.LT.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FRAME,
+            IntermediateOpcode.CALL,
+            IntermediateOpcode.HALT,
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.LT,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test103.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -147,22 +147,22 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_while_backToBack() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FRAME.toString(),
-            IntermediateOpcodes.Method.CALL.toString(),
-            IntermediateOpcodes.Flow.HALT.toString(),
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Bool.LT.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Other.READ.toString(),
-            IntermediateOpcodes.Flow.JMP.toString(),
-            IntermediateOpcodes.Bool.NE.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Flow.JMP.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FRAME,
+            IntermediateOpcode.CALL,
+            IntermediateOpcode.HALT,
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.LT,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.READ,
+            IntermediateOpcode.JMP,
+            IntermediateOpcode.NE,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.JMP,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test104.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -184,13 +184,13 @@ public class CompilerIntermediateCodeTest {
   
   @Test
   public void test_assignment() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FRAME.toString(),
-            IntermediateOpcodes.Method.CALL.toString(),
-            IntermediateOpcodes.Flow.HALT.toString(),
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Other.MOV.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FRAME,
+            IntermediateOpcode.CALL,
+            IntermediateOpcode.HALT,
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.MOV,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test105.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -208,13 +208,13 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_assignment_fromReference() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Method.RTN.toString(),
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Other.REF.toString(),
-            IntermediateOpcodes.Other.MOV.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.RTN,
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.REF,
+            IntermediateOpcode.MOV,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test106.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -233,13 +233,13 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_assignment_toReference() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Method.RTN.toString(),
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Other.REF.toString(),
-            IntermediateOpcodes.Other.MOV.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.RTN,
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.REF,
+            IntermediateOpcode.MOV,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test107.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -258,10 +258,10 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_expression_addition() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Math.ADD.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.ADD,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test108.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -279,11 +279,11 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_expression_multi_additionMultiplication() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Math.MUL.toString(),
-            IntermediateOpcodes.Math.ADD.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.MUL,
+            IntermediateOpcode.ADD,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test109.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -302,10 +302,10 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_expression_boolean() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Bool.LT.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.LT,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test110.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -323,12 +323,12 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_expression_boolean_complex() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Bool.LT.toString(),
-            IntermediateOpcodes.Bool.NE.toString(),
-            IntermediateOpcodes.Logic.AND.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.LT,
+            IntermediateOpcode.NE,
+            IntermediateOpcode.AND,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test111.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -348,13 +348,13 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_assignment_fromExpression() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Math.MUL.toString(),
-            IntermediateOpcodes.Math.DIV.toString(),
-            IntermediateOpcodes.Math.ADD.toString(),
-            IntermediateOpcodes.Other.MOV.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.MUL,
+            IntermediateOpcode.DIV,
+            IntermediateOpcode.ADD,
+            IntermediateOpcode.MOV,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test112.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -375,11 +375,11 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_readAndPrint() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Other.READ.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.READ,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test114.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);
@@ -398,18 +398,18 @@ public class CompilerIntermediateCodeTest {
 
   @Test
   public void test_forLoop() throws IOException {
-    List<String> expectedOpcodes = Arrays.asList(
-            IntermediateOpcodes.Method.FUNC.toString(),
-            IntermediateOpcodes.Other.MOV.toString(),
-            IntermediateOpcodes.Bool.LT.toString(),
-            IntermediateOpcodes.Flow.BF.toString(),
-            IntermediateOpcodes.Math.ADD.toString(),
-            IntermediateOpcodes.Other.MOV.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Other.PRINT.toString(),
-            IntermediateOpcodes.Flow.JMP.toString(),
-            IntermediateOpcodes.Method.RTN.toString());
+    List<IntermediateOpcode> expectedOpcodes = Arrays.asList(
+            IntermediateOpcode.FUNC,
+            IntermediateOpcode.MOV,
+            IntermediateOpcode.LT,
+            IntermediateOpcode.BF,
+            IntermediateOpcode.ADD,
+            IntermediateOpcode.MOV,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.PRINT,
+            IntermediateOpcode.JMP,
+            IntermediateOpcode.RTN);
     Compiler compiler = CompilerTestUtils.compileNoThrow("test115.ccl", CompilerOptions.GENERATE_I_CODE_ONLY);
 
     assertNotNull(compiler);

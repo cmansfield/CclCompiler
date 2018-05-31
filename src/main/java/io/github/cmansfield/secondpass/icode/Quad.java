@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Quad {
   private String label;
-  private String opcode;
+  private IntermediateOpcode opcode;
   private String operand1;
   private String operand2;
   private String operand3;
@@ -12,17 +12,17 @@ public class Quad {
   
   public Quad() {}
   
-  private Quad(String opcode, String operand1) {
+  private Quad(IntermediateOpcode opcode, String operand1) {
     this.opcode = opcode;
     this.operand1 = operand1;
   }
   
-  private Quad(String opcode, String operand1, String operand2) {
+  private Quad(IntermediateOpcode opcode, String operand1, String operand2) {
     this(opcode, operand1);
     this.operand2 = operand2;
   }
 
-  Quad(String opcode, String operand1, String operand2, String operand3) {
+  Quad(IntermediateOpcode opcode, String operand1, String operand2, String operand3) {
     this(opcode, operand1, operand2);
     this.operand3 = operand3;
   }
@@ -51,7 +51,7 @@ public class Quad {
     return label;
   }
 
-  public String getOpcode() {
+  public IntermediateOpcode getOpcode() {
     return opcode;
   }
 
@@ -88,7 +88,7 @@ public class Quad {
 
   public static class QuadBuilder {
     private String label;
-    private String opcode;
+    private IntermediateOpcode opcode;
     private String operand1;
     private String operand2;
     private String operand3;
@@ -99,7 +99,7 @@ public class Quad {
       return this;
     }
 
-    public QuadBuilder opcode(String opcode) {
+    public QuadBuilder opcode(IntermediateOpcode opcode) {
       this.opcode = opcode;
       return this;
     }
@@ -125,13 +125,8 @@ public class Quad {
     }
 
     public Quad build() {
-      if(StringUtils.isBlank(opcode)) {
+      if(opcode == null) {
         throw new IllegalArgumentException("A quad's opcode cannot be blank");
-      }
-      if(!IntermediateOpcodes.isOpcode(opcode)) {
-        throw new IllegalArgumentException(String.format(
-                "Opcode \'%s\' is not a valid opcode",
-                opcode));
       }
 
       Quad quad = new Quad(opcode, operand1, operand2, operand3);

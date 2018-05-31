@@ -233,8 +233,8 @@ public class IntermediateCode {
    * @param opcode  Opcode to compare with
    * @return        Boolean true if they match
    */
-  public boolean isLastOpcode(String opcode) {
-    if(StringUtils.isBlank(opcode) || icode.isEmpty()) {
+  public boolean isLastOpcode(IntermediateOpcode opcode) {
+    if(opcode == null || icode.isEmpty()) {
       return false;
     }
     return opcode.equals(icode.get(icode.size() - 1).getOpcode());
